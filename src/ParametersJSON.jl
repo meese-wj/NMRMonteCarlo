@@ -20,11 +20,8 @@ end
 
 pretty_display(params) = pretty_display(stdout, params)
 
-function import_json_and_display(fl, ::Type{T}, io::IO = stdout; illusion=true) where {T}
+function import_json_and_display(fl, ::Type{T}, io::IO = stdout) where {T}
     println("\nImporting values from $fl...")
-    if illusion
-        sleep(1.5)
-    end
     params = import_json(fl, T)
     pretty_display(io, params)
     return params

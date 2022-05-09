@@ -21,10 +21,10 @@ ham = AT_Hamiltonian{Float64}(latt)
 mc_params = MetropolisParameters{Float64}()
 mc_model = Model(latt, ham)
 
-@time run_default_metropolis()
+# @time run_default_metropolis()
 
 @time thermalize!(mc_model, mc_params, metropolis_sweep!)
-# @time thermalize!(mc_model, mc_params, metropolis_sweep!)
+@time thermalize!(mc_model, mc_params, metropolis_sweep!)
 
-# @time sweep_and_measure!(mc_model, mc_params, metropolis_sweep!, nothing)
-# @time sweep_and_measure!(mc_model, mc_params, metropolis_sweep!, nothing)
+@time sweep_and_measure!(mc_model, mc_params, metropolis_sweep!)
+@time sweep_and_measure!(mc_model, mc_params, metropolis_sweep!, joinpath(@__DIR__, "NMR_Simulation_Data"))

@@ -46,15 +46,15 @@ function thermalize!( model::Model{L, H}, mc_params::MonteCarloParameters, mc_sw
     return nothing
 end
 
-write_state( model, sweep_number, data_dir ) = nothing
+write_state( model, sweep_number, data_dir::Nothing ) = nothing
 
-function sweep_and_measure!( model::Model{L, H}, mc_params::MonteCarloParameters, mc_sweep::Function, data_dir ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
+function sweep_and_measure!( model::Model{L, H}, mc_params::MonteCarloParameters, mc_sweep::Function, data_dir = nothing ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
     total_writes = mc_params.measure_sweeps ÷ mc_params.sweeps_until_write
     @inbounds for write ∈ (1:total_writes)
         @inbounds for sweep ∈ (1:mc_params.sweeps_until_write)
             mc_sweep(model, mc_params)
         end
-        write_state( model, write * mc_params.sweeps_until_write, data_dir )
+        write_state( model.ham, write * mc_params.sweeps_until_write, data_dir )
     end
     return nothing
 end

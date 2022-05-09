@@ -100,3 +100,11 @@ function AT_site_flip!( ham::AT_Hamiltonian, site )
     ham[site, ham.color_update] *= -one(ham[site, ham.color_update])
     return nothing
 end
+
+state_file_name(ham::AT_Hamiltonian, sweep_number) = "sweep-$sweep_number.bin"
+
+function write_state(ham::AT_Hamiltonian, sweep_number, data_dir::String)
+    data_path = joinpath(data_dir, state_file_name(ham, sweep_number))
+    write(data_path, ham.colors)
+    return nothing
+end
