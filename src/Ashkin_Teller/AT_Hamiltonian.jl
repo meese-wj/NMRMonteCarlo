@@ -101,40 +101,9 @@ function AT_site_flip!( ham::AT_Hamiltonian, site )
     return nothing
 end
 
-const int8spinminus = zero(Int8)
-const int8spinplus = one(Int8)
-
-function ising_to_int8(vectorlike)
-    int8vector = Vector{typeof(int8spinplus)}(undef, length(vectorlike))
-    @inbounds @simd for idx in eachindex(vectorlike)
-        int8vector[idx] = vectorlike[idx] == one(vectorlike[idx]) ? int8spinplus : int8spinminus
-    end
-    return int8vector
-end
-
-function int8_to_ising!(ising_vectorlike, vectorlike)
-    length(ising_vectorlike) == length(vectorlike) ? nothing : error("Ising vector has length $(length(ising_vectorlike)) but the Int8 vector has length $(length(vectorlike)).")
-    @inbounds @simd for idx in eachindex(ising_vectorlike)
-        ising_vectorlike[idx] = vectorlike[idx] == int8spinplus ? one(ising_vectorlike[idx]) : -one(ising_vectorlike[idx])
-    end
-    return nothing
-end
-
-function int8_to_ising(vectorlike, type::Type = Float64)
-    ising_vector = Vector{type}(undef, length(vectorlike))
-    int8_to_ising!(ising_vector, vectorlike)
-    return ising_vector
-end
-
-state_file_name(ham::AT_Hamiltonian, sweep_number) = "sweep-$sweep_number.bin"
-
-function export_state(ham::AT_Hamiltonian, sweep_number, data_dir::String)
-    data_path = joinpath(data_dir, state_file_name(ham, sweep_number))
-    write(data_path, ising_to_int8(ham.colors) )
-    return nothing
-end
-
 function export_state!(state_container::AbstractArray, ham::AT_Hamiltonian, export_index)
     state_container[:, export_index] .= ham.colors
     return nothing 
 end
+
+load_state!(ham::AT_Hamiltonian, state) = ham.colors .= state

@@ -4,13 +4,13 @@ struct Model{L <: AbstractLattice, H <: AbstractHamiltonian}
 end
 
 abstract type MonteCarloParameters end
-num_writes(params::MonteCarloParameters) = params.measure_sweeps ÷ params.sweeps_until_write
+sweeps_per_export(params::MonteCarloParameters) = params.measure_sweeps <= params.total_measurements ? 1 : params.measure_sweeps ÷ params.total_measurements
 
 struct MetropolisParameters{T <: AbstractFloat} <: MonteCarloParameters
     β::T
     therm_sweeps::Int
     measure_sweeps::Int
-    sweeps_until_write::Int
+    total_measurements::Int
 end
 StructTypes.StructType(::Type{MetropolisParameters{T}}) where {T} = StructTypes.Struct()
 
@@ -48,9 +48,10 @@ function thermalize!( model::Model{L, H}, mc_params::MonteCarloParameters, mc_sw
 end
 
 function sweep_and_measure!( model::Model{L, H}, mc_params::MonteCarloParameters, mc_sweep::Function, state_container::AbstractArray = [] ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
-    total_writes = num_writes(mc_params)
-    @inbounds for write ∈ (1:total_writes)
-        @inbounds for sweep ∈ (1:mc_params.sweeps_until_write)
+    total_exports = mc_params.total_measurements
+    sue = sweeps_per_export(mc_params)
+    @inbounds for write ∈ (1:total_exports)
+        @inbounds for sweep ∈ (1:sue)
             mc_sweep(model, mc_params)
         end
 
