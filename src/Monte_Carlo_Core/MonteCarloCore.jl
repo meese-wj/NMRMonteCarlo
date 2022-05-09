@@ -39,7 +39,7 @@ function metropolis_sweep!( model::Model{L, H}, mc_params::MonteCarloParameters 
 end
 
 function thermalize!( model::Model{L, H}, mc_params::MonteCarloParameters, mc_sweep::Function ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
-    total_sweeps::Int = mc_params.therm_sweeps
+    total_sweeps::Int64 = mc_params.therm_sweeps
     @inbounds for sweep ∈ 1:total_sweeps
         mc_sweep(model, mc_params)
     end
