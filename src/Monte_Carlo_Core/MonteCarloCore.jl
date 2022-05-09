@@ -4,6 +4,7 @@ struct Model{L <: AbstractLattice, H <: AbstractHamiltonian}
 end
 
 abstract type MonteCarloParameters end
+num_writes(params::MonteCarloParameters) = params.measure_sweeps ÷ params.sweeps_until_write
 
 struct MetropolisParameters{T <: AbstractFloat} <: MonteCarloParameters
     β::T
@@ -46,15 +47,17 @@ function thermalize!( model::Model{L, H}, mc_params::MonteCarloParameters, mc_sw
     return nothing
 end
 
-write_state( model, sweep_number, data_dir::Nothing ) = nothing
-
-function sweep_and_measure!( model::Model{L, H}, mc_params::MonteCarloParameters, mc_sweep::Function, data_dir = nothing ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
-    total_writes = mc_params.measure_sweeps ÷ mc_params.sweeps_until_write
+function sweep_and_measure!( model::Model{L, H}, mc_params::MonteCarloParameters, mc_sweep::Function, state_container::AbstractArray = [] ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
+    total_writes = num_writes(mc_params)
     @inbounds for write ∈ (1:total_writes)
         @inbounds for sweep ∈ (1:mc_params.sweeps_until_write)
             mc_sweep(model, mc_params)
         end
-        write_state( model.ham, write * mc_params.sweeps_until_write, data_dir )
+
+        # Only write out observables if the state container is defined
+        if length(state_container) > 0
+            export_state!( state_container, model.ham, write )
+        end
     end
     return nothing
 end

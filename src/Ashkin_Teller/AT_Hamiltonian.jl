@@ -128,8 +128,13 @@ end
 
 state_file_name(ham::AT_Hamiltonian, sweep_number) = "sweep-$sweep_number.bin"
 
-function write_state(ham::AT_Hamiltonian, sweep_number, data_dir::String)
+function export_state(ham::AT_Hamiltonian, sweep_number, data_dir::String)
     data_path = joinpath(data_dir, state_file_name(ham, sweep_number))
     write(data_path, ising_to_int8(ham.colors) )
     return nothing
+end
+
+function export_state!(state_container::AbstractArray, ham::AT_Hamiltonian, export_index)
+    copyto!( state_container[:, export_index], ham.colors ) 
+    return nothing 
 end
