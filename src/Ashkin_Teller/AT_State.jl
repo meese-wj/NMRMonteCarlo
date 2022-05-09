@@ -34,8 +34,6 @@ state_file_name() = "states.bin"
 
 function export_states(state_container::AbstractArray, data_dir::String)
     data_path = joinpath(data_dir, state_file_name())
-    display(ising_to_int8(state_container))
-    # write(data_path, ising_to_int8(state_container) )
     open(data_path, "w") do io
         write(io, ising_to_int8(state_container))
     end
@@ -51,6 +49,20 @@ function import_states(ty::Type{AT_Hamiltonian{T}}, data_file, num_dofs, num_sta
     return reshape(ising_states, num_dofs, num_states)
 end
 
-function separate_colors!(colors::Matrix{T}, state::AbstractVector)
-    nothing
+function separate_colors!(::Type{AT_Hamiltonian{T}}, colors::Matrix{T}, state::AbstractVector) where {T}
+    length(colors[:,Int(AT_σ)]) == length(state) ? nothing : error("\nDestination matrix and state have different lengths: 2 × $(length(colors[:,Int(AT_σ)])) ≂̸ $(length(state)).")
+    @inbounds for site ∈ 1:(length(state) ÷ NUM_AT_COLORS)
+        colors[site, Int(AT_σ)] = state[ color_index(site, AT_σ) ]
+        colors[site, Int(AT_τ)] = state[ color_index(site, AT_τ) ]
+    end
+    return nothing
+end
+
+function separate_colors_from_states(ty::Type{AT_Hamiltonian{T}}, states::AbstractArray) where {T}
+    num_color, num_states = size(states)
+    state_colors = Array{T, 3}(undef, num_color ÷ NUM_AT_COLORS, NUM_AT_COLORS, num_states)
+    @inbounds for state_idx ∈ 1:num_states
+        separate_colors!(ty, state_colors[:,:,state_idx], states[:, state_idx])
+    end
+    return state_colors
 end
