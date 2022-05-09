@@ -135,6 +135,6 @@ function export_state(ham::AT_Hamiltonian, sweep_number, data_dir::String)
 end
 
 function export_state!(state_container::AbstractArray, ham::AT_Hamiltonian, export_index)
-    copyto!( state_container[:, export_index], ham.colors ) 
+    state_container[:, export_index] .= ham.colors
     return nothing 
 end
