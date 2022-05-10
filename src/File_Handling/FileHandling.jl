@@ -48,6 +48,6 @@ function import_simulation(data_path, simparam_t::Type, identifiers...)
     temp_latt = (reciprocal_type(sim_params.latt_params))(sim_params.latt_params)
     temp_ham = (reciprocal_type(sim_params.ham_params))(temp_latt, sim_params.ham_params)
     states_file = joinpath(data_path, "states$(concat_ids(identifiers...)).bin")
-    states = import_states( reciprocal_type(sims_params.ham_params), states_file, num_DoF(temp_ham), num_exports(sims_params) )
+    states = import_states( reciprocal_type(sim_params.ham_params), states_file, num_DoF(temp_ham), num_exports(sim_params) )
     return (sim_params, states)
 end
