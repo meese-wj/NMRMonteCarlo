@@ -1,3 +1,5 @@
+using StaticArrays
+
 abstract type AbstractHamiltonian end
 
 @enum AT_Colors AT_σ=1 AT_τ=2 AT_enum_end
@@ -37,8 +39,11 @@ num_sites( ham::AT_Hamiltonian ) = length(ham) ÷ NUM_AT_COLORS
 Base.size( ham::AT_Hamiltonian ) = ( num_sites(ham), num_sites(ham) )
 num_DoF( ham::AT_Hamiltonian ) = length(ham)
 color_index( site, col ) = convert(Int, NUM_AT_COLORS * (site - 1) + Int(col) )
-Base.getindex( ham::AT_Hamiltonian, site, col ) = ham.colors[ color_index(site, col) ]
-Base.setindex!(ham::AT_Hamiltonian, value, site, col) = ham.colors[ color_index(site, col) ] = value  
+Base.getindex( colors::AbstractVector, site, col::AT_Colors ) = getindex(colors, color_index(site, col))
+Base.getindex( ham::AT_Hamiltonian, site, col::AT_Colors ) = ham.colors[ site, col ]
+Base.setindex!( colors::AbstractVector, value, site, col::AT_Colors ) = setindex!(colors, value, color_index(site, col))
+Base.setindex!(ham::AT_Hamiltonian, value, site, col::AT_Colors) = ham.colors[ site, col ] = value  
+site_Baxter( colors::AbstractVector, site ) = colors[site, AT_σ] * colors[site, AT_τ]
 site_Baxter( ham::AT_Hamiltonian, site ) = ham[site, AT_σ] * ham[site, AT_τ]
 function switch_color_update!(ham::AT_Hamiltonian)
     if ham.color_update == AT_σ
@@ -49,40 +54,41 @@ function switch_color_update!(ham::AT_Hamiltonian)
     return nothing
 end
 
-using StaticArrays
-
-function AT_neighbor_fields(ham::AT_Hamiltonian, latt::AbstractLattice, site)
+function AT_neighbor_fields(colors::AbstractVector, hamparams::AT_Parameters{T}, latt::AbstractLattice, site) where {T}
     near_neighbors = nearest_neighbors(latt, site)
-    # (σ_field::Float64, τ_field::Float64, bax_field::Float64) = ( zero(Float64), zero(Float64), zero(Float64) )
-    σ_field = zero(eltype(ham))
+    σ_field = zero(T)
     τ_field = σ_field
     bax_field = σ_field
     for nn ∈ near_neighbors
-        σ_field += ham[nn, AT_σ]
-        τ_field += ham[nn, AT_σ]
+        σ_field += colors[nn, AT_σ]
+        τ_field += colors[nn, AT_σ]
         bax_field += site_Baxter(ham, nn)
     end
-    return @SVector [ ham.params.Jex * σ_field, ham.params.Jex * τ_field, ham.params.Kex * bax_field ]
-    # return ( ham.params.Jex * σ_field, ham.params.Jex * τ_field, ham.params.Kex * bax_field )
+    return @SVector [ hamparams.Jex * σ_field, hamparams.Jex * τ_field, hamparams.Kex * bax_field ]
 end
 
-function AT_site_energy( ham::AT_Hamiltonian, latt::AbstractLattice, site, site_values::SVector{3} )
-    effective_fields::SVector = AT_neighbor_fields(ham, latt, site)    
-    en = zero(eltype(effective_fields))
+AT_neighbor_fields(ham::AT_Hamiltonian, latt::AbstractLattice, site) = AT_neighbor_fields(ham.colors, ham.params, latt, site)
+
+function AT_site_energy( colors::AbstractVector, hamparams::AT_Parameters{T}, latt::AbstractLattice, site, site_values::SVector{3} ) where {T}
+    effective_fields::SVector = AT_neighbor_fields(colors, hamparams, latt, site)    
+    en = zero(T)
     @inbounds for idx ∈ 1:length(effective_fields)
         en += site_values[idx] * effective_fields[idx]
     end
-    # en = site_values[AT_σ] * effective_fields[AT_σ] + site_values[AT_τ] * effective_fields[AT_τ] + site_values[end] * effective_fields[end]
     return -en
 end
 
-function AT_total_energy( ham, latt )
-    en = AT_site_energy( ham, latt, 1 )
+AT_site_energy(ham::AT_Hamiltonian, latt::AbstractLattice, site, site_values::SVector{3}) = AT_site_energy(ham.colors, ham.params, latt, site, site_values)
+
+function AT_total_energy( colors::AbstractVector, hamparams::AT_Parameters{T}, latt::AbstractLattice ) where {T}
+    en = AT_site_energy( colors, hamparams, latt, 1 )
     for site ∈ 2:num_sites(latt)
-        en += AT_site_energy( ham, latt, site)
+        en += AT_site_energy( colors, hamparams, latt, site)
     end
     return -0.5 * en
 end
+
+AT_total_energy(ham::AT_Hamiltonian, latt::AbstractLattice) = AT_total_energy(ham.colors, ham.params, latt)
 
 AT_site_energy(ham::AT_Hamiltonian, latt::AbstractLattice, site) = AT_site_energy( ham, latt, site, @SVector [ ham[site, AT_σ], ham[site, AT_τ], site_Baxter(ham, site) ] )
 function AT_site_energy_change(ham::AT_Hamiltonian, latt::AbstractLattice, site, color = AT_σ)
