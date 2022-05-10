@@ -2,12 +2,12 @@ using Pkg
 Pkg.activate(@__DIR__)
 
 include("src/ParametersJSON.jl")
-include("src/File_Handling/FileHandling.jl")
 include("src/Lattices/CubicLattice2D.jl")
 include("src/Ashkin_Teller/AT_Hamiltonian.jl")
 include("src/Ashkin_Teller/AT_State.jl")
 include("src/Monte_Carlo_Core/MonteCarloCore.jl")
 include("src/SimulationParameters.jl")
+include("src/File_Handling/FileHandling.jl")
 
 using BenchmarkTools
 latt = CubicLattice2D()

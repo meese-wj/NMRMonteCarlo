@@ -82,6 +82,7 @@ function AT_site_energy( colors::AbstractVector, hamparams::AT_Parameters{T}, la
 end
 
 AT_site_energy(ham::AT_Hamiltonian, latt::AbstractLattice, site, site_values::SVector{3}) = AT_site_energy(ham.colors, ham.params, latt, site, site_values)
+AT_site_energy(colors::AbstractVector, hamparams::AT_Parameters{T}, latt::AbstractLattice, site) where {T} = AT_site_energy(colors, ham.params, latt, site, @SVector [ ham[site, AT_σ], ham[site, AT_τ], site_Baxter(ham, site) ])
 
 function AT_total_energy( colors::AbstractVector, hamparams::AT_Parameters{T}, latt::AbstractLattice ) where {T}
     en = AT_site_energy( colors, hamparams, latt, 1 )
@@ -91,9 +92,9 @@ function AT_total_energy( colors::AbstractVector, hamparams::AT_Parameters{T}, l
     return -0.5 * en
 end
 
+AT_site_energy(ham::AT_Hamiltonian, latt::AbstractLattice, site) = AT_site_energy( ham, latt, site, @SVector [ ham[site, AT_σ], ham[site, AT_τ], site_Baxter(ham, site) ] )
 AT_total_energy(ham::AT_Hamiltonian, latt::AbstractLattice) = AT_total_energy(ham.colors, ham.params, latt)
 
-AT_site_energy(ham::AT_Hamiltonian, latt::AbstractLattice, site) = AT_site_energy( ham, latt, site, @SVector [ ham[site, AT_σ], ham[site, AT_τ], site_Baxter(ham, site) ] )
 function AT_site_energy_change(ham::AT_Hamiltonian, latt::AbstractLattice, site, color = AT_σ)
     σ_value = -ham[site, AT_σ]
     τ_value = ham[site, AT_τ]
