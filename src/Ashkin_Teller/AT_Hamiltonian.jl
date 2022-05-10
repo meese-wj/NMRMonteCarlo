@@ -59,10 +59,10 @@ function AT_neighbor_fields(colors::AbstractVector, hamparams::AT_Parameters{T},
     σ_field = zero(T)
     τ_field = σ_field
     bax_field = σ_field
-    for nn ∈ near_neighbors
+    @inbounds for nn ∈ near_neighbors
         σ_field += colors[nn, AT_σ]
         τ_field += colors[nn, AT_σ]
-        bax_field += site_Baxter(ham, nn)
+        bax_field += site_Baxter(colors, nn)
     end
     return @SVector [ hamparams.Jex * σ_field, hamparams.Jex * τ_field, hamparams.Kex * bax_field ]
 end
