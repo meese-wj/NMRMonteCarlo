@@ -10,7 +10,7 @@ struct CubicLattice2DParams
     Ly::Int
 end
 StructTypes.StructType(::Type{CubicLattice2DParams}) = StructTypes.Struct()
-corresponding_object(::Type{CubicLattice2DParams}) = CubicLattice2D
+reciprocal_type(::Type{CubicLattice2DParams}) = CubicLattice2D
 
 struct CubicLattice2D <: AbstractLattice
     params::CubicLattice2DParams
