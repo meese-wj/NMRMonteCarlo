@@ -30,10 +30,10 @@ function int8_to_ising(arraylike, type::Type = Float64)
     return ising_vector
 end
 
-state_file_name() = "states.bin"
+state_file_name(identifiers...) = "states$(concat_ids(identifiers...)).bin"
 
-function export_states(state_container::AbstractArray, data_dir::String)
-    data_path = joinpath(data_dir, state_file_name())
+function export_states(state_container::AbstractArray, data_dir::String, identifiers...)
+    data_path = joinpath(data_dir, state_file_name(identifiers...))
     open(data_path, "w") do io
         write(io, ising_to_int8(state_container))
     end

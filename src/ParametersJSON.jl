@@ -1,5 +1,7 @@
 using JSON3, StructTypes
 
+abstract type SimulationParameters end
+
 function import_json(fl, ::Type{T}) where {T}
     return JSON3.read( read(fl, String), T )
 end
