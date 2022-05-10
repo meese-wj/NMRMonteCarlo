@@ -45,7 +45,8 @@ function import_simulation(data_path, simparam_t::Type, identifiers...)
     sim_params = import_json( param_file, simparam_t )::SimulationParameters
 
     # Get the states with a temporary Hamiltonian
-    temp_ham = (corresponding_hamiltonian(sim_params))(sim_params.latt_params, sim_params.ham_params)
+    temp_latt = (corresponding_object(sim_params.latt_params))(sim_params.latt_params)
+    temp_ham = (corresponding_object(sim_params.ham_params))(temp_latt; params = sim_params.ham_params)
     states_file = joinpath(data_path, "states$(concat_ids(identifiers...)).bin")
     states = import_states( corresponding_hamiltonian(sims_params), states_file, num_DoF(temp_ham), num_exports(sims_params) )
     return (sim_params, states)

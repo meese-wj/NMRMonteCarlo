@@ -14,8 +14,9 @@ struct AT_Parameters{T <: AbstractFloat}
 end
 AT_Parameters{T}(; J::T = 1., K::T = 0. ) where {T <: AbstractFloat} = AT_Parameters{T}( J, K )
 StructTypes.StructType(::Type{AT_Parameters{T}}) where {T} = StructTypes.Struct()
-corresponding_hamiltonian(ty::Type) = error("\nNo corresponding Hamiltonian defined for $(typeof(ty)) types.\n")
-corresponding_hamiltonian(ty::Type{AT_Parameters{T}}) where {T} = AT_Hamiltonian{T}
+corresponding_object(ty::Type{T}) where {T} = error("\nNo corresponding object defined for $(typeof(ty)) types.\n")
+corresponding_object(obj) = corresponding_object(typeof(obj))
+corresponding_object(ty::Type{AT_Parameters{T}}) where {T} = AT_Hamiltonian{T}
 
 mutable struct AT_Hamiltonian{T <: AbstractFloat} <: AbstractHamiltonian
     color_update::AT_Colors
