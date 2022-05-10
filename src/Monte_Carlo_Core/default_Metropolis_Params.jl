@@ -1,6 +1,6 @@
 {
-                    "β": 0.01,
-         "therm_sweeps": 16384,
-       "measure_sweeps": 1024,
-   "total_measurements": 16
+                    "β": 0.441,
+         "therm_sweeps": 65536,
+       "measure_sweeps": 4096,
+   "total_measurements": 128
 }

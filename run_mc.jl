@@ -7,14 +7,7 @@ include("src/Lattices/CubicLattice2D.jl")
 include("src/Ashkin_Teller/AT_Hamiltonian.jl")
 include("src/Ashkin_Teller/AT_State.jl")
 include("src/Monte_Carlo_Core/MonteCarloCore.jl")
-
-struct AT_2DCL_Metro_Params{T <: AbstractFloat} <: SimulationParameters
-    latt_params::CubicLattice2DParams
-    ham_params::AT_Parameters{T}
-    mc_params::MetropolisParameters{T}
-end
-StructTypes.StructType(::Type{AT_2DCL_Metro_Params{T}}) where {T} = StructTypes.Struct()
-num_exports(sim_params::AT_2DCL_Metro_Params) = mc_params.total_measurements
+include("src/SimulationParameters.jl")
 
 using BenchmarkTools
 latt = CubicLattice2D()
