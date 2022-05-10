@@ -1,6 +1,7 @@
 using JSON3, StructTypes
 
 abstract type SimulationParameters end
+num_exports(simparams::SimulationParameters) = error("\nNo method defined for $(typeof(sim_params)) types.")
 
 function import_json(fl, ::Type{T}) where {T}
     return JSON3.read( read(fl, String), T )

@@ -14,6 +14,7 @@ struct AT_2DCL_Metro_Params{T <: AbstractFloat} <: SimulationParameters
     mc_params::MetropolisParameters{T}
 end
 StructTypes.StructType(::Type{AT_2DCL_Metro_Params{T}}) where {T} = StructTypes.Struct()
+num_exports(sim_params::AT_2DCL_Metro_Params) = mc_params.total_measurements
 
 using BenchmarkTools
 latt = CubicLattice2D()

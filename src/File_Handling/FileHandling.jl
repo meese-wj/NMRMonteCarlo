@@ -37,3 +37,13 @@ function export_simulation(data_path, states::AbstractArray,
     export_parameters(data_path, simparams, identifiers...)
     return nothing
 end
+
+function import_simulation(data_path, simparam_t::Type, identifiers...)
+    param_file = joinpath(data_path, "$(simparam_t)$(concat_ids(identifiers...)).params")
+    isfile(param_file) ? nothing : error("\nSimulation parameters file:\n\t$param_file\nnot found.")
+    sim_params = import_json( param_file, simparam_t )
+    temp_ham = (corresponding_hamiltonian(sim_params))(sim_params.latt_params, sim_params.ham_params)
+    states_file = joinpath(data_path, "states$(concat_ids(identifiers...)).bin")
+    states = import_states( corresponding_hamiltonian(sims_params), states_file, num_DoF(temp_ham), num_exports(sims_params) )
+    return (sim_params, states)
+end
