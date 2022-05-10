@@ -11,3 +11,11 @@ function build_data_directory(; model_name, data_root = default_mc_root)
     return mkpath(data_path)
 end
 
+function export_parameters(data_path, params...)
+    for param_struct ∈ params
+        file_name = "$(Base.typename(param_struct).wrapper).json"
+        println(file_name)
+        # export_json(param_struct, joinpath(data_path, "$file_name.json"))
+    end
+    return nothing 
+end
