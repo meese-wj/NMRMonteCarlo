@@ -77,11 +77,13 @@ function populate_hyperfine_fluctuations!(flucts, state, latt::CubicLattice2D) w
 end
 
 function populate_all_hyperfine_fluctuations!(all_flucts, all_states, latt::CubicLattice2D)
-    if size(all_flucts) != size(all_states)
-        error("\nFluctuations state and MC state do not match in size: $(size(all_flucts)) != $(size(all_states))")
+    # all_flucts and all_states have reversed sizes
+    # for speed on all_flucts analysis
+    if size(all_flucts) != reverse(size(all_states))
+        error("\nFluctuations state and MC state do not match in size: $(size(all_flucts)) != reverse($(size(all_states)))")
     end 
-    @inbounds for state_idx ∈ eachindex(1:size(all_flucts)[2])
-        flucts = @view all_flucts[:, state_idx]
+    @inbounds for state_idx ∈ eachindex(1:size(all_flucts)[1])
+        flucts = @view all_flucts[state_idx, :]
         state =  @view all_states[:, state_idx]
         populate_hyperfine_fluctuations!( flucts, state, latt)
     end
