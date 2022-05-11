@@ -50,10 +50,10 @@ function import_states(ty::Type{AT_Hamiltonian{T}}, data_file, num_dofs, num_sta
 end
 
 function separate_colors!(::Type{AT_Hamiltonian{T}}, colors::Matrix{T}, state::AbstractVector) where {T}
-    length(colors[:,Int(AT_σ)]) == length(state) ? nothing : error("\nDestination matrix and state have different lengths: 2 × $(length(colors[:,Int(AT_σ)])) ≂̸ $(length(state)).")
+    length(colors[:,Int(AT_sigma)]) == length(state) ? nothing : error("\nDestination matrix and state have different lengths: 2 × $(length(colors[:,Int(AT_sigma)])) ≂̸ $(length(state)).")
     @inbounds for site ∈ 1:(length(state) ÷ NUM_AT_COLORS)
-        colors[site, Int(AT_σ)] = state[ color_index(site, AT_σ) ]
-        colors[site, Int(AT_τ)] = state[ color_index(site, AT_τ) ]
+        colors[site, Int(AT_sigma)] = state[ color_index(site, AT_sigma) ]
+        colors[site, Int(AT_tau)] = state[ color_index(site, AT_tau) ]
     end
     return nothing
 end
