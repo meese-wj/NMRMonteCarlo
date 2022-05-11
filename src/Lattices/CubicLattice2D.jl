@@ -22,6 +22,7 @@ num_sites( latt::CubicLattice2D ) = num_sites_CL2D( latt.params.Lx, latt.params.
 Base.getindex( latt::CubicLattice2D, site, neighbor ) = latt.neighbors[ site, neighbor ]
 Base.setindex!( latt::CubicLattice2D, value, site, neighbor ) = latt.neighbors[ site, neighbor ] = value 
 site_index( latt::CubicLattice2D, indices::Tuple{Int, Int} ) = latt.params.Lx * ( indices[2] - 1 ) + indices[1]
+indices_from_site( latt::CubicLattice2D, origin_site::Int ) = ( origin_site % latt.params.Lx, 1 + origin_site ÷ latt.params.Lx )
 function pbc_add(x1, x2, Lsize) 
     output = x1 + x2
     while output > Lsize
@@ -33,15 +34,27 @@ function pbc_add(x1, x2, Lsize)
     return output
 end
 
+site_index(latt::CubicLattice2D, origin::Tuple{Int,Int}, Δr::Tuple{Int, Int}) = site_index(latt, 
+                                                                                          ( pbc_add(origin[1], Δr[1], latt.params.Lx),
+                                                                                            pbc_add(origin[2], Δr[2], latt.params.Ly) ) )
+
+function site_index(latt::CubicLattice2D, origin_site::Int, Δr::Tuple{Int, Int} )
+    origin = indices_from_site(latt, origin_site)
+    return site_index(latt, origin, Δr)
+end
+
 function construct_lattice!( latt::CubicLattice2D )
     for ydx ∈ 1:latt.params.Ly, xdx ∈ 1:latt.params.Lx
         site = site_index(latt, (xdx, ydx))
         
         # Order of neighbors: (x, y-1), (x-1, y), (x+1, y), (x, y+1)
-        latt[site, 1] = site_index(latt, ( xdx, pbc_add(ydx, -1, latt.params.Ly) ) )
-        latt[site, 2] = site_index(latt, ( pbc_add(xdx, -1, latt.params.Lx), ydx ) )
-        latt[site, 3] = site_index(latt, ( pbc_add(xdx, 1, latt.params.Lx), ydx ) )
-        latt[site, 4] = site_index(latt, ( xdx, pbc_add(ydx, 1, latt.params.Ly) ) )
+        latt[site, 1] = site_index(latt, (xdx, ydx), ( 0, -1))
+        latt[site, 2] = site_index(latt, (xdx, ydx), (-1,  0))
+        latt[site, 3] = site_index(latt, (xdx, ydx), ( 1,  0))
+        latt[site, 4] = site_index(latt, (xdx, ydx), ( 0,  1))
+        # latt[site, 2] = site_index(latt, ( pbc_add(xdx, -1, latt.params.Lx), ydx ) )
+        # latt[site, 3] = site_index(latt, ( pbc_add(xdx, 1, latt.params.Lx), ydx ) )
+        # latt[site, 4] = site_index(latt, ( xdx, pbc_add(ydx, 1, latt.params.Ly) ) )
     end
     return nothing
 end
