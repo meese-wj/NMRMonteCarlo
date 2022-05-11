@@ -24,7 +24,7 @@ mutable struct AT_Hamiltonian{T <: AbstractFloat} <: AbstractHamiltonian
     colors::Vector{T}
 end
 
-AT_Hamiltonian{T}( num_dof::Int; params = AT_Parameters{T}() ) where {T <: AbstractFloat} = AT_Hamiltonian( AT_σ, params, ones(T, num_dof) )
+AT_Hamiltonian{T}( num_dof::Int; params = AT_Parameters{T}() ) where {T <: AbstractFloat} = AT_Hamiltonian( AT_σ, params, rand([one(T), -one(T)], num_dof) )
 # AT_Hamiltonian{T}( latt::AbstractLattice; params = AT_Parameters{T}() ) where {T <: AbstractFloat} = AT_Hamiltonian{T}( NUM_AT_COLORS * num_sites(latt); params = params )
 AT_Hamiltonian{T}( latt::AbstractLattice, params::AT_Parameters{T} ) where {T <: AbstractFloat} = AT_Hamiltonian{T}( NUM_AT_COLORS * num_sites(latt); params = params )
 
@@ -89,7 +89,7 @@ function AT_total_energy( colors::AbstractVector, hamparams::AT_Parameters{T}, l
     for site ∈ 2:num_sites(latt)
         en += AT_site_energy( colors, hamparams, latt, site)
     end
-    return -0.5 * en
+    return 0.5 * en
 end
 
 AT_site_energy(ham::AT_Hamiltonian, latt::AbstractLattice, site) = AT_site_energy( ham, latt, site, @SVector [ ham[site, AT_σ], ham[site, AT_τ], site_Baxter(ham, site) ] )
