@@ -25,19 +25,17 @@ sweep_indices = sweeps_per_export(sim_params.mc_params) .* (1:1:num_states)
 
 # Energies, sigma and tau mags
 energies = zeros(data_t, num_states)
-mags = zeros(NUM_AT_COLORS, num_states)
+mags = zeros(data_t, NUM_AT_COLORS, num_states)
 @inbounds for idx ∈ eachindex(1:num_states)
     energies[idx] = AT_total_energy(mc_states[:, idx], ham.params, latt) / num_AT_sites
-    mags[1, idx] = sum(mc_states[begin:2:end, idx]) / num_AT_sites
-    mags[2, idx] = sum(mc_states[2:2:end, idx]) / num_AT_sites
+    mags[1, idx] = sum(mc_states[begin:NUM_AT_COLORS:end, idx]) / num_AT_sites
+    mags[2, idx] = sum(mc_states[2:NUM_AT_COLORS:end, idx]) / num_AT_sites
 end
 
-@show mags[1,:] == mags[2,:]
-
-plot( sweep_indices, energies,
-      color=:blue, xlabel = "MC Sweeps",
-      ylabel = "Energy / Site", 
-      label="\$\\beta = $(sim_params.mc_params.β)\\,J^{-1}\$")
+energy_plt = plot( sweep_indices, energies,
+                   color=:green,
+                   ylabel = L"$E/N$", 
+                   label="\$\\beta = $(sim_params.mc_params.β)\\,J^{-1}\$")
 
 sigma_plt = plot( sweep_indices, mags[1, :], 
                   color=:blue,
@@ -50,5 +48,5 @@ tau_plt   = plot( sweep_indices, mags[2, :],
                   label=nothing)
 
 
-plot(sigma_plt, tau_plt, layout=(2,1), link = :xy,
+plot( energy_plt, sigma_plt, tau_plt, layout=(3,1), link = :xy,
      plot_title="\$\\beta = $(sim_params.mc_params.β)\\,J^{-1}\$")
