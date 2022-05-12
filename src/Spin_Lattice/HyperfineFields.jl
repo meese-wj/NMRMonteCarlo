@@ -10,9 +10,6 @@ const hyp_Acc = 0.47
 const hyp_Aac = 0.43
 const hyp_Aab = 0.33
 
-const hyp_constants = @SVector [hyp_Aaa, hyp_Acc, hyp_Aac, hyp_Aab]
-const max_hyp_const = maximum(hyp_constants)
-
 const hyp_A1 = @SMatrix [ [hyp_Aaa hyp_Aab hyp_Aac] ;
                           [hyp_Aab hyp_Aaa hyp_Aac] ;
                           [hyp_Aac hyp_Aac hyp_Acc] ]
@@ -29,17 +26,31 @@ const hyp_A4 = @SMatrix [ [ hyp_Aaa  hyp_Aab -hyp_Aac] ;
                           [ hyp_Aab  hyp_Aaa -hyp_Aac] ;
                           [-hyp_Aac -hyp_Aac  hyp_Acc] ]
 
+# This rotation matrix converts the spin-space coordinates
+# of the As nuclear moment to the real-space coordinates
+# where the crystallographic ̂b direction is the one chosen
+# for the external NMR field. 
+const rotation_mat = @SMatrix [ [-1 0 0] ;
+                                [ 0 0 1] ;
+                                [ 0 1 0] ]
+
 const hyperfine_Amats = @SVector [ hyp_A1, hyp_A2, hyp_A3, hyp_A4 ]
+
 
 # There are two As atoms per unit cell, denoted by 
 # As_plus and As_minus
 @enum As_atoms As_plus=1 As_minus As_enum_end
 const NUM_As_ATOMS = Int(As_enum_end) - Int(As_plus)
 
+# Define a couple of empty structs to be magnetic traits
 struct Out_of_Plane end
 struct Spin_Orbit_Coupling end
 const mag_vector_types = @SVector [Out_of_Plane, Spin_Orbit_Coupling]
 
+# Define the mag_vector in the model with respect to 
+# the expected behavior in the crystallographic basis.
+# Later, use the rotation_mat to calculate the spin-
+# lattice relaxation rate.
 mag_vector(ty::Type{T}...) where {T} = error("\nNo method defined for mag_vectors with the $(ty) trait.")
 mag_vector(::Type{Out_of_Plane}, state, site, color) = @SVector [0,0, state[site, color]]
 function mag_vector(::Type{Spin_Orbit_Coupling}, state, site, color)
@@ -54,7 +65,7 @@ function hyperfine_plus(ty, state, latt::CubicLattice2D, site )
     hyp2 = hyperfine_Amats[1] * mag_vector(ty, state, site_index(latt, site, (0, 1)), AT_tau)
     hyp3 = hyperfine_Amats[3] * mag_vector(ty, state, site, AT_sigma)
     hyp4 = hyperfine_Amats[2] * mag_vector(ty, state, site_index(latt, site, (1, 0)), AT_sigma)
-    return hyp1 - hyp2 + hyp3 - hyp4
+    return rotation_mat * (hyp1 - hyp2 + hyp3 - hyp4)
 end
 
 function hyperfine_minus(ty, state, latt::CubicLattice2D, site )
@@ -62,17 +73,21 @@ function hyperfine_minus(ty, state, latt::CubicLattice2D, site )
     hyp2 = hyperfine_Amats[4] * mag_vector(ty, state, site_index(latt, site, (0, -1)), AT_sigma)
     hyp3 = hyperfine_Amats[2] * mag_vector(ty, state, site, AT_tau)
     hyp4 = hyperfine_Amats[3] * mag_vector(ty, state, site_index(latt, site, (-1, 0)), AT_tau)
-    return hyp1 - hyp2 + hyp3 - hyp4
+    return rotation_mat * (hyp1 - hyp2 + hyp3 - hyp4)
 end
 
 function hyperfine_fields(ty, state, latt::CubicLattice2D, site )
     return @SVector [ hyperfine_plus(ty, state, latt, site), hyperfine_minus(ty, state, latt, site) ]
 end
 
+single_hyperfine_fluct( field ) = field[1] * field[1] + field[2] * field[2]
+
+# By definition, in spin space, the ̂z direction points along the
+# external field which doesn't couple to the As nuclear moment's 
+# raising and lowering operators.
 function inst_hyperfine_fluctuations(ty, state, latt::CubicLattice2D, site )
     fields = hyperfine_fields(ty, state, latt, site)
-    return @SVector [fields[1][1] * fields[1][1] + fields[1][3] * fields[1][3],
-                     fields[2][1] * fields[2][1] + fields[2][3] * fields[2][3] ]
+    return @SVector [ single_hyperfine_fluct(fields[1]), single_hyperfine_fluct(fields[2]) ]
 end
 
 function populate_hyperfine_fluctuations!(ty, flucts, state, latt::CubicLattice2D) where {T}
