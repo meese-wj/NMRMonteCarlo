@@ -10,6 +10,7 @@ include("src/Ashkin_Teller/AT_State.jl")
 include("src/Monte_Carlo_Core/MonteCarloCore.jl")
 include("src/SimulationParameters.jl")
 include("src/File_Handling/FileHandling.jl")
+include("src/Spin_Lattice/HyperfineFields.jl")
 
 const import_directory = "NMR_Simulation_Data/Ashkin-Teller/May-11-2022/"
 
@@ -54,3 +55,11 @@ tau_plt   = plot( sweep_indices, mags[2, :],
 
 plot( energy_plt, sigma_plt, tau_plt, layout=(3,1), link = :x,
      plot_title="\$\\beta = $(sim_params.mc_params.β)\\,J^{-1} = ($(round(1/sim_params.mc_params.β, digits=3))\\,J)^{-1}\$")
+
+all_fluctuations = populate_all_hyperfine_fluctuations(Out_of_Plane, mc_states, latt)
+fluct_dists = analyze_fluctuations!(all_fluctuations, mc_states, latt; analysis = mean)
+     
+histogram(fluct_dists;
+          xlabel = L"$\mathcal{W}$ $(\textrm{ T}/\mu_B)^2$", ylabel="Counts",
+          label = permutedims(replace.(String.(Symbol.(mag_vector_types)), "_" => " ")),
+          plot_title="\$\\beta = $(sim_params.mc_params.β)\\,J^{-1} = ($(round(1/sim_params.mc_params.β, digits=3))\\,J)^{-1}\$")

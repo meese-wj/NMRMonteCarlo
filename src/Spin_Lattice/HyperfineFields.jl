@@ -36,13 +36,13 @@ const hyperfine_Amats = @SVector [ hyp_A1, hyp_A2, hyp_A3, hyp_A4 ]
 @enum As_atoms As_plus=1 As_minus As_enum_end
 const NUM_As_ATOMS = Int(As_enum_end) - Int(As_plus)
 
-struct OutofPlane end
-struct SpinOrbitCoupling end
-const mag_vector_types = @SVector [OutofPlane, SpinOrbitCoupling]
+struct Out_of_Plane end
+struct Spin_Orbit_Coupling end
+const mag_vector_types = @SVector [Out_of_Plane, Spin_Orbit_Coupling]
 
 mag_vector(ty::Type{T}...) where {T} = error("\nNo method defined for mag_vectors with the $(ty) trait.")
-mag_vector(::Type{OutofPlane}, state, site, color) = @SVector [0,0, state[site, color]]
-function mag_vector(::Type{SpinOrbitCoupling}, state, site, color)
+mag_vector(::Type{Out_of_Plane}, state, site, color) = @SVector [0,0, state[site, color]]
+function mag_vector(::Type{Spin_Orbit_Coupling}, state, site, color)
     if site_Baxter(state, site) == one(eltype(state))
         return @SVector [state[site, color], 0, 0]
     end
@@ -101,6 +101,12 @@ function populate_all_hyperfine_fluctuations!(ty, all_flucts, all_states, latt::
     return nothing
 end
 
+function populate_all_hyperfine_fluctuations(ty, all_states, latt::CubicLattice2D)
+    all_fluctuations = zeros(reverse(size(all_states)))
+    populate_all_hyperfine_fluctuations!(ty, all_fluctuations, all_states, latt)
+    return all_fluctuations
+end
+ 
 function analyze_fluctuations!( all_flucts, all_states, latt::CubicLattice2D; analysis = mean )
     fluct_dists = zeros( size(all_flucts)[2], length(mag_vector_types) )
     @inbounds for (tydx, ty) ∈ enumerate(mag_vector_types)
