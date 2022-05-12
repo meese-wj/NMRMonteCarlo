@@ -21,10 +21,10 @@ simulation_parameters = AT_2DCL_Metro_Params( latt.params, ham.params, mc_params
 mc_states = build_state_container(typeof(mc_model.ham), num_DoF(ham), mc_params.total_measurements)
 
 @time thermalize!(mc_model, mc_params, metropolis_sweep!)
-@time thermalize!(mc_model, mc_params, metropolis_sweep!)
+# @time thermalize!(mc_model, mc_params, metropolis_sweep!)
 
 @time sweep_and_measure!(mc_model, mc_params, metropolis_sweep!, mc_states)
-@time sweep_and_measure!(mc_model, mc_params, metropolis_sweep!, mc_states)
+# @time sweep_and_measure!(mc_model, mc_params, metropolis_sweep!, mc_states)
 # export_states(mc_states, joinpath(@__DIR__, "NMR_Simulation_Data"))
 
 # Export simulation

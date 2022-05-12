@@ -58,8 +58,9 @@ plot( energy_plt, sigma_plt, tau_plt, layout=(3,1), link = :x,
 
 all_fluctuations = populate_all_hyperfine_fluctuations(Out_of_Plane, mc_states, latt)
 fluct_dists = analyze_fluctuations!(all_fluctuations, mc_states, latt; analysis = mean)
-     
+
 histogram(fluct_dists;
-          xlabel = L"$\mathcal{W}$ $(\textrm{ T}/\mu_B)^2$", ylabel="Counts",
+          xlabel = L"$\textrm{Av}\,\left[\mathcal{W}(\mathbf{x}_i)\right]$ $(\textrm{ T}/\mu_B)^2$", ylabel="Counts",
           label = permutedims(replace.(String.(Symbol.(mag_vector_types)), "_" => " ")),
-          plot_title="\$\\beta = $(sim_params.mc_params.β)\\,J^{-1} = ($(round(1/sim_params.mc_params.β, digits=3))\\,J)^{-1}\$")
+          plot_title="\$\\beta = $(sim_params.mc_params.β)\\,J^{-1} = ($(round(1/sim_params.mc_params.β, digits=3))\\,J)^{-1}\$",
+          legend = :topright)
