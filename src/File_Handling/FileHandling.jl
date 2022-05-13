@@ -33,21 +33,26 @@ end
 function export_simulation(data_path, states::AbstractArray, 
                            simparams::SimulationParameters, identifiers...)
     # Assumes data_path exists...
-    export_states(states, data_dir, identifiers...)
-    export_parameters(data_path, simparams, identifiers...)
+    export_states(states, data_path, identifiers...)
+    # export_parameters(data_path, simparams, identifiers...)
     return nothing
+end
+
+function import_paramters(data_path, simparam_t::Type, identifiers...)
+    param_file = joinpath(data_path, "$(simparam_t)$(concat_ids(identifiers...)).params")
+    isfile(param_file) ? nothing : error("\nSimulation parameters file:\n\t$param_file\nnot found.")
+    return import_json( param_file, simparam_t )::SimulationParameters
 end
 
 function import_simulation(data_path, simparam_t::Type, identifiers...)
     # Get the parameters
-    param_file = joinpath(data_path, "$(simparam_t)$(concat_ids(identifiers...)).params")
-    isfile(param_file) ? nothing : error("\nSimulation parameters file:\n\t$param_file\nnot found.")
-    sim_params = import_json( param_file, simparam_t )::SimulationParameters
+    # sim_params = import_paramters(data, simparam_t, identifiers...)
 
     # Get the states with a temporary Hamiltonian
     temp_latt = (reciprocal_type(sim_params.latt_params))(sim_params.latt_params)
     temp_ham = (reciprocal_type(sim_params.ham_params))(temp_latt, sim_params.ham_params)
     states_file = joinpath(data_path, "states$(concat_ids(identifiers...)).bin")
     states = import_states( reciprocal_type(sim_params.ham_params), states_file, num_DoF(temp_ham), num_exports(sim_params) )
-    return (sim_params, states)
+    # return (sim_params, states)
+    return states
 end
