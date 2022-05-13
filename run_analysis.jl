@@ -70,7 +70,8 @@ for (betadx, β) ∈ enumerate(sim_params.mc_params.βvalues)
                         xlabel = L"$\mathcal{W}(\mathbf{x})$ $(\textrm{ T}/\mu_B)^2$", ylabel="Counts",
                         label = permutedims(replace.(String.(Symbol.(mag_vector_types)), "_" => " ")),
                         plot_title="\$\\beta = $(β)\\,J^{-1} = ($(temperature)\\,J)^{-1}\$",
-                        legend = :topright)
+                        legend = :topright,
+                        alpha = 0.7, linecolor = :match)
 
     savefig(histplt, joinpath(import_directory, "W_histograms_T-$(temperature).png"))
 end
