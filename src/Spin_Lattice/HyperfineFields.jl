@@ -44,8 +44,9 @@ const NUM_As_ATOMS = Int(As_enum_end) - Int(As_plus)
 
 # Define a couple of empty structs to be magnetic traits
 struct Out_of_Plane end
+struct Easy_Axis_In_Plane end
 struct Spin_Orbit_Coupling end
-const mag_vector_types = @SVector [Out_of_Plane, Spin_Orbit_Coupling]
+const mag_vector_types = @SVector [Out_of_Plane, Easy_Axis_In_Plane, Spin_Orbit_Coupling]
 
 # Define the mag_vector in the model with respect to 
 # the expected behavior in the crystallographic basis.
@@ -53,6 +54,7 @@ const mag_vector_types = @SVector [Out_of_Plane, Spin_Orbit_Coupling]
 # lattice relaxation rate.
 mag_vector(ty::Type{T}...) where {T} = error("\nNo method defined for mag_vectors with the $(ty) trait.")
 mag_vector(::Type{Out_of_Plane}, state, site, color) = @SVector [0,0, state[site, color]]
+mag_vector(::Type{Easy_Axis_In_Plane}, state, site, color) = @SVector [state[site, color], 0, 0]
 function mag_vector(::Type{Spin_Orbit_Coupling}, state, site, color)
     if site_Baxter(state, site) == one(eltype(state))
         return @SVector [state[site, color], 0, 0]

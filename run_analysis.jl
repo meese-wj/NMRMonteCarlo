@@ -12,7 +12,7 @@ include("src/SimulationParameters.jl")
 include("src/File_Handling/FileHandling.jl")
 include("src/Spin_Lattice/HyperfineFields.jl")
 
-const import_directory = "NMR_Simulation_Data/Ashkin-Teller/May-13-2022/"
+const import_directory = "NMR_Simulation_Data/Ashkin-Teller/May-23-2022/"
 
 sim_params = import_paramters(import_directory, AT_2DCL_Metro_Params{Float64}, "job-1")
 
@@ -74,4 +74,5 @@ for (betadx, β) ∈ enumerate(sim_params.mc_params.βvalues)
                         alpha = 0.7, linecolor = :match)
 
     savefig(histplt, joinpath(import_directory, "W_histograms_T-$(temperature).png"))
+    vscodedisplay(histplt)
 end
