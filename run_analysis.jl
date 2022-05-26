@@ -12,7 +12,8 @@ include("src/SimulationParameters.jl")
 include("src/File_Handling/FileHandling.jl")
 include("src/Spin_Lattice/HyperfineFields.jl")
 
-const import_directory = "NMR_Simulation_Data/Ashkin-Teller/May-23-2022/"
+model_name = "Ashkin-Teller"
+import_directory = simulation_date_directory(model_name, Dates.now())
 
 sim_params = import_paramters(import_directory, AT_2DCL_Metro_Params{Float64}, "job-1")
 
@@ -65,6 +66,11 @@ for (betadx, β) ∈ enumerate(sim_params.mc_params.βvalues)
 
     @time all_fluctuations = populate_all_hyperfine_fluctuations(Out_of_Plane, analysis_states, analysis_latt)
     fluct_dists = analyze_fluctuations!(all_fluctuations, analysis_states, analysis_latt; analysis = mean)
+
+    for (typedx, type) ∈ enumerate(mag_vector_types)
+        println("Magnetic model: $type")
+        @show mean(fluct_dists[:, typedx])
+    end
 
     histplt = histogram(fluct_dists;
                         xlabel = L"$\mathcal{W}(\mathbf{x})$ $(\textrm{ T}/\mu_B)^2$", ylabel="Counts",

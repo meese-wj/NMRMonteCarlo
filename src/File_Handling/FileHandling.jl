@@ -17,9 +17,13 @@ function concat_ids(identifiers...)
     return ids
 end
 
+simulation_date_format( date, form = mc_date_format ) = Dates.format(date, form)
+
+simulation_date_directory( model_name, date, data_root = default_mc_root, form = mc_date_format ) = joinpath(data_root, model_name, simulation_date_format(date, form))
+
 function build_data_directory(; model_name, data_root = default_mc_root)
     model_name ∈ eligible_models() ? nothing : error("\nModel name $(model_name) not an eligible type.\n")
-    data_path = joinpath(data_root, model_name, Dates.format(Dates.now(), mc_date_format))
+    data_path = simulation_date_directory(model_name, Dates.now(), data_root, mc_date_format)
     return mkpath(data_path)
 end
 
