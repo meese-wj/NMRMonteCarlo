@@ -55,36 +55,26 @@ for test_type ∈ test_mag_types
     test_rate_minus = zeros(Float64, 0) 
 
     # Testing the Ω⁺ rates
-    for val1 ∈ test_values
+    for val1 ∈ test_values, val2 ∈ test_values, val3 ∈ test_values, val4 ∈ test_values
         test_state[ site_index(test_latt, test_site, (0, 0)), AT_sigma ] = val1
-        for val2 ∈ test_values
-            test_state[ site_index(test_latt, test_site, (0, 0)), AT_tau ] = val2
-            for val3 ∈ test_values
-                test_state[ site_index(test_latt, test_site, (1, 0)), AT_sigma ] = val3 
-                for val4 ∈ test_values
-                    test_state[ site_index(test_latt, test_site, (0, 1)), AT_tau ] = val4
-                    Ωvals = inst_hyperfine_fluctuations(test_type, test_state, test_latt, test_site )
-                    push!(test_rate_plus, Ωvals[1])
-                    println("{$val1, $val2, $val3, $val4} → $(round(Ωvals[1], digits=4))")
-                end
-            end
-        end
+        test_state[ site_index(test_latt, test_site, (0, 0)), AT_tau ]   = val2
+        test_state[ site_index(test_latt, test_site, (1, 0)), AT_sigma ] = val3 
+        test_state[ site_index(test_latt, test_site, (0, 1)), AT_tau ]   = val4
+
+        Ωvals = inst_hyperfine_fluctuations(test_type, test_state, test_latt, test_site )
+        push!(test_rate_plus, Ωvals[1])
+        println("{$val1, $val2, $val3, $val4} → $(round(Ωvals[1], digits=4))")
     end
 
     # Testing the Ω⁻ rates
-    for val1 ∈ test_values
-        test_state[ site_index(test_latt, test_site, (0, 0)), AT_sigma ] = val1
-        for val2 ∈ test_values
-            test_state[ site_index(test_latt, test_site, (0, 0)), AT_tau ] = val2
-            for val3 ∈ test_values
-                test_state[ site_index(test_latt, test_site, (-1, 0)), AT_tau ] = val3 
-                for val4 ∈ test_values
-                    test_state[ site_index(test_latt, test_site, (0, -1)), AT_sigma ] = val4
-                    Ωvals = inst_hyperfine_fluctuations(test_type, test_state, test_latt, test_site )
-                    push!(test_rate_minus, Ωvals[2])
-                end
-            end
-        end
+    for val1 ∈ test_values, val2 ∈ test_values, val3 ∈ test_values, val4 ∈ test_values
+        test_state[ site_index(test_latt, test_site, (0, 0)), AT_sigma ]  = val1
+        test_state[ site_index(test_latt, test_site, (0, 0)), AT_tau ]    = val2
+        test_state[ site_index(test_latt, test_site, (-1, 0)), AT_tau ]   = val3 
+        test_state[ site_index(test_latt, test_site, (0, -1)), AT_sigma ] = val4
+
+        Ωvals = inst_hyperfine_fluctuations(test_type, test_state, test_latt, test_site )
+        push!(test_rate_minus, Ωvals[2])
     end
 
     test_rate_plus = round.(test_rate_plus, digits = 4)
@@ -115,6 +105,7 @@ for test_type ∈ test_mag_types
                     plot_title = replace(String(Symbol(test_type)), "_" => " "))
 
     savefig(test_plot, joinpath(plot_dir, "$(String(Symbol(test_type)))_values.svg"))
+    savefig(test_plot, joinpath(plot_dir, "$(String(Symbol(test_type)))_values.png"))
     test_plot
 end
 
@@ -126,46 +117,28 @@ end
 soc_test_values_plus  = zeros(Float64, 0)
 soc_test_values_minus = zeros(Float64, 0)
 
-for val1 ∈ test_values
+for val1 ∈ test_values, val2 ∈ test_values, val3 ∈ test_values, val4 ∈ test_values, val5 ∈ test_values, val6 ∈ test_values
     test_state[ site_index(test_latt, test_site, (0, 0)), AT_sigma ] = val1
-    for val2 ∈ test_values
-        test_state[ site_index(test_latt, test_site, (0, 0)), AT_tau ] = val2
-        for val3 ∈ test_values
-            test_state[ site_index(test_latt, test_site, (1, 0)), AT_sigma ] = val3 
-            for val4 ∈ test_values
-                test_state[ site_index(test_latt, test_site, (1, 0)), AT_tau ] = val4 
-                for val5 ∈ test_values
-                    test_state[ site_index(test_latt, test_site, (0, 1)), AT_sigma ] = val5 
-                    for val6 ∈ test_values
-                        test_state[ site_index(test_latt, test_site, (0, 1)), AT_tau ] = val6
-                        Ωvals = inst_hyperfine_fluctuations(Spin_Orbit_Coupling, test_state, test_latt, test_site )
-                        push!(soc_test_values_plus, Ωvals[1])
-                    end
-                end
-            end
-        end
-    end
+    test_state[ site_index(test_latt, test_site, (0, 0)), AT_tau ]   = val2
+    test_state[ site_index(test_latt, test_site, (1, 0)), AT_sigma ] = val3 
+    test_state[ site_index(test_latt, test_site, (1, 0)), AT_tau ]   = val4 
+    test_state[ site_index(test_latt, test_site, (0, 1)), AT_sigma ] = val5 
+    test_state[ site_index(test_latt, test_site, (0, 1)), AT_tau ]   = val6
+    
+    Ωvals = inst_hyperfine_fluctuations(Spin_Orbit_Coupling, test_state, test_latt, test_site )
+    push!(soc_test_values_plus, Ωvals[1])
 end
 
-for val1 ∈ test_values
-    test_state[ site_index(test_latt, test_site, (0, 0)), AT_sigma ] = val1
-    for val2 ∈ test_values
-        test_state[ site_index(test_latt, test_site, (0, 0)), AT_tau ] = val2
-        for val3 ∈ test_values
-            test_state[ site_index(test_latt, test_site, (0, -1)), AT_sigma ] = val3 
-            for val4 ∈ test_values
-                test_state[ site_index(test_latt, test_site, (0, -1)), AT_tau ] = val4 
-                for val5 ∈ test_values
-                    test_state[ site_index(test_latt, test_site, (-1, 0)), AT_sigma ] = val5 
-                    for val6 ∈ test_values
-                        test_state[ site_index(test_latt, test_site, (-1, 0)), AT_tau ] = val6
-                        Ωvals = inst_hyperfine_fluctuations(Spin_Orbit_Coupling, test_state, test_latt, test_site )
-                        push!(soc_test_values_minus, Ωvals[2])
-                    end
-                end
-            end
-        end
-    end
+for val1 ∈ test_values, val2 ∈ test_values, val3 ∈ test_values, val4 ∈ test_values, val5 ∈ test_values, val6 ∈ test_values
+    test_state[ site_index(test_latt, test_site, (0, 0)), AT_sigma ]  = val1
+    test_state[ site_index(test_latt, test_site, (0, 0)), AT_tau ]    = val2
+    test_state[ site_index(test_latt, test_site, (0, -1)), AT_sigma ] = val3 
+    test_state[ site_index(test_latt, test_site, (0, -1)), AT_tau ]   = val4 
+    test_state[ site_index(test_latt, test_site, (-1, 0)), AT_sigma ] = val5 
+    test_state[ site_index(test_latt, test_site, (-1, 0)), AT_tau ]   = val6
+    
+    Ωvals = inst_hyperfine_fluctuations(Spin_Orbit_Coupling, test_state, test_latt, test_site )
+    push!(soc_test_values_minus, Ωvals[2])
 end
 
 soc_test_values_plus = broadcast(x -> round(x, digits = 4), soc_test_values_plus)
@@ -197,4 +170,5 @@ soc_plot = plot(soc_plt_p, soc_plt_m;
                 )
 
 savefig(soc_plot, joinpath(plot_dir, "$(String(Symbol(Spin_Orbit_Coupling)))_values.svg"))
+savefig(soc_plot, joinpath(plot_dir, "$(String(Symbol(Spin_Orbit_Coupling)))_values.png"))
 soc_plot
