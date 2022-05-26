@@ -62,14 +62,19 @@ function mag_vector(::Type{Spin_Orbit_Coupling}, state, site, color)
     return @SVector [0, state[site, color], 0]
 end
 
-function hyperfine_plus(ty, state, latt::CubicLattice2D, site )
-    hyp1 = hyperfine_Amats[4] * mag_vector(ty, state, site, AT_tau)
-    hyp2 = hyperfine_Amats[1] * mag_vector(ty, state, site_index(latt, site, (0, 1)), AT_tau)
-    hyp3 = hyperfine_Amats[3] * mag_vector(ty, state, site, AT_sigma)
-    hyp4 = hyperfine_Amats[2] * mag_vector(ty, state, site_index(latt, site, (1, 0)), AT_sigma)
-    return rotation_mat * (hyp1 - hyp2 + hyp3 - hyp4)
+function hyperfine_plus_vectors(ty, state, latt::CubicLattice2D, site )
+    Atau0     = hyperfine_Amats[4] * mag_vector(ty, state, site, AT_tau)
+    Atau0p1   = -hyperfine_Amats[1] * mag_vector(ty, state, site_index(latt, site, (0, 1)), AT_tau)
+    Asigma0   = hyperfine_Amats[3] * mag_vector(ty, state, site, AT_sigma)
+    Asigma1p0 = -hyperfine_Amats[2] * mag_vector(ty, state, site_index(latt, site, (1, 0)), AT_sigma)
+    return @SVector [ Asigma0, Atau0, Asigma1p0, Atau0p1 ]
 end
 
+function hyperfine_plus(ty, state, latt::CubicLattice2D, site )
+    return sum( rotation_mat .* hyperfine_plus_vectors(ty, state, latt, site) )
+end
+
+# TODO: Modify this to look like the plus case
 function hyperfine_minus(ty, state, latt::CubicLattice2D, site )
     hyp1 = hyperfine_Amats[1] * mag_vector(ty, state, site, AT_sigma)
     hyp2 = hyperfine_Amats[4] * mag_vector(ty, state, site_index(latt, site, (0, -1)), AT_sigma)
