@@ -4,12 +4,6 @@ include("../../Lattices/CubicLattice2D.jl")
 include("../../Ashkin_Teller/AT_Hamiltonian.jl")
 include("../HyperfineFields.jl")
 
-function figure_3d()
-    fig = figure()
-    ax = fig[:gca](projection = "3d")
-    return fig, ax
-end
-
 function pm_one(value)
     if abs(value) != one(value)
         error("\nArgument $value does not have unit magnitude.\n")
@@ -72,7 +66,8 @@ function build_unit_cell_3d!( ax3d, properties )
 end
 
 function build_unit_cell_3d( properties )
-    fig3d, ax3d = figure_3d()
+    fig3d = PyPlot.figure()
+    ax3d = fig3d.add_subplot(projection="3d")
     build_unit_cell_3d!(ax3d, properties)
     return (fig3d, ax3d)
 end
@@ -103,6 +98,7 @@ test_state[ site_index(test_latt, test_site, (0, 1)) , AT_tau]   *= -1
 ################################################################
 test_values = [1, -1]
 test_mag_types = [Out_of_Plane, Easy_Axis_In_Plane]
+test_model_type = Easy_Axis_In_Plane
 
 latt_space = 1
 arrow_fraction = 0.45
@@ -119,28 +115,46 @@ ucprop = unit_cell_properties(; bbox_coords = bbox_coords,
                                 arrow_fraction = arrow_fraction,
                                 latt_space = latt_space)
 
-fig3d, ax3d = build_unit_cell_3d(ucprop)
+fig3d = PyPlot.figure(figsize = PyPlot.figaspect(0.5))
+mag_ax = fig3d.add_subplot(1,2,1, projection="3d")
+hyp_ax = fig3d.add_subplot(1,2,2, projection="3d")
+build_unit_cell_3d!(mag_ax, ucprop)
+build_unit_cell_3d!(hyp_ax, ucprop)
 
+spin_vectors = @SVector [ mag_vector(test_model_type, test_state, test_site, AT_sigma),
+                          mag_vector(test_model_type, test_state, test_site, AT_tau),
+                          -mag_vector(test_model_type, test_state, site_index(test_latt, test_site, (1, 0)), AT_sigma),
+                          -mag_vector(test_model_type, test_state, site_index(test_latt, test_site, (0, 1)), AT_tau) ]
+for (coords, spin) ∈ zip(ucprop[:bbox_coords], spin_vectors)
+    mag_ax[:quiver](coords..., spin..., 
+                    length = arrow_fraction * ucprop[:latt_space], 
+                    color = "blue", pivot = "middle", zorder = 0)
+end
 
-hyp_vectors = hyperfine_plus_vectors(Easy_Axis_In_Plane, test_state, test_latt, test_site)
+hyp_vectors = hyperfine_plus_vectors(test_model_type, test_state, test_latt, test_site)
 for arrow_prop ∈ zip(bbox_coords, hyp_vectors)
-    ax3d[:quiver](arrow_prop[1]..., arrow_prop[2]...,
+    hyp_ax[:quiver](arrow_prop[1]..., arrow_prop[2]...,
                   length = arrow_fraction * ucprop[:latt_space], 
-                  color = "black", pivot = "middle", zorder = 0)
+                  color = "purple", pivot = "middle", zorder = 0)
 end
 
 net_hyp_vector = sum(hyp_vectors)
-ax3d[:quiver](ucprop[:as_center]..., net_hyp_vector..., 
+hyp_ax[:quiver](ucprop[:as_center]..., net_hyp_vector..., 
               length = arrow_fraction * ucprop[:latt_space],
               color = "orange", lw = 2, pivot = "middle", zorder = 0)
 
-ylims = ax3d.get_ylim()
-ax3d[:quiver](0.5 * ucprop[:latt_space], 0, -ucprop[:latt_space], 0, ylims[2] - ylims[1], 0, color = "purple", lw = 1)
-ax3d.text( 0.55 * ucprop[:latt_space], 0.4 * ucprop[:latt_space], -ucprop[:latt_space], 
-          L"$\mathbf{H}_0$", color = "purple")
 
+axes = @SVector [ mag_ax, hyp_ax ]
+for ax ∈ axes
+    ylims = ax.get_ylim()
+    ax[:quiver](0.5 * ucprop[:latt_space], 0, -ucprop[:latt_space], 0, ylims[2] - ylims[1], 0, color = "black", lw = 1)
+    ax.text( 0.55 * ucprop[:latt_space], 0.4 * ucprop[:latt_space], -ucprop[:latt_space], 
+             L"$\mathbf{H}_0$", color = "black")
+end
 
-ax3d.set_title("\$\\{$( state_string(test_state, test_latt, test_site) )\\}\$")
+fig3d.suptitle("Ashkin-Teller State: \$\\{$( state_string(test_state, test_latt, test_site) )\\}\$")
+mag_ax.set_title("Spin Configuration")
+hyp_ax.set_title("Hyperfine Field Contributions")
 
 pygui(false)
 fig3d
