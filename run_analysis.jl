@@ -1,7 +1,7 @@
 using Pkg
 Pkg.activate(".")
 
-using BenchmarkTools, Plots, LaTeXStrings
+using BenchmarkTools, Plots, LaTeXStrings, Statistics
 
 include("src/ParametersJSON.jl")
 include("src/Lattices/CubicLattice2D.jl")
@@ -14,6 +14,7 @@ include("src/Spin_Lattice/HyperfineFields.jl")
 
 model_name = "Ashkin-Teller"
 import_directory = simulation_date_directory(model_name, Dates.now())
+println("\nAnalyzing data from $import_directory...\n")
 
 sim_params = import_paramters(import_directory, AT_2DCL_Metro_Params{Float64}, "job-1")
 
@@ -69,7 +70,8 @@ for (betadx, β) ∈ enumerate(sim_params.mc_params.βvalues)
 
     for (typedx, type) ∈ enumerate(mag_vector_types)
         println("Magnetic model: $type")
-        @show mean(fluct_dists[:, typedx])
+        println("Mean W  = $(round(mean(fluct_dists[:, typedx]), digits=4))")
+        println("Stdev W = $(round(std(fluct_dists[:, typedx]), digits=4))\n")
     end
 
     histplt = histogram(fluct_dists;

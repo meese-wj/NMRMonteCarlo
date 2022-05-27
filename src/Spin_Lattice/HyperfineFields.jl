@@ -70,17 +70,20 @@ function hyperfine_plus_vectors(ty, state, latt::CubicLattice2D, site )
     return @SVector [ Asigma0, Atau0, Asigma1p0, Atau0p1 ]
 end
 
-function hyperfine_plus(ty, state, latt::CubicLattice2D, site )
-    return sum( rotation_mat .* hyperfine_plus_vectors(ty, state, latt, site) )
+function hyperfine_minus_vectors(ty, state, latt::CubicLattice2D, site )
+    Asigma0   = hyperfine_Amats[1] * mag_vector(ty, state, site, AT_sigma)
+    Asigma0m1 = -hyperfine_Amats[4] * mag_vector(ty, state, site_index(latt, site, (0, -1)), AT_sigma)
+    Atau0     = hyperfine_Amats[2] * mag_vector(ty, state, site, AT_tau)
+    Atau1m0   = -hyperfine_Amats[3] * mag_vector(ty, state, site_index(latt, site, (-1, 0)), AT_tau)
+    return @SVector [ Asigma0, Asigma0m1, Atau0, Atau1m0 ]
 end
 
-# TODO: Modify this to look like the plus case
+function hyperfine_plus(ty, state, latt::CubicLattice2D, site )
+    return rotation_mat * sum( hyperfine_plus_vectors(ty, state, latt, site) )
+end
+
 function hyperfine_minus(ty, state, latt::CubicLattice2D, site )
-    hyp1 = hyperfine_Amats[1] * mag_vector(ty, state, site, AT_sigma)
-    hyp2 = hyperfine_Amats[4] * mag_vector(ty, state, site_index(latt, site, (0, -1)), AT_sigma)
-    hyp3 = hyperfine_Amats[2] * mag_vector(ty, state, site, AT_tau)
-    hyp4 = hyperfine_Amats[3] * mag_vector(ty, state, site_index(latt, site, (-1, 0)), AT_tau)
-    return rotation_mat * (hyp1 - hyp2 + hyp3 - hyp4)
+    return rotation_mat * sum( hyperfine_minus_vectors(ty, state, latt, site ) )
 end
 
 function hyperfine_fields(ty, state, latt::CubicLattice2D, site )
