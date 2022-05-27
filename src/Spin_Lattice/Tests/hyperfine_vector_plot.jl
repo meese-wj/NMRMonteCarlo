@@ -25,6 +25,58 @@ function state_string( state, latt, site )
     return "$sigma0, $tau0, $sigma1p0, $tau0p1"
 end
 
+function unit_cell_properties(; bbox_coords, fe_size, 
+                                latt_space = 1, arrow_fraction = 0.45,
+                                as_center = (0.5 * latt_space) .* (1, 1, 0),
+                                elev = 15, azim = -80 )
+    properties = Dict(:bbox_coords => bbox_coords,
+                        :fe_size => fe_size, 
+                        :latt_space => latt_space, 
+                        :as_center => as_center,
+                        :arrow_fraction => arrow_fraction,
+                        :elev => elev,
+                        :azim => azim)
+    return properties
+end
+
+function bbox_border( bbox_coords )
+    return ( [bbox_coords[1][1], bbox_coords[2][1], bbox_coords[3][1], bbox_coords[4][1], bbox_coords[1][1] ],
+             [bbox_coords[1][2], bbox_coords[2][2], bbox_coords[3][2], bbox_coords[4][2], bbox_coords[1][2] ],
+             [bbox_coords[1][3], bbox_coords[2][3], bbox_coords[3][3], bbox_coords[4][3], bbox_coords[1][3] ] )
+end
+
+function build_unit_cell_3d!( ax3d, properties )
+
+    for coords ∈ properties[:bbox_coords]
+        ax3d[:scatter3D](coords..., color = "red", s=properties[:fe_size], edgecolor = "black")
+    end
+    bbox_outline = bbox_border(properties[:bbox_coords])
+    ax3d[:plot3D]( bbox_outline...,
+                   color = "red", ls = "dashed", lw = 2)
+    
+    ax3d[:scatter3D](properties[:as_center]..., color = "blue", s=6*properties[:fe_size], edgecolor = "black", zorder=1000)
+    ax3d.set_xlim( properties[:latt_space] .* (-0.15, 1.15) )
+    xlims = ax3d.get_xlim()
+    ax3d.set_ylim(xlims)
+    ax3d.set_zlim(-properties[:latt_space], properties[:latt_space])
+    ax3d.set_xlabel(L"a")
+    ax3d.set_ylabel(L"b")
+    ax3d.set_zlabel(L"c")
+    ax3d.set_xticks([])
+    ax3d.set_yticks([])
+    ax3d.set_zticks([])
+    ax3d.view_init(properties[:elev], properties[:azim])
+    ax3d.grid(false)
+
+    return nothing
+end
+
+function build_unit_cell_3d( properties )
+    fig3d, ax3d = figure_3d()
+    build_unit_cell_3d!(ax3d, properties)
+    return (fig3d, ax3d)
+end
+
 plot_dir = joinpath(@__DIR__, "TestData")
 mkpath(plot_dir)
 
@@ -54,7 +106,7 @@ test_mag_types = [Out_of_Plane, Easy_Axis_In_Plane]
 
 latt_space = 1
 arrow_fraction = 0.45
-fe_size = 40
+fe_size = 70
 bbox_coords = [ (0, 1, 0),  # σ₀
                 (0, 0, 0),  # τ₀
                 (1, 0, 0),  # σ₍₁,₀₎
@@ -62,48 +114,33 @@ bbox_coords = [ (0, 1, 0),  # σ₀
 
 bbox_coords = [ latt_space .* coords for coords ∈ bbox_coords ]
 
-as_center = 0.5 .* (latt_space, latt_space, 0)
+ucprop = unit_cell_properties(; bbox_coords = bbox_coords,
+                                fe_size = fe_size, 
+                                arrow_fraction = arrow_fraction,
+                                latt_space = latt_space)
 
-fig3d, ax3d = figure_3d()
-for coords ∈ bbox_coords
-    ax3d[:scatter3D](coords..., color = "red", s=fe_size, edgecolor = "black")
-end
-ax3d[:plot3D]( [bbox_coords[1][1], bbox_coords[2][1], bbox_coords[3][1], bbox_coords[4][1], bbox_coords[1][1] ],
-               [bbox_coords[1][2], bbox_coords[2][2], bbox_coords[3][2], bbox_coords[4][2], bbox_coords[1][2] ],
-               [bbox_coords[1][3], bbox_coords[2][3], bbox_coords[3][3], bbox_coords[4][3], bbox_coords[1][3] ],
-               color = "red", ls = "dashed", lw = 2)
+fig3d, ax3d = build_unit_cell_3d(ucprop)
 
-ax3d[:scatter3D](as_center..., color = "blue", s=6*fe_size, edgecolor = "black", zorder=1000)
 
 hyp_vectors = hyperfine_plus_vectors(Easy_Axis_In_Plane, test_state, test_latt, test_site)
 for arrow_prop ∈ zip(bbox_coords, hyp_vectors)
     ax3d[:quiver](arrow_prop[1]..., arrow_prop[2]...,
-                  length = arrow_fraction * latt_space, 
+                  length = arrow_fraction * ucprop[:latt_space], 
                   color = "black", pivot = "middle", zorder = 0)
 end
 
 net_hyp_vector = sum(hyp_vectors)
-ax3d[:quiver](as_center..., net_hyp_vector..., 
-              length = arrow_fraction * latt_space,
+ax3d[:quiver](ucprop[:as_center]..., net_hyp_vector..., 
+              length = arrow_fraction * ucprop[:latt_space],
               color = "orange", lw = 2, pivot = "middle", zorder = 0)
 
 ylims = ax3d.get_ylim()
-ax3d[:quiver](0.5 * latt_space, 0, -latt_space, 0, ylims[2] - ylims[1], 0, color = "purple", lw = 1)
-ax3d.text( 0.55 * latt_space, 0.4 * latt_space, -latt_space, 
+ax3d[:quiver](0.5 * ucprop[:latt_space], 0, -ucprop[:latt_space], 0, ylims[2] - ylims[1], 0, color = "purple", lw = 1)
+ax3d.text( 0.55 * ucprop[:latt_space], 0.4 * ucprop[:latt_space], -ucprop[:latt_space], 
           L"$\mathbf{H}_0$", color = "purple")
 
-ax3d.set_xlim( latt_space .* (-0.15, 1.15) )
-ax3d.set_ylim(ylims)
-ax3d.set_zlim(-latt_space, latt_space)
-ax3d.set_xlabel(L"a")
-ax3d.set_ylabel(L"b")
-ax3d.set_zlabel(L"c")
-ax3d.set_xticks([])
-ax3d.set_yticks([])
-ax3d.set_zticks([])
-ax3d.view_init(15, -80)
+
 ax3d.set_title("\$\\{$( state_string(test_state, test_latt, test_site) )\\}\$")
-ax3d.grid(false)
 
 pygui(false)
 fig3d
