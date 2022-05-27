@@ -11,25 +11,38 @@ function pm_one(value)
     return value == one(value) ? "+1" : "-1"
 end 
 
-function state_string( state, latt, site )
+function state_substrings( state, latt, site )
     sigma0   = pm_one( state[ site, AT_sigma ] )
     tau0     = pm_one( state[ site, AT_tau ] )
     sigma1p0 = pm_one( state[ site_index(latt, site, (1, 0)), AT_sigma ] )
     tau0p1   = pm_one( state[ site_index(latt, site, (0, 1)), AT_tau ] )
-    return "$sigma0, $tau0, $sigma1p0, $tau0p1"
+    return (sigma0, tau0, sigma1p0, tau0p1)
+end
+
+function state_string(state, latt, site; delim = ", ")
+    state_substrs = state_substrings(state, latt, site)
+    result = ""
+    for (idx, substr) ∈ enumerate(state_substrs)
+        result *= substr
+        if idx != length(state_substrs)
+            result *= delim
+        end
+    end
+    return result
 end
 
 function unit_cell_properties(; bbox_coords, fe_size, 
                                 latt_space = 1, arrow_fraction = 0.45,
                                 as_center = (0.5 * latt_space) .* (1, 1, 0),
-                                elev = 15, azim = -80 )
+                                elev = 15, azim = -80, as_size = 4 )
     properties = Dict(:bbox_coords => bbox_coords,
                         :fe_size => fe_size, 
                         :latt_space => latt_space, 
                         :as_center => as_center,
                         :arrow_fraction => arrow_fraction,
                         :elev => elev,
-                        :azim => azim)
+                        :azim => azim,
+                        :as_size => as_size * fe_size)
     return properties
 end
 
@@ -48,7 +61,9 @@ function build_unit_cell_3d!( ax3d, properties )
     ax3d[:plot3D]( bbox_outline...,
                    color = "red", ls = "dashed", lw = 2)
     
-    ax3d[:scatter3D](properties[:as_center]..., color = "blue", s=6*properties[:fe_size], edgecolor = "black", zorder=1000)
+    ax3d[:scatter3D](properties[:as_center]..., color = "blue", 
+                     s=properties[:as_size],
+                     edgecolor = "black", zorder=1000)
     ax3d.set_xlim( properties[:latt_space] .* (-0.15, 1.15) )
     xlims = ax3d.get_xlim()
     ax3d.set_ylim(xlims)
@@ -88,7 +103,7 @@ test_site = site_index(test_latt, (2, 2))
 ################################################################
 test_state = ones( 2 * num_sites(test_latt) )
 test_state[test_site, AT_tau] *= -1
-# test_state[ site_index(test_latt, test_site, (1, 0)) , AT_sigma] *= -1
+test_state[ site_index(test_latt, test_site, (1, 0)) , AT_sigma] *= -1
 test_state[ site_index(test_latt, test_site, (0, 1)) , AT_tau]   *= -1
 
 ################################################################
@@ -150,11 +165,25 @@ for ax ∈ axes
     ax[:quiver](0.5 * ucprop[:latt_space], 0, -ucprop[:latt_space], 0, ylims[2] - ylims[1], 0, color = "black", lw = 1)
     ax.text( 0.55 * ucprop[:latt_space], 0.4 * ucprop[:latt_space], -ucprop[:latt_space], 
              L"$\mathbf{H}_0$", color = "black")
+    ax.text( ucprop[:bbox_coords][1][1], ucprop[:bbox_coords][1][2] + 0.15 * ucprop[:latt_space], 0.15 * ucprop[:latt_space],  
+             L"$\sigma_0$", color = "black")
+    ax.text( ucprop[:bbox_coords][2][1] + 0.05 * ucprop[:latt_space], ucprop[:bbox_coords][2][2] - 0.15 * ucprop[:latt_space], -0.15 * ucprop[:latt_space],  
+             L"$\tau_0$", color = "black")
+    ax.text( ucprop[:bbox_coords][3][1] + 0.05 * ucprop[:latt_space], ucprop[:bbox_coords][3][2] - 0.15 * ucprop[:latt_space], -0.2 * ucprop[:latt_space],  
+             L"$\sigma_{(1,0)}$", color = "black")
+    ax.text( ucprop[:bbox_coords][4][1], ucprop[:bbox_coords][4][2] + 0.05 * ucprop[:latt_space], 0.15 * ucprop[:latt_space],  
+             L"$\tau_{(0,1)}$", color = "black")
 end
 
 fig3d.suptitle("Ashkin-Teller State: \$\\{$( state_string(test_state, test_latt, test_site) )\\}\$")
 mag_ax.set_title("Spin Configuration")
 hyp_ax.set_title("Hyperfine Field Contributions")
+
+fig3d.tight_layout()
+
+state_str = state_string(test_state, test_latt, test_site; delim = "_" )
+fig3d.savefig(joinpath(plot_dir, "$(test_model_type)_$state_str.svg"))
+fig3d.savefig(joinpath(plot_dir, "$(test_model_type)_$state_str.png"))
 
 pygui(false)
 fig3d
