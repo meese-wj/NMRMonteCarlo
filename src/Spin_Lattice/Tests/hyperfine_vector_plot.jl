@@ -1,5 +1,9 @@
 using PyPlot, LaTeXStrings, StructTypes, StaticArrays
 
+rcParams = PyPlot.PyDict(PyPlot.matplotlib."rcParams")
+rcParams["font.family"] = "serif"
+rcParams["font.style"] = "normal"
+
 include("../../Lattices/CubicLattice2D.jl")
 include("../../Ashkin_Teller/AT_Hamiltonian.jl")
 include("../HyperfineFields.jl")
@@ -102,7 +106,7 @@ test_site = site_index(test_latt, (2, 2))
 # Create a set of Ashkin-Teller spins 
 ################################################################
 test_state = ones( 2 * num_sites(test_latt) )
-test_state[test_site, AT_tau] *= -1
+# test_state[test_site, AT_tau] *= -1
 test_state[ site_index(test_latt, test_site, (1, 0)) , AT_sigma] *= -1
 test_state[ site_index(test_latt, test_site, (0, 1)) , AT_tau]   *= -1
 
@@ -113,7 +117,7 @@ test_state[ site_index(test_latt, test_site, (0, 1)) , AT_tau]   *= -1
 ################################################################
 test_values = [1, -1]
 test_mag_types = [Out_of_Plane, Easy_Axis_In_Plane]
-test_model_type = Easy_Axis_In_Plane
+test_model_type = Out_of_Plane
 
 latt_space = 1
 arrow_fraction = 0.45
