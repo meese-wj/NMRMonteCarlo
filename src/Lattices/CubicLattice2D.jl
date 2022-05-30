@@ -22,7 +22,7 @@ num_sites( latt::CubicLattice2D ) = num_sites_CL2D( latt.params.Lx, latt.params.
 Base.getindex( latt::CubicLattice2D, site, neighbor ) = latt.neighbors[ site, neighbor ]
 Base.setindex!( latt::CubicLattice2D, value, site, neighbor ) = latt.neighbors[ site, neighbor ] = value 
 site_index( latt::CubicLattice2D, indices::Tuple{Int, Int} ) = latt.params.Lx * ( indices[2] - 1 ) + indices[1]
-indices_from_site( latt::CubicLattice2D, origin_site::Int ) = ( origin_site % latt.params.Lx, 1 + origin_site ÷ latt.params.Lx )
+indices_from_site( latt::CubicLattice2D, origin_site::Int ) = ( 1 + (origin_site - 1) % latt.params.Lx, 1 + (origin_site - 1) ÷ latt.params.Lx )
 function pbc_add(x1, x2, Lsize) 
     output = x1 + x2
     while output > Lsize
@@ -76,3 +76,20 @@ end
 CubicLattice2D(Lx::Int, Ly::Int) = CubicLattice2D( CubicLattice2DParams(Lx, Ly) )
 
 nearest_neighbors(latt::CubicLattice2D, site) = view(latt.neighbors, site, :)
+
+function side_by_side_Ω( typedx, flucts, latt; reshaper=reshape )
+    size = (latt.params.Lx, latt.params.Ly)
+    plt1 = heatmap( reshaper(flucts[1:2:end, typedx], size); title = L"$\Omega^{(+)}$" )
+    plt2 = heatmap( reshaper(flucts[2:2:end, typedx], size); title = L"$\Omega^{(-)}$" )
+    return plot(plt1, plt2; layout = (1,2) )
+end
+
+function my_reshape(vec, tup)
+    prod(tup) == length(vec) ? nothing : error("Size mismatch")
+    arr = zeros(tup)
+    for idx ∈ 1:tup[1], jdx ∈ 1:tup[2]
+        index = tup[1] * (jdx - 1) + idx
+        arr[jdx, idx] = vec[index]
+    end
+    arr
+end
