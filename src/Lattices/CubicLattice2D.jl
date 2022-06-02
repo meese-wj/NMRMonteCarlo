@@ -1,3 +1,5 @@
+using Parameters2JSON
+
 abstract type AbstractLattice end
 construct_lattice!( latt::AbstractLattice ) = error("No implementation defined for $(typeof(latt)) types.")
 num_sites( latt::AbstractLattice ) = error("No implementation defined for $(typeof(latt)) types.")
@@ -5,11 +7,10 @@ site_index( latt::AbstractLattice, indices ) = error("No implementation defined 
 nearest_neighbors( latt::AbstractLattice, site ) = error("No implementation defined for $(typeof(latt)) and $(typeof(site)) types.")
 
 const NN_SQUARE_LATT = 4
-struct CubicLattice2DParams
+@jsonable struct CubicLattice2DParams
     Lx::Int
     Ly::Int
 end
-StructTypes.StructType(::Type{CubicLattice2DParams}) = StructTypes.Struct()
 reciprocal_type(::Type{CubicLattice2DParams}) = CubicLattice2D
 
 struct CubicLattice2D <: AbstractLattice
@@ -77,19 +78,19 @@ CubicLattice2D(Lx::Int, Ly::Int) = CubicLattice2D( CubicLattice2DParams(Lx, Ly) 
 
 nearest_neighbors(latt::CubicLattice2D, site) = view(latt.neighbors, site, :)
 
-function side_by_side_Ω( typedx, flucts, latt; reshaper=reshape )
-    size = (latt.params.Lx, latt.params.Ly)
-    plt1 = heatmap( reshaper(flucts[1:2:end, typedx], size); title = L"$\Omega^{(+)}$" )
-    plt2 = heatmap( reshaper(flucts[2:2:end, typedx], size); title = L"$\Omega^{(-)}$" )
-    return plot(plt1, plt2; layout = (1,2) )
-end
+# function side_by_side_Ω( typedx, flucts, latt; reshaper=reshape )
+#     size = (latt.params.Lx, latt.params.Ly)
+#     plt1 = heatmap( reshaper(flucts[1:2:end, typedx], size); title = L"$\Omega^{(+)}$" )
+#     plt2 = heatmap( reshaper(flucts[2:2:end, typedx], size); title = L"$\Omega^{(-)}$" )
+#     return plot(plt1, plt2; layout = (1,2) )
+# end
 
-function my_reshape(vec, tup)
-    prod(tup) == length(vec) ? nothing : error("Size mismatch")
-    arr = zeros(tup)
-    for idx ∈ 1:tup[1], jdx ∈ 1:tup[2]
-        index = tup[1] * (jdx - 1) + idx
-        arr[jdx, idx] = vec[index]
-    end
-    arr
-end
+# function my_reshape(vec, tup)
+#     prod(tup) == length(vec) ? nothing : error("Size mismatch")
+#     arr = zeros(tup)
+#     for idx ∈ 1:tup[1], jdx ∈ 1:tup[2]
+#         index = tup[1] * (jdx - 1) + idx
+#         arr[jdx, idx] = vec[index]
+#     end
+#     arr
+# end
