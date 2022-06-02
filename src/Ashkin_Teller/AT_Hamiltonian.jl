@@ -1,4 +1,4 @@
-using StaticArrays
+using StaticArrays, Parameters2JSON
 
 abstract type AbstractHamiltonian end
 
@@ -8,12 +8,11 @@ Base.getindex(collection::AbstractVector, color::AT_Colors) = collection[Int(col
 Base.setindex!(collection, value, color::AT_Colors) = collection[Int(color)] = value
 const NUM_AT_COLORS = Int(AT_enum_end) - Int(AT_sigma)
 
-struct AT_Parameters{T <: AbstractFloat}
+@jsonable struct AT_Parameters{T <: AbstractFloat}
     Jex::T  # Ising exchanges in the AT model. Jex > 0 is ferromagnetic
     Kex::T  # Baxter exchange measured in units of Jex
 end
 AT_Parameters{T}(; J::T = 1., K::T = 0. ) where {T <: AbstractFloat} = AT_Parameters{T}( J, K )
-StructTypes.StructType(::Type{AT_Parameters{T}}) where {T} = StructTypes.Struct()
 reciprocal_type(ty::Type{T}) where {T} = error("\nNo corresponding object defined for $(typeof(ty)) types.\n")
 reciprocal_type(obj) = reciprocal_type(typeof(obj))
 reciprocal_type(ty::Type{AT_Parameters{T}}) where {T} = AT_Hamiltonian{T}
