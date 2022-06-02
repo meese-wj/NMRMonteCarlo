@@ -1,4 +1,4 @@
-using Plots, LaTeXStrings, StructTypes
+using Plots, LaTeXStrings, StructTypes, Statistics
 
 include("../../Lattices/CubicLattice2D.jl")
 include("../../Ashkin_Teller/AT_Hamiltonian.jl")
@@ -84,7 +84,9 @@ for test_type ∈ test_mag_types
 
     @show Symbol(test_type)
     @show mean(test_rate_plus)
+    @show std(test_rate_plus)
     @show mean(test_rate_minus)
+    @show std(test_rate_minus)
     println()
 
     plt_Ωp = bar_graph(test_rate_plus; 
