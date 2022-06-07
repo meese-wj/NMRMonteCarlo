@@ -1,3 +1,5 @@
+using Parameters2JSON
+
 struct Model{L <: AbstractLattice, H <: AbstractHamiltonian}
     latt::L
     ham::H
@@ -6,13 +8,12 @@ end
 abstract type MonteCarloParameters end
 sweeps_per_export(params::MonteCarloParameters) = params.measure_sweeps <= params.total_measurements ? 1 : params.measure_sweeps ÷ params.total_measurements
 
-struct MetropolisParameters{T <: AbstractFloat} <: MonteCarloParameters
+@jsonable struct MetropolisParameters{T <: AbstractFloat} <: MonteCarloParameters
     βvalues::Vector{T}
     therm_sweeps::Int
     measure_sweeps::Int
     total_measurements::Int
 end
-StructTypes.StructType(::Type{MetropolisParameters{T}}) where {T} = StructTypes.Struct()
 
 function MetropolisParameters{T}(; params_file = joinpath(@__DIR__, "default_Metropolis_Params.jl"),
                                    display_io::IO = stdout) where {T}
