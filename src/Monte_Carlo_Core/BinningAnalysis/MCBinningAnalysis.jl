@@ -1,8 +1,8 @@
-module MCBinningAnalysis
+# module MCBinningAnalysis
 
 using Statistics
 
-export var_of_mean, Binner, analyze!
+# export var_of_mean, bin_size, Binner, analyze!, Rx, τeff
 
 """
     var_of_mean(record::AbstractVector)
@@ -38,6 +38,7 @@ julia> bin_size(4)
 ```
 """
 bin_size(bin_level) = Int(2^bin_level)
+bin_size(bins::Binner) = [ bin_size(level) for level ∈ 1:bin_depth(bins) ]
 """
     num_bins(num_measurements, bin_level) → Int 
 
@@ -211,4 +212,4 @@ bin_variance( bins::Binner ) = [ bin_variance(bin_values) for bin_values ∈ bin
 #     return bin_record( average_halves(subrecord) )
 # end
 
-end
+# end
