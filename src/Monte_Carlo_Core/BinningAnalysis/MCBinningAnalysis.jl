@@ -1,4 +1,8 @@
+module MCBinningAnalysis
+
 using Statistics
+
+export var_of_mean, Binner, analyze!
 
 """
     var_of_mean(record::AbstractVector)
@@ -206,3 +210,5 @@ bin_variance( bins::Binner ) = [ bin_variance(bin_values) for bin_values ∈ bin
 #     end
 #     return bin_record( average_halves(subrecord) )
 # end
+
+end
