@@ -49,12 +49,16 @@ num_bins( num_measurements, bin_level ) = floor(Int, num_measurements / bin_size
 num_bins( record::AbstractVector, bin_level ) = num_bins(length(record), bin_level)
 num_bins( bins::Binner, bin_level ) = num_bins(bins.time_record, bin_level)
 
-function Binner( record::AbstractVector )
+function Binner( record::AbstractVector; analyze = false )
     num_t = length(record)
     max_bin_level = bin_depth(num_t)
-    return Binner( mean(record), var_of_mean(record), record,
+    bins = Binner( mean(record), var_of_mean(record), record,
                    [ zeros( num_bins(num_t, level) ) for level ∈ 1:max_bin_level ],
                    zeros(max_bin_level) )
+    if analyze
+        analyze!(bins)
+    end
+    return bins
 end
 
 """
