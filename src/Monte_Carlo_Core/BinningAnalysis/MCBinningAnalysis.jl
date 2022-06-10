@@ -127,6 +127,7 @@ Rx(bins::Binner) = begin values = var_of_mean(bins); values ./ naive_variance(bi
 τeff(bins) = 0.5 .* ( Rx(bins) .- 1 )
 
 function generate_poisson( τ, signal_length )
+
     signal::Vector{Float64} = []
     stepsize = floor(Int, -τ * log( 1 - rand() ))
     append!(signal, ones(stepsize))
@@ -140,4 +141,25 @@ function generate_poisson( τ, signal_length )
     end
     return signal[1:signal_length]
 end
+
+reldiff(a, b) = abs(a - b) / b
+reldiff(a::AbstractVector) = broadcast( (a,b) -> reldiff(a,b), a[2:end], a[1:end-1] )
 # end
+
+function poisson_plots( τ, minpow2, maxpow2, incr = 2 )
+    plt1 = plot()
+    plt2 = plot()
+    for pow2 ∈ minpow2:incr:maxpow2
+        pt_binner = Binner( generate_poisson(τ, 2^pow2), analyze = true )
+        plot!(plt1, bin_size(pt_binner), Rx(pt_binner); 
+              xscale = :log10, yscale = :identity, 
+              xlabel = L"Bin Size $2^\ell$", ylabel = L"$R_X$", 
+              markershape = :circle, leg = false )
+
+        plot!(plt2, bin_size(pt_binner)[2:end], reldiff(Rx(pt_binner)); 
+              xscale = :log10, yscale = :identity, 
+              xlabel = L"Bin Size $2^\ell$", ylabel = L"$\Delta R_X / R_X$", 
+              markershape = :circle, label = "\$\\ell_{\\textrm{max}} = $(bin_depth(pt_binner))\$" )
+    end
+    plot(plt1, plt2; layout = (1,2), link = :x, figsize = (800, 450))
+end
