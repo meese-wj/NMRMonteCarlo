@@ -16,13 +16,13 @@ model_name = "Ashkin-Teller"
 import_directory = simulation_date_directory(model_name, Dates.now())
 println("\nAnalyzing data from $import_directory...\n")
 
-sim_params = import_paramters(import_directory, AT_2DCL_Metro_Params{Float64}, "job-1")
+sim_params = import_parameters(import_directory, AT_2DCL_Metro_Params{Float64}, "job-1")
 
 for (betadx, β) ∈ enumerate(sim_params.mc_params.βvalues)
     temperature = round(1/β, digits=3)
     println("\nAnalyzing T = $temperature data...\n")
     # sim_params, analysis_states = import_simulation(import_directory, AT_2DCL_Metro_Params{Float64}, "job-1")
-    analysis_states = import_simulation(import_directory, AT_2DCL_Metro_Params{Float64}, "betadx-$(betadx)")
+    analysis_states = import_simulation(import_directory, sim_params, "betadx-$(betadx)")
     analysis_latt = (reciprocal_type(sim_params.latt_params))(sim_params.latt_params)
     analysis_ham  = (reciprocal_type(sim_params.ham_params))(analysis_latt, sim_params.ham_params)
 

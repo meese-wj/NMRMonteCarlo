@@ -42,15 +42,15 @@ function export_simulation(data_path, states::AbstractArray,
     return nothing
 end
 
-function import_paramters(data_path, simparam_t::Type, identifiers...)
+function import_parameters(data_path, simparam_t::Type, identifiers...)
     param_file = joinpath(data_path, "$(simparam_t)$(concat_ids(identifiers...)).params")
     isfile(param_file) ? nothing : error("\nSimulation parameters file:\n\t$param_file\nnot found.")
     return import_json( param_file, simparam_t )
 end
 
-function import_simulation(data_path, simparam_t::Type, identifiers...)
+function import_simulation(data_path, sim_params, identifiers...)
     # Get the parameters
-    # sim_params = import_paramters(data, simparam_t, identifiers...)
+    # sim_params = import_parameters(data, simparam_t, identifiers...)
 
     # Get the states with a temporary Hamiltonian
     temp_latt = (reciprocal_type(sim_params.latt_params))(sim_params.latt_params)
