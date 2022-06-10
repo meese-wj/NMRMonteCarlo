@@ -27,7 +27,7 @@ function build_data_directory(; model_name, data_root = default_mc_root)
     return mkpath(data_path)
 end
 
-function export_parameters(data_path, simparams::SimulationParameters, identifiers...)
+function export_parameters(data_path, simparams, identifiers...)
     ids = concat_ids(identifiers...)
     file_name = "$(typeof(simparams))$ids.params"
     export_json(simparams, joinpath(data_path, file_name))
@@ -35,7 +35,7 @@ function export_parameters(data_path, simparams::SimulationParameters, identifie
 end
 
 function export_simulation(data_path, states::AbstractArray, 
-                           simparams::SimulationParameters, identifiers...)
+                           simparams, identifiers...)
     # Assumes data_path exists...
     export_states(states, data_path, identifiers...)
     # export_parameters(data_path, simparams, identifiers...)
@@ -45,7 +45,7 @@ end
 function import_paramters(data_path, simparam_t::Type, identifiers...)
     param_file = joinpath(data_path, "$(simparam_t)$(concat_ids(identifiers...)).params")
     isfile(param_file) ? nothing : error("\nSimulation parameters file:\n\t$param_file\nnot found.")
-    return import_json( param_file, simparam_t )::SimulationParameters
+    return import_json( param_file, simparam_t )
 end
 
 function import_simulation(data_path, simparam_t::Type, identifiers...)
