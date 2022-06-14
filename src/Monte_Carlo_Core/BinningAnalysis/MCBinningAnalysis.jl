@@ -42,8 +42,9 @@ julia> bin_size(4)
 bin_size(bin_level) = Int(2^bin_level)
 bin_size(bins::Binner) = [ bin_size(level) for level ∈ 1:bin_depth(bins) ]
 reliable_bin_size(bins::Binner) = begin arr = bin_size(bins); arr[ length(bins.time_record) ./ arr .>= MIN_NUM_BINS ] end
-max_reliable_bin_size(record) = length(record) / MIN_NUM_BINS
-max_reliable_bin_size(bins::Binner) = length(bins.time_record) / MIN_NUM_BINS
+max_reliable_bin_size(number::Number) = number ÷ MIN_NUM_BINS
+max_reliable_bin_size(record) = max_reliable_bin_size(length(record))
+max_reliable_bin_size(bins::Binner) = max_reliable_bin_size(bins.time_record)
 
 """
     num_bins(num_measurements, bin_level) → Int 
@@ -149,7 +150,8 @@ function bin_plot!( plt1, plt2, bins::Binner )
     return nothing
 end
 
-plot_max_num_bins( record ) = vline([max_reliable_bin_size(record)]; color = "black", linestyle = :dash, label = "\$N_{\\mathrm{bins}} = $MIN_NUM_BINS\$", alpha = 0.5 )
+plot_max_num_bins( number::Number ) = vline([max_reliable_bin_size(number)]; color = "black", linestyle = :dash, label = "\$N_{\\mathrm{bins}} = $MIN_NUM_BINS\$", alpha = 0.5 )
+plot_max_num_bins( record ) = plot_max_num_bins( length(record) )
 
 function bin_plot( record; plot_title = "" )
     plt1 = plot_max_num_bins(record)
@@ -159,8 +161,8 @@ function bin_plot( record; plot_title = "" )
 end
 
 function telegraph_plots( dwell_time, minpow2, maxpow2, incr = 2 )
-    plt1 = plot()
-    plt2 = plot()
+    plt1 = plot_max_num_bins(2^minpow2)
+    plt2 = plot_max_num_bins(2^minpow2)
     for pow2 ∈ minpow2:incr:maxpow2
         @show 2^pow2
         pt_binner = Binner( Telegraph(dwell_time, Int(2^pow2)).signal )
