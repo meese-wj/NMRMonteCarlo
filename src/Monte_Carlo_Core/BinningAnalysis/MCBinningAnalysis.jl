@@ -1,6 +1,6 @@
 # module MCBinningAnalysis
 
-using Statistics
+using Statistics, TelegraphNoise, Plots, LaTeXStrings
 
 # export var_of_mean, bin_size, Binner, analyze!, Rx, τeff
 
@@ -132,25 +132,6 @@ var_of_mean(bins::Binner) = [ level_var_of_mean(bins, level) for level ∈ 1:bin
 Rx(bins::Binner) = begin values = var_of_mean(bins); values ./ naive_variance(bins) end
 τeff(bins) = 0.5 .* ( Rx(bins) .- 1 )
 
-function generate_poisson( τ, signal_length )
-
-    signal::Vector{Float64} = []
-    stepsize = floor(Int, -τ * log( 1 - rand() ))
-    while stepsize < 1
-        stepsize = floor(Int, -τ * log( 1 - rand() ))
-    end
-    append!(signal, ones(stepsize))
-    while length(signal) < Int(signal_length)
-        stepsize = floor(Int, -τ * log( 1 - rand() ))
-        if signal[end] == 1
-            append!(signal, zeros(stepsize))
-        else
-            append!(signal, ones(stepsize))
-        end
-    end
-    return signal[1:signal_length]
-end
-
 reldiff(a, b) = abs(a - b) / b
 reldiff(a::AbstractVector) = broadcast( (a,b) -> reldiff(a,b), a[2:end], a[1:end-1] )
 # end
@@ -177,11 +158,12 @@ function bin_plot( record; plot_title = "" )
     plot(plt1, plt2; layout = (1,2), link = :x, figsize = (800, 450), plot_title = plot_title)
 end
 
-function poisson_plots( τ, minpow2, maxpow2, incr = 2 )
+function telegraph_plots( dwell_time, minpow2, maxpow2, incr = 2 )
     plt1 = plot()
     plt2 = plot()
     for pow2 ∈ minpow2:incr:maxpow2
-        pt_binner = Binner( generate_poisson(τ, 2^pow2), analyze = true )
+        @show 2^pow2
+        pt_binner = Binner( Telegraph(dwell_time, Int(2^pow2)).signal )
         bin_plot!(plt1, plt2, pt_binner)
     end
     plot(plt1, plt2; layout = (1,2), link = :x, figsize = (800, 450))
