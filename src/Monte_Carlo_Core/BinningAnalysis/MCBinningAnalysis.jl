@@ -41,6 +41,10 @@ julia> bin_size(4)
 """
 bin_size(bin_level) = Int(2^bin_level)
 bin_size(bins::Binner) = [ bin_size(level) for level ∈ 1:bin_depth(bins) ]
+reliable_bin_size(bins::Binner) = begin arr = bin_size(bins); arr[ length(bins.time_record) ./ arr .>= MIN_NUM_BINS ] end
+max_reliable_bin_size(record) = length(record) / MIN_NUM_BINS
+max_reliable_bin_size(bins::Binner) = length(bins.time_record) / MIN_NUM_BINS
+
 """
     num_bins(num_measurements, bin_level) → Int 
 
@@ -164,7 +168,7 @@ function bin_plot!( plt1, plt2, bins::Binner )
     return nothing
 end
 
-plot_max_num_bins( record ) = vline([length(record) / MIN_NUM_BINS]; color = "black", linestyle = :dash, label = "\$N_{\\mathrm{bins}} = $MIN_NUM_BINS\$", alpha = 0.5 )
+plot_max_num_bins( record ) = vline([max_reliable_bin_size(record)]; color = "black", linestyle = :dash, label = "\$N_{\\mathrm{bins}} = $MIN_NUM_BINS\$", alpha = 0.5 )
 
 function bin_plot( record; plot_title = "" )
     plt1 = plot_max_num_bins(record)
