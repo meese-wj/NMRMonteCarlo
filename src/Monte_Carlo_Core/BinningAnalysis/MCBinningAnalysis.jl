@@ -4,6 +4,8 @@ using Statistics
 
 # export var_of_mean, bin_size, Binner, analyze!, Rx, τeff
 
+const MIN_NUM_BINS = Int(64)
+
 """
     var_of_mean(record::AbstractVector)
 
@@ -162,9 +164,11 @@ function bin_plot!( plt1, plt2, bins::Binner )
     return nothing
 end
 
+plot_max_num_bins( record ) = vline([length(record) / MIN_NUM_BINS]; color = "black", linestyle = :dash, label = L"$N_{\mathrm{bins}} = 32$", alpha = 0.5 )
+
 function bin_plot( record; plot_title = "" )
-    plt1 = plot()
-    plt2 = plot()
+    plt1 = plot_max_num_bins(record)
+    plt2 = plot_max_num_bins(record)
     bin_plot!(plt1, plt2, Binner(record))
     plot(plt1, plt2; layout = (1,2), link = :x, figsize = (800, 450), plot_title = plot_title)
 end
