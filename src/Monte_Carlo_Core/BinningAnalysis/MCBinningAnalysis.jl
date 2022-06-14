@@ -153,7 +153,7 @@ reldiff(a::AbstractVector) = broadcast( (a,b) -> reldiff(a,b), a[2:end], a[1:end
 
 function bin_plot!( plt1, plt2, bins::Binner )
     plot!(plt1, bin_size(bins), Rx(bins); 
-          xscale = :log10, yscale = :identity, 
+          xscale = :log10, yscale = :log10, 
           xlabel = L"Bin Size $2^\ell$", ylabel = L"$R_X$", 
           markershape = :circle, leg = false )
 
