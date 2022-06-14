@@ -164,7 +164,7 @@ function bin_plot!( plt1, plt2, bins::Binner )
     return nothing
 end
 
-plot_max_num_bins( record ) = vline([length(record) / MIN_NUM_BINS]; color = "black", linestyle = :dash, label = L"$N_{\mathrm{bins}} = 32$", alpha = 0.5 )
+plot_max_num_bins( record ) = vline([length(record) / MIN_NUM_BINS]; color = "black", linestyle = :dash, label = "\$N_{\\mathrm{bins}} = $MIN_NUM_BINS\$", alpha = 0.5 )
 
 function bin_plot( record; plot_title = "" )
     plt1 = plot_max_num_bins(record)
