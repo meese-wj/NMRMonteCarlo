@@ -1,8 +1,5 @@
-module CubicLattices
 
 using Parameters2JSON
-include("AbstractLattices.jl")
-import .AbstractLattices: AbstractLattice, construct_lattice!, num_sites, site_index, nearest_neighbors
 
 export CubicLattice2D, CubicLattice2DParams
 
@@ -79,5 +76,3 @@ end
 CubicLattice2D(Lx::Int, Ly::Int) = CubicLattice2D( CubicLattice2DParams(Lx, Ly) )
 
 nearest_neighbors(latt::CubicLattice2D, site) = view(latt.neighbors, site, :)
-
-end # CubicLattices
