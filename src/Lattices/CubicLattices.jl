@@ -4,6 +4,7 @@ using Parameters2JSON
 export CubicLattice2D, CubicLattice2DParams
 
 abstract type AbstractCubicLattice <: AbstractLattice end
+parameters(latt::AbstractCubicLattice) = latt.params
 
 const NN_SQUARE_LATT = 4
 @jsonable struct CubicLattice2DParams
