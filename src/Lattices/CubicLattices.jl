@@ -1,4 +1,12 @@
+module CubicLattices
+
 using Parameters2JSON
+include("AbstractLattices.jl")
+import .AbstractLattices: AbstractLattice, construct_lattice!, num_sites, site_index, nearest_neighbors
+
+export CubicLattice2D, CubicLattice2DParams, construct_lattice!, num_sites, site_index, nearest_neighbors
+
+abstract type AbstractCubicLattice <: AbstractLattice end
 
 const NN_SQUARE_LATT = 4
 @jsonable struct CubicLattice2DParams
@@ -7,7 +15,7 @@ const NN_SQUARE_LATT = 4
 end
 reciprocal_type(::Type{CubicLattice2DParams}) = CubicLattice2D
 
-struct CubicLattice2D <: AbstractLattice
+struct CubicLattice2D <: AbstractCubicLattice
     params::CubicLattice2DParams
     neighbors::Matrix{Int32}
 end
@@ -71,3 +79,5 @@ end
 CubicLattice2D(Lx::Int, Ly::Int) = CubicLattice2D( CubicLattice2DParams(Lx, Ly) )
 
 nearest_neighbors(latt::CubicLattice2D, site) = view(latt.neighbors, site, :)
+
+end # CubicLattices
