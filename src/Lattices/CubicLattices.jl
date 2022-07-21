@@ -4,7 +4,7 @@ using Parameters2JSON
 include("AbstractLattices.jl")
 import .AbstractLattices: AbstractLattice, construct_lattice!, num_sites, site_index, nearest_neighbors
 
-export CubicLattice2D, CubicLattice2DParams, construct_lattice!, num_sites, site_index, nearest_neighbors
+export CubicLattice2D, CubicLattice2DParams
 
 abstract type AbstractCubicLattice <: AbstractLattice end
 
