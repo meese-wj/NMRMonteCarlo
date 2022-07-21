@@ -43,6 +43,8 @@ construct_lattice!( latt::AbstractLattice ) = throw(MethodError(construct_lattic
 
 Return the number of sites that an [`AbstractLattice`](@ref) contains.
 
+# Example
+
 ```jldoctest
 julia> latt = CubicLattice2D(4, 4);
 
@@ -56,6 +58,8 @@ num_sites( latt::AbstractLattice ) = throw(MethodError(num_sites, latt))
 
 Calculate the flattened index from an iterable set of `indices` in an [`AbstractLattice`](@ref).
 
+# Example
+
 ```jldoctest
 julia> latt = CubicLattice2D(4, 4);
 
@@ -68,6 +72,8 @@ site_index( latt::AbstractLattice, indices ) = throw(MethodError(site_index, lat
     nearest_neighbors(::AbstractLattice, site)
 
 Return the set of `nearest_neighbors` for a given `site` in the [`AbstractLattice`](@ref).
+
+# Example
 
 ```jldoctest
 julia> latt = CubicLattice2D(4, 4);
@@ -86,6 +92,8 @@ nearest_neighbors( latt::AbstractLattice, site ) = throw(MethodError(nearest_nei
 
 Return the `parameters` used to define the [`AbstractLattice`](@ref).
 
+# Example
+
 ```jldoctest
 julia> latt = CubicLattice2D(4, 4);
 
@@ -102,6 +110,8 @@ parameters(latt::AbstractLattice) = throw(MethodError(parameters, latt))
 Overload `savename` for a given [`AbstractLattice`](@ref). This assumes that the
 [`parameters`](@ref) for that [`AbstractLattice`](@ref) instance return a simple 
 enough object for `savename` to act upon.
+
+# Example
 
 ```jldoctest
 julia> latt = CubicLattice2D(4, 4);
