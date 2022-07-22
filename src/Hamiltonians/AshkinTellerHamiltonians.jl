@@ -1,6 +1,6 @@
 
 using Parameters2JSON
-import StaticArrays: @SVector
+import StaticArrays: @SVector, SVector
 import Base: getindex, setindex!
 export 
 # Base overloads
@@ -50,18 +50,17 @@ mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAs
     params::AshkinTellerParameters{T}
     spins::Vector{T}
 end
-for col ∈ ATColorList
-    @eval num_colors(ham::AshkinTellerHamiltonian, site, ::Type{$col}) = Index() 
 
-AshkinTellerHamiltonian{T}( num_dof::Int; params = AT_Parameters{T}() ) where {T <: AbstractFloat} = AshkinTellerHamiltonian( AT_sigma, params, rand([one(T), -one(T)], num_dof) )
-# AshkinTellerHamiltonian{T}( latt::AbstractLattice; params = AT_Parameters{T}() ) where {T <: AbstractFloat} = AshkinTellerHamiltonian{T}( num_colors(AshkinTellerHamiltonian) * num_sites(latt); params = params )
-AshkinTellerHamiltonian{T}( latt::AbstractLattice, params::AT_Parameters{T} ) where {T <: AbstractFloat} = AshkinTellerHamiltonian{T}( num_colors(AshkinTellerHamiltonian) * num_sites(latt); params = params )
+AshkinTellerHamiltonian{T}( num_dof::Int; params = AshkinTellerParameters{T}() ) where {T <: AbstractFloat} = AshkinTellerHamiltonian( AT_sigma, params, rand([one(T), -one(T)], num_dof) )
+# AshkinTellerHamiltonian{T}( latt::AbstractLattice; params = AshkinTellerParameters{T}() ) where {T <: AbstractFloat} = AshkinTellerHamiltonian{T}( num_colors(AshkinTellerHamiltonian) * num_sites(latt); params = params )
+# AshkinTellerHamiltonian{T}( latt::AbstractLattice, params::AshkinTellerParameters{T} ) where {T <: AbstractFloat} = AshkinTellerHamiltonian{T}( num_colors(AshkinTellerHamiltonian) * num_sites(latt); params = params )
+AshkinTellerHamiltonian{T}( latt, params::AshkinTellerParameters{T} ) where {T <: AbstractFloat} = AshkinTellerHamiltonian{T}( num_colors(AshkinTellerHamiltonian) * num_sites(latt); params = params )
 
 const default_params = String(joinpath(@__DIR__, "default_AT_Params.jl"))
-function AshkinTellerHamiltonian{T}( latt::AbstractLattice; 
+function AshkinTellerHamiltonian{T}( latt; # ::AbstractLattice
                             params_file::String = joinpath(@__DIR__, "default_AT_Params.jl"),
                             display_io::IO = stdout ) where {T}
-    at_params = import_json_and_display(params_file, AT_Parameters{T}, display_io )
+    at_params = import_json_and_display(params_file, AshkinTellerParameters{T}, display_io )
     return AshkinTellerHamiltonian{T}(latt, at_params)
 end
   
@@ -77,8 +76,8 @@ function switch_color_update!(ham::AbstractTwoColorAshkinTellerHamiltonian)
 end
 
 # TODO: get rid of this maybe? Only use the ham::AbstractTwoColorAshkinTellerHamiltonian version?
-# function neighbor_fields(colors::AbstractVector, hamparams::AT_Parameters{T}, latt::AbstractLattice, site) where {T}
-function neighbor_fields(colors::AbstractVector, hamparams::AT_Parameters{T}, latt, site) where {T}
+# function neighbor_fields(colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt::AbstractLattice, site) where {T}
+function neighbor_fields(colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt, site) where {T}
     near_neighbors = nearest_neighbors(latt, site)
     σ_field = zero(T)
     τ_field = σ_field
@@ -95,8 +94,8 @@ end
 neighbor_fields(ham::AshkinTellerHamiltonian, latt, site) = neighbor_fields(ham.colors, ham.params, latt, site)
 
 # TODO: get rid of this maybe? Only use the ham::AbstractTwoColorAshkinTellerHamiltonian version?
-function DoF_energy( colors::AbstractVector, hamparams::AT_Parameters{T}, latt::AbstractLattice, site, site_values::SVector{3} ) where {T}
-function DoF_energy( colors::AbstractVector, hamparams::AT_Parameters{T}, latt, site, site_values::SVector{3} ) where {T}
+# function DoF_energy( colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt::AbstractLattice, site, site_values::SVector{3} ) where {T}
+function DoF_energy( colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt, site, site_values::SVector{3} ) where {T}
     effective_fields::SVector = neighbor_fields(colors, hamparams, latt, site)    
     en = zero(T)
     @inbounds for idx ∈ 1:length(effective_fields)
@@ -106,12 +105,14 @@ function DoF_energy( colors::AbstractVector, hamparams::AT_Parameters{T}, latt, 
 end
 
 # DoF_energy(ham::AshkinTellerHamiltonian, latt::AbstractLattice, site, site_values::SVector{3}) = DoF_energy(ham.colors, ham.params, latt, site, site_values)
-DoF_energy(ham::AbstractAshkinTeller, latt::AbstractLattice, site, site_values::SVector{3}) = DoF_energy(ham.colors, ham.params, latt, site, site_values)
+DoF_energy(ham::AbstractAshkinTeller, latt, site, site_values::SVector{3}) = DoF_energy(ham.colors, ham.params, latt, site, site_values)
 # TODO: get rid of this maybe? Only use the ham::AbstractTwoColorAshkinTellerHamiltonian version?
-DoF_energy(colors::AbstractVector, hamparams::AT_Parameters{T}, latt::AbstractLattice, site) where {T} = DoF_energy(colors, hamparams, latt, site, @SVector [ colors[site, AT_sigma], colors[site, AT_tau], site_Baxter(colors, site) ])
+# DoF_energy(colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt::AbstractLattice, site) where {T} = DoF_energy(colors, hamparams, latt, site, @SVector [ colors[site, AT_sigma], colors[site, AT_tau], site_Baxter(colors, site) ])
+DoF_energy(colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt, site) where {T} = DoF_energy(colors, hamparams, latt, site, @SVector [ colors[site, AT_sigma], colors[site, AT_tau], site_Baxter(colors, site) ])
 
 # TODO: get rid of this maybe? Only use the ham::AbstractTwoColorAshkinTellerHamiltonian version?
-function energy( colors::AbstractVector, hamparams::AT_Parameters{T}, latt::AbstractLattice ) where {T}
+# function energy( colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt::AbstractLattice ) where {T}
+function energy( colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt ) where {T}
     en = DoF_energy( colors, hamparams, latt, 1 )
     for site ∈ 2:num_sites(latt)
         en += DoF_energy( colors, hamparams, latt, site)
