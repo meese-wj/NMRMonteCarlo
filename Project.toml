@@ -1,4 +1,4 @@
-name = "NMR_Monte_Carlo"
+name = "NMRMonteCarlo"
 uuid = "a9685376-5ac2-4cf4-a6a2-42cc591b2ec9"
 authors = ["W. Joe Meese <meese022@umn.edu> and contributors"]
 version = "0.2.0"

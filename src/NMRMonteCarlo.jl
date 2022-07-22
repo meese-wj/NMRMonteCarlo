@@ -1,4 +1,4 @@
-module NMR_Monte_Carlo
+module NMRMonteCarlo
 
 import Reexport: @reexport
 include( joinpath( "Lattices", "Lattices.jl" ) )
@@ -9,4 +9,4 @@ include( joinpath( "MonteCarloMethods", "MonteCarloMethods.jl" ) )
 @reexport using .Hamiltonians
 @reexport using .MonteCarloMethods
 
-end # NMR_Monte_Carlo
+end # NMRMonteCarlo
