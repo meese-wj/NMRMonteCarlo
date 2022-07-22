@@ -30,6 +30,12 @@ end
 
 # function metropolis_sweep!( model::Model{L, H}, beta ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
 function metropolis_sweep!( model::AbstractModel, beta )
+
+    # # TODO: Generalize this loop to something like this:
+    # for (dof_idx, dof_val) ∈ enumerate( hamiltonian(model), IterateByDoF )
+    #     metropolis_update!(model, beta, dof_idx, dof_val)
+    # end
+
     for dof_color ∈ 1:NUM_AT_COLORS
         # for site ∈ 1:num_sites(model.latt)
         for site ∈ 1:num_sites(lattice(model))
