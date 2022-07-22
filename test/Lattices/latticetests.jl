@@ -1,9 +1,3 @@
-# Assumes that @quickactivate "NMR_Monte_Carlo" has been 
-# called in the parent scope!
-
-include(srcdir("Lattices", "Lattices.jl"))
-using .Lattices
-
 
 @info "Testing CubicLattice2D..."
 @time @testset "CubicLattice2D" begin

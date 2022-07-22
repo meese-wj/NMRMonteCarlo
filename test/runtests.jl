@@ -1,9 +1,9 @@
 using DrWatson
-@quickactivate "NMR_Monte_Carlo"
+@quickactivate :NMRMonteCarlo
 
 using Test
 
-test_timer = @timed @testset "NMR_Monte_Carlo" begin
+test_timer = @timed @testset "NMRMonteCarlo" begin
     include(joinpath("Lattices", "latticetests.jl"))
 end
 @info "Test timing: $(test_timer.time) seconds" 
