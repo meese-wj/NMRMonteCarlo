@@ -1,5 +1,5 @@
 
-export traverse, enumerate
+export iterate, enumerate
 
 """
     abstract type HamiltonianIterationScheme end 
