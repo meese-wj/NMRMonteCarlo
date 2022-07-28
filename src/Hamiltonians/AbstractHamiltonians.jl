@@ -54,24 +54,24 @@ Return the number of degrees of freedom of a given [`AbstractHamiltonian`](@ref)
 """
 num_DoF(ham::AbstractHamiltonian) = throw(MethodError(num_DoF, ham))
 """
-    enumerate(::AbstractHamiltonian, ::Type{<: HamiltonianTraversalScheme}) -> MethodError
+    enumerate(::AbstractHamiltonian, ::Type{<: HamiltonianIterationScheme}) -> MethodError
 
 Define a set of enumeration iterators to traverse an [`AbstractHamiltonian`](@ref) with 
-according to a specific [`HamiltonianTraversalScheme`](@ref).
+according to a specific [`HamiltonianIterationScheme`](@ref).
 
 Should always return `(idx, value)`-`Tuple`s.
 """
-enumerate(ham::AbstractHamiltonian, type::Type{<: HamiltonianTraversalScheme}) = throw(MethodError(enumerate_DoFs, ham, type))
+enumerate(ham::AbstractHamiltonian, type::Type{<: HamiltonianIterationScheme}) = throw(MethodError(enumerate_DoFs, ham, type))
 """
-    enumerate(::AbstractHamiltonian, ::Type{TraverseByDoFType}) -> MethodError
+    enumerate(::AbstractHamiltonian, ::Type{IterateByDoFType}) -> MethodError
 
 Define a set of enumeration iterators to traverse an [`AbstractHamiltonian`](@ref) with 
-according to [`TraverseByDoFType`](@ref) scheme. This is _required_ for defining generic
+according to [`IterateByDoFType`](@ref) scheme. This is _required_ for defining generic
 sweeps through a system.
 
 Should always return `(idx, value)`-`Tuple`s.
 """
-enumerate(ham::AbstractHamiltonian, type::Type{TraverseByDoFType}) = throw(MethodError(enumerate_DoFs, ham, type))
+enumerate(ham::AbstractHamiltonian, type::Type{IterateByDoFType}) = throw(MethodError(enumerate_DoFs, ham, type))
 
 # Default Interface Methods
 

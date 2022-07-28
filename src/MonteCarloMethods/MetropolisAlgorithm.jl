@@ -32,7 +32,7 @@ end
 function metropolis_sweep!( model::AbstractModel, beta )
 
     # # TODO: Generalize this loop to something like this:
-    # for (dof_idx, dof_val) ∈ enumerate( hamiltonian(model), TraverseByDoF )
+    # for (dof_idx, dof_val) ∈ enumerate( hamiltonian(model), IterateByDoFType )
     #     metropolis_update!(model, beta, dof_idx, dof_val)
     # end
 

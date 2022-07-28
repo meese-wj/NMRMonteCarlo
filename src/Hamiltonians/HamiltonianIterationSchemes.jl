@@ -2,13 +2,13 @@
 export traverse, enumerate
 
 """
-    abstract type AbstractEnumerationScheme end 
+    abstract type HamiltonianIterationScheme end 
 
 Interface for different [`AbstractHamiltonian`](@ref) iteration/enumeration `methods`.
 This is necessary because, depending on the specific `method` context, the specific 
 way one needs to traverse a system's degrees of freedom (DoF) may change.
 """
-abstract type HamiltonianTraversalScheme end
+abstract type HamiltonianIterationScheme end
 """
     IterateByDefault <: HamiltonianIterationScheme
 
@@ -22,19 +22,19 @@ struct IterateByDefault <: HamiltonianIterationScheme end
 Traverse the degrees of freedom by outputting a `Tuple` of values at each define site
 or within each unit cell.
 """
-struct BySite <: HamiltonianTraversalScheme end
+struct IterateBySite <: HamiltonianIterationScheme end
 """
     IterateByDoFType <: HamiltonianIterationScheme
 
 Traverse the degrees of freedom by their type. Useful for cases where sweeps are 
 defined with one variable type while all others are _quenched_. 
 """
-struct ByDoFType <: HamiltonianTraversalScheme end
+struct IterateByDoFType <: HamiltonianIterationScheme end
 
 """
-    TraversalScheme(::Type{T}) where T <: HamiltonianTraversalScheme = T()
+    IterationScheme(::Type{T}) where T <: HamiltonianIterationScheme = T()
 
-Create an iterator trait for various `subtype`s of [`HamiltonianTraversalScheme`](@ref).
+Create an iterator trait for various `subtype`s of [`HamiltonianIterationScheme`](@ref).
 """
 IterationScheme(::Type{T}) where {T <: HamiltonianIterationScheme} = T()
 
