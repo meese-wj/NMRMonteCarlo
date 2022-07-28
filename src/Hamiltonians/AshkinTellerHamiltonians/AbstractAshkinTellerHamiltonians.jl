@@ -45,38 +45,30 @@ const TwoC_ATH = AbstractTwoColorAshkinTellerHamiltonian
 @inline num_colors(::Type{<: TwoC_ATH}) = 2
 
 """
-    traverse(ByMemory, ::AbstractTwoColorAshkinTellerHamiltonian)
+    iterate(::HamiltonianIterator{<: AbstractTwoColorAshkinTellerHamiltonian, IterateByDefault}, [state])
 
-Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) as it is
-laid out in memory.
+Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) as it is laid out in memory.
 """
-function traverse(::Type{ByDefault}, ham::TwoC_ATH)
-    iter = MVector{Tuple{Int, eltype(ham)}, num_DoF(ham)}(undef)
+function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDefault}, state = (one(Int),))
+    ham = Hamiltonian(iter)
+    spin_idx, = state
+    return spin_idx <= length(ham) ? (spins(ham)[spin_idx], (spin_idx + one(Int),)) : nothing
 end
 """
-    traverse(TraverseByDoFType, ::AbstractTwoColorAshkinTellerHamiltonian)
+    iterate(::HamiltonianIterator{<: AbstractTwoColorAshkinTellerHamiltonian, IterateByDoFType}, [state])
 
-Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) by the 
-spin types separately.
+Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) by the spin types separately.
 """
-traverse(::Type{ByDoFType}, ham::TwoC_ATH) = length(ham) >= num_colors(ham) ? ( ham.color_update = AT_sigma; ( one(Int), ham[one(Int), color_update(ham)] )) : nothing
-
-function _next_state!(::Type{TraverseByMemory}, ham::TwoC_ATH, state)
-    idx = state[begin]
-    next = idx == length(ham) ? nothing : (idx + one(Int), spins[idx + one(Int)])
-    return next
-end
-
-function _next_state!(::Type{TraverseByDoFType}, ham::TwoC_ATH, state)
-    site_index = state[begin]
-    next_site = site_index + one(Int)
-    end_of_iteration = false
-    if site_index == num_sites(ham)
+function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state = (one(Int), AT_sigma))
+    ham = Hamiltonian(iter)
+    site_idx, color = state
+    ham.color_update = color
+    next = site_idx + one(Int), color
+    iteration_complete = false
+    if site_idx == num_sites(ham)
         switch_color_update!(ham)
-        next_site = one(Int)
-        end_of_iteration = color_update(ham) === AT_tau
+        next = one(Int), ifelse( color === AT_sigma, AT_tau, AT_sigma )
+        iteration_complete = color === AT_tau
     end
-    return end_of_iteration ? nothing : (next_site, ham[next_site, color_update(ham)])
+    return iteration_complete ? nothing : ( ham[site_idx, color], next )
 end
-
-traverse(::Type{T}, ham::TwoC_ATH, state) where T <: HamiltonianTraversalScheme = _next_state!(T, ham, state)
