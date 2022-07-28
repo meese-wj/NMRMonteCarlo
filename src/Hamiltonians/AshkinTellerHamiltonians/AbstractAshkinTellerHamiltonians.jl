@@ -5,8 +5,7 @@ export
 # Base overloads
        getindex, setindex!, eltype, length, iterate, enumerate,
 # Ashkin-Teller functionality
-       num_colors, spins, AT_sigma, AT_tau, Index, 
-       AshkinTellerHamiltonian, AshkinTellerParameters
+       num_colors, spins, AT_sigma, AT_tau, Index
 
 getTypename(::Type{T}) where T = isempty(T.parameters) ? T : T.name.wrapper
 
@@ -18,6 +17,7 @@ abstract type AbstractAshkinTeller <: AbstractHamiltonian end
 num_colors(type::Type{<: AbstractAshkinTeller}) = throw(MethodError(num_colors, type))
 num_colors(::ATType) where ATType = num_colors(ATType)
 spins(ham::AbstractAshkinTeller) = ham.spins
+color_update(ham::AbstractAshkinTeller) = ham.color_update
 
 Base.eltype(ham::AbstractAshkinTeller) = eltype(spins(ham))
 Base.length( ham::AbstractAshkinTeller ) = length(spins(ham))
@@ -45,11 +45,36 @@ const TwoC_ATH = AbstractTwoColorAshkinTellerHamiltonian
 @inline num_colors(::Type{<: TwoC_ATH}) = 2
 
 """
+    iterate(IterateByMemory, ::AbstractTwoColorAshkinTellerHamiltonian)
 
+Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) as it is
+laid out in memory.
 """
-iterate(::Type{IterateByMemory}, ham::TwoC_ATH) = length(ham) > zero(Int) ? (one(Int), spins(ham)[begin]) : nothing
-function iterate(::Type{IterateByMemory}, ham::TwoC_ATH, state)
+iterate(::Type{IterateByMemory}, ham::TwoC_ATH) = length(ham) > zero(Int) ? (one(Int), ham[one(Int), color_update(ham)]) : nothing
+"""
+    iterate(IterateByDoFType, ::AbstractTwoColorAshkinTellerHamiltonian)
+
+Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) by the 
+spin types separately.
+"""
+iterate(::Type{IterateByDoFType}, ham::TwoC_ATH) = length(ham) >= num_colors(ham) ? ( ham.color_update = AT_sigma; ( one(Int), ham[one(Int), color_update(ham)] )) : nothing
+
+function _next_state!(::Type{IterateByMemory}, ham::TwoC_ATH, state)
     idx = state[begin]
     next = idx == length(ham) ? nothing : (idx + one(Int), spins[idx + one(Int)])
     return next
 end
+
+function _next_state!(::Type{IterateByDoFType}, ham::TwoC_ATH, state)
+    site_index = state[begin]
+    next_site = site_index + one(Int)
+    end_of_iteration = false
+    if site_index == num_sites(ham)
+        switch_color_update!(ham)
+        next_site = one(Int)
+        end_of_iteration = color_update(ham) === AT_tau
+    end
+    return end_of_iteration ? nothing : (next_site, ham[next_site, color_update(ham)])
+end
+
+iterate(::Type{T}, ham::TwoC_ATH, state) where T <: HamiltonianIterationScheme = _next_state!(T, ham, state)

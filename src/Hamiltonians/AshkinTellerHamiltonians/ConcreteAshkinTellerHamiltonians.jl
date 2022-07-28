@@ -3,6 +3,8 @@
 using Parameters2JSON
 import StaticArrays: @SVector, SVector
 
+export AshkinTellerHamiltonian, AshkinTellerParameters
+
 @jsonable struct AshkinTellerParameters{T <: AbstractFloat}
     Jex::T  # Ising exchanges in the AT model. Jex > 0 is ferromagnetic
     Kex::T  # Baxter exchange measured in units of Jex
