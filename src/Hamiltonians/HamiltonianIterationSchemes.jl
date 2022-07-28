@@ -1,4 +1,7 @@
 
+import Base: iterate, enumerate
+export iterate, enumerate
+
 """
 abstract type AbstractEnumerationScheme end 
 
@@ -35,3 +38,7 @@ struct IterateByDoFType <: HamiltonianIterationScheme end
 Create an iterator trait for various `subtype`s of [`HamiltonianIterationScheme`](@ref).
 """
 IterationScheme(::Type{T}) where {T <: HamiltonianIterationScheme} = T()
+
+iterate(iter::Type{<: HamiltonianIterationScheme, Any}, args...) = iterate(iter..., args...)
+iterate(a::Any, b::Type{<: HamiltonianIterationScheme}, args...) = iterate((b, a), args...)
+enumerate(a::Any, b::Type{<: HamiltonianIterationScheme}) = enumerate((b, a))
