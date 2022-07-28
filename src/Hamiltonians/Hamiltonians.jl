@@ -1,6 +1,6 @@
 module Hamiltonians
 
-include("HamiltonianIterationSchemes.jl")
+include("HamiltonianTraversalSchemes.jl")
 include("AbstractHamiltonians.jl")
 include("AshkinTellerHamiltonians/AshkinTellerHamiltonians.jl")
 

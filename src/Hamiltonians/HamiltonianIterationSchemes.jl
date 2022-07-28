@@ -1,6 +1,5 @@
 
-import Base: iterate, enumerate
-export iterate, enumerate
+export traverse, enumerate
 
 """
 abstract type AbstractEnumerationScheme end 
@@ -9,36 +8,36 @@ Interface for different [`AbstractHamiltonian`](@ref) iteration/enumeration `met
 This is necessary because, depending on the specific `method` context, the specific 
 way one needs to traverse a system's degrees of freedom (DoF) may change.
 """
-abstract type HamiltonianIterationScheme end
+abstract type HamiltonianTraversalScheme end
 """
-IterateByDefault <: HamiltonianIterationScheme
+TraverseByDefault <: HamiltonianTraversalScheme
 
 Easy iteration scheme. Simply traverse through the `<:` [`AbstractHamiltonian`](@ref)
 as it is stored by default in whatever `iter`able container is used.
 """
-struct IterateByMemory <: HamiltonianIterationScheme end
+struct TraverseByMemory <: HamiltonianTraversalScheme end
 """
-IterateBySite <: HamiltonianIterationScheme
+TraverseBySite <: HamiltonianTraversalScheme
 
-Iterate the degrees of freedom by outputting a `Tuple` of values at each define site
+Traverse the degrees of freedom by outputting a `Tuple` of values at each define site
 or within each unit cell.
 """
-struct IterateBySite <: HamiltonianIterationScheme end
+struct TraverseBySite <: HamiltonianTraversalScheme end
 """
-IterateByDoFType <: HamiltonianIterationScheme
+TraverseByDoFType <: HamiltonianTraversalScheme
 
-Iterate the degrees of freedom by their type. Useful for cases where sweeps are 
+Traverse the degrees of freedom by their type. Useful for cases where sweeps are 
 defined with one variable type while all others are _quenched_. 
 """
-struct IterateByDoFType <: HamiltonianIterationScheme end
+struct TraverseByDoFType <: HamiltonianTraversalScheme end
 
 """
-    IterationScheme(::Type{T}) where T <: HamiltonianIterationScheme = T()
+    TraversalScheme(::Type{T}) where T <: HamiltonianTraversalScheme = T()
 
-Create an iterator trait for various `subtype`s of [`HamiltonianIterationScheme`](@ref).
+Create an iterator trait for various `subtype`s of [`HamiltonianTraversalScheme`](@ref).
 """
-IterationScheme(::Type{T}) where {T <: HamiltonianIterationScheme} = T()
+TraversalScheme(::Type{T}) where {T <: HamiltonianTraversalScheme} = T()
 
-iterate(iter::Tuple{<: HamiltonianIterationScheme, <: Any}, args...) = iterate(iter..., args...)
-iterate(a::Any, b::Type{<: HamiltonianIterationScheme}, args...) = iterate((b, a), args...)
-enumerate(a::Any, b::Type{<: HamiltonianIterationScheme}) = enumerate((b, a))
+traverse(iter::Tuple{<: HamiltonianTraversalScheme, <: Any}, args...) = traverse(iter..., args...)
+traverse(a::Any, b::Type{<: HamiltonianTraversalScheme}, args...) = traverse((b, a), args...)
+enumerate(a::Any, b::Type{<: HamiltonianTraversalScheme}) = enumerate((b, a))
