@@ -1,5 +1,5 @@
 
-import StaticArrays: @SVector
+import StaticArrays: @SVector, @MVector
 import Base: getindex, setindex!
 export 
 # Base overloads
@@ -45,19 +45,21 @@ const TwoC_ATH = AbstractTwoColorAshkinTellerHamiltonian
 @inline num_colors(::Type{<: TwoC_ATH}) = 2
 
 """
-    traverse(TraverseByMemory, ::AbstractTwoColorAshkinTellerHamiltonian)
+    traverse(ByMemory, ::AbstractTwoColorAshkinTellerHamiltonian)
 
 Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) as it is
 laid out in memory.
 """
-traverse(::Type{TraverseByMemory}, ham::TwoC_ATH) = length(ham) > zero(Int) ? (one(Int), ham[one(Int), color_update(ham)]) : nothing
+function traverse(::Type{ByDefault}, ham::TwoC_ATH)
+    iter = MVector{Tuple{Int, eltype(ham)}, num_DoF(ham)}(undef)
+end
 """
     traverse(TraverseByDoFType, ::AbstractTwoColorAshkinTellerHamiltonian)
 
 Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) by the 
 spin types separately.
 """
-traverse(::Type{TraverseByDoFType}, ham::TwoC_ATH) = length(ham) >= num_colors(ham) ? ( ham.color_update = AT_sigma; ( one(Int), ham[one(Int), color_update(ham)] )) : nothing
+traverse(::Type{ByDoFType}, ham::TwoC_ATH) = length(ham) >= num_colors(ham) ? ( ham.color_update = AT_sigma; ( one(Int), ham[one(Int), color_update(ham)] )) : nothing
 
 function _next_state!(::Type{TraverseByMemory}, ham::TwoC_ATH, state)
     idx = state[begin]

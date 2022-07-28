@@ -10,26 +10,26 @@ way one needs to traverse a system's degrees of freedom (DoF) may change.
 """
 abstract type HamiltonianTraversalScheme end
 """
-TraverseByDefault <: HamiltonianTraversalScheme
+    ByDefault <: HamiltonianTraversalScheme
 
 Easy iteration scheme. Simply traverse through the `<:` [`AbstractHamiltonian`](@ref)
 as it is stored by default in whatever `iter`able container is used.
 """
-struct TraverseByMemory <: HamiltonianTraversalScheme end
+struct ByDefault <: HamiltonianTraversalScheme end
 """
-TraverseBySite <: HamiltonianTraversalScheme
+    BySite <: HamiltonianTraversalScheme
 
 Traverse the degrees of freedom by outputting a `Tuple` of values at each define site
 or within each unit cell.
 """
-struct TraverseBySite <: HamiltonianTraversalScheme end
+struct BySite <: HamiltonianTraversalScheme end
 """
-TraverseByDoFType <: HamiltonianTraversalScheme
+    ByDoFType <: HamiltonianTraversalScheme
 
 Traverse the degrees of freedom by their type. Useful for cases where sweeps are 
 defined with one variable type while all others are _quenched_. 
 """
-struct TraverseByDoFType <: HamiltonianTraversalScheme end
+struct ByDoFType <: HamiltonianTraversalScheme end
 
 """
     TraversalScheme(::Type{T}) where T <: HamiltonianTraversalScheme = T()
@@ -37,7 +37,3 @@ struct TraverseByDoFType <: HamiltonianTraversalScheme end
 Create an iterator trait for various `subtype`s of [`HamiltonianTraversalScheme`](@ref).
 """
 TraversalScheme(::Type{T}) where {T <: HamiltonianTraversalScheme} = T()
-
-traverse(iter::Tuple{<: HamiltonianTraversalScheme, <: Any}, args...) = traverse(iter..., args...)
-traverse(a::Any, b::Type{<: HamiltonianTraversalScheme}, args...) = traverse((b, a), args...)
-enumerate(a::Any, b::Type{<: HamiltonianTraversalScheme}) = enumerate((b, a))
