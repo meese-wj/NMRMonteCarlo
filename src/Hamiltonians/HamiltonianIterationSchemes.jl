@@ -28,3 +28,10 @@ Iterate the degrees of freedom by their type. Useful for cases where sweeps are
 defined with one variable type while all others are _quenched_. 
 """
 struct IterateByDoFType <: HamiltonianIterationScheme end
+
+"""
+    IterationScheme(::Type{T}) where T <: HamiltonianIterationScheme = T()
+
+Create an iterator trait for various `subtype`s of [`HamiltonianIterationScheme`](@ref).
+"""
+IterationScheme(::Type{T}) where {T <: HamiltonianIterationScheme} = T()
