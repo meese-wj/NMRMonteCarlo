@@ -33,27 +33,27 @@ abstract type AbstractHamiltonian end
 
 Return the total energy of a given [`AbstractHamiltonian`](@ref).
 """
-energy(ham::AbstractHamiltonian) = throw(MethodError(energy, ham))
+function energy(::AbstractHamiltonian) end
 """
     energy_change(::AbstractHamiltonian, args...) -> MethodError
 
 Return the change in energy of a given [`AbstractHamiltonian`](@ref).
 The `args` are variadic and can change for a given system or method.
 """
-energy_change(ham::AbstractHamiltonian, args...) = throw(MethodError(energy_change, ham, args...))
+function energy_change(::AbstractHamiltonian, args...) end
 """
     DoF_energy(::AbstractHamiltonian, args...) -> MethodError
 
 Return the energy for a given degree of freedom (DoF) of a given [`AbstractHamiltonian`](@ref).
 The specific DoF should be specified by the `args`.
 """
-# DoF_energy(ham::AbstractHamiltonian, args...) = throw(MethodError(DoF_energy, ham, args...))
+function DoF_energy(::AbstractHamiltonian, args...) end
 """
     num_DoF(::AbstractHamiltonian) -> MethodError
 
 Return the number of degrees of freedom of a given [`AbstractHamiltonian`](@ref).
 """
-num_DoF(ham::AbstractHamiltonian) = throw(MethodError(num_DoF, ham))
+function num_DoF(::AbstractHamiltonian) end
 
 # Default Interface Methods
 
