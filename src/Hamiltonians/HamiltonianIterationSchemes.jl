@@ -8,6 +8,9 @@ export iterate, enumerate
 Interface for different [`AbstractHamiltonian`](@ref) iteration/enumeration `methods`.
 This is necessary because, depending on the specific `method` context, the specific 
 way one needs to traverse a system's degrees of freedom (DoF) may change.
+
+All iteration schemes should return both the location and the value of a particular degree
+of freedom (DoF) as a `Tuple` `dof_location_value`.
 """
 abstract type HamiltonianIterationScheme end
 """
@@ -52,10 +55,10 @@ A wrapper iterator around a given Hamiltonian of type `H`.
 
     HamiltonianIterator(ham::H, ::Type{S})
 
-Creates a new `HamiltonianIterator` with respect to the Hamiltonian 
+Creates a new `HamiltonianIterator` with respect to the [`AbstractHamiltonian`](@ref) 
 `ham` with a given `S <:`[`HamiltonianIterationScheme`](@ref).
 """
-struct HamiltonianIterator{H, S <: HamiltonianIterationScheme} 
+struct HamiltonianIterator{H <: AbstractHamiltonian, S <: HamiltonianIterationScheme} 
     iter::H
     HamiltonianIterator(ham::H, ::Type{S}) where {H, S} = new{H, S}(ham)
 end

@@ -33,9 +33,9 @@ end
 function metropolis_sweep!( model::AbstractModel, beta )
 
     # # TODO: Generalize this loop to something like this:
-    # for (iteration, dof_site_val) ∈ enumerate( Hamiltonian(model), IterateByDoFType )
-    #     metropolis_update!(model, beta, dof_site_val[begin])
-    # end
+    for (iteration, dof_site_val) ∈ enumerate( Hamiltonian(model), IterateByDoFType )
+        metropolis_update!(model, beta, dof_site_val[begin])
+    end
 
     # for dof_color ∈ 1:NUM_AT_COLORS
     #     # for site ∈ 1:num_sites(model.latt)
