@@ -1,6 +1,7 @@
 
 import StaticArrays: @SVector, @MVector
 import Base: getindex, setindex!
+import ..Lattices: num_sites  # Automatically submodulizes this code
 export 
 # Base overloads
        getindex, setindex!, eltype, length,

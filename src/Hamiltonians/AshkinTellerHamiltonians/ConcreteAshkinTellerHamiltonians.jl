@@ -2,7 +2,6 @@
 
 using Parameters2JSON
 import StaticArrays: @SVector, SVector
-
 export AshkinTellerHamiltonian, AshkinTellerParameters
 
 @jsonable struct AshkinTellerParameters{T <: AbstractFloat}
@@ -18,19 +17,11 @@ mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAs
     color_update::Type{<: AshkinTellerColor}
     params::AshkinTellerParameters{T}
     spins::Vector{T}
-end
 
-AshkinTellerHamiltonian{T}( num_dof::Int; params = AshkinTellerParameters{T}() ) where {T <: AbstractFloat} = AshkinTellerHamiltonian( AT_sigma, params, rand([one(T), -one(T)], num_dof) )
-# AshkinTellerHamiltonian{T}( latt::AbstractLattice; params = AshkinTellerParameters{T}() ) where {T <: AbstractFloat} = AshkinTellerHamiltonian{T}( num_colors(AshkinTellerHamiltonian) * num_sites(latt); params = params )
-# AshkinTellerHamiltonian{T}( latt::AbstractLattice, params::AshkinTellerParameters{T} ) where {T <: AbstractFloat} = AshkinTellerHamiltonian{T}( num_colors(AshkinTellerHamiltonian) * num_sites(latt); params = params )
-AshkinTellerHamiltonian{T}( latt, params::AshkinTellerParameters{T} ) where {T <: AbstractFloat} = AshkinTellerHamiltonian{T}( num_colors(AshkinTellerHamiltonian) * num_sites(latt); params = params )
-
-const default_params = String(joinpath(@__DIR__, "default_AT_Params.jl"))
-function AshkinTellerHamiltonian{T}( latt; # ::AbstractLattice
-                            params_file::String = joinpath(@__DIR__, "default_AT_Params.jl"),
-                            display_io::IO = stdout ) where {T}
-    at_params = import_json_and_display(params_file, AshkinTellerParameters{T}, display_io )
-    return AshkinTellerHamiltonian{T}(latt, at_params)
+    function AshkinTellerHamiltonian(latt, params::AshkinTellerParameters{T}) where T
+        ndofs = num_colors(AshkinTellerHamiltonian) * num_sites(latt)
+        return new{T}(AT_sigma, params, rand([one(T) -one(T)], ndofs))
+    end
 end
   
 site_Baxter( ham::AbstractTwoColorAshkinTellerHamiltonian, site ) = ham[site, AT_sigma] * ham[site, AT_tau]
