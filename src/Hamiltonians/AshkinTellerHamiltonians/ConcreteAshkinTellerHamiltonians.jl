@@ -30,8 +30,6 @@ function switch_color_update!(ham::AbstractTwoColorAshkinTellerHamiltonian)
     return nothing
 end
 
-# TODO: get rid of this maybe? Only use the ham::AbstractTwoColorAshkinTellerHamiltonian version?
-# function neighbor_fields(colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt::AbstractLattice, site) where {T}
 function neighbor_fields(ham::TwoC_ATH, hamparams::AshkinTellerParameters{T}, latt, site) where {T}
     near_neighbors = nearest_neighbors(latt, site)
     σ_field = zero(T)
@@ -45,11 +43,6 @@ function neighbor_fields(ham::TwoC_ATH, hamparams::AshkinTellerParameters{T}, la
     return @SVector [ hamparams.Jex * σ_field, hamparams.Jex * τ_field, hamparams.Kex * bax_field ]
 end
 
-# neighbor_fields(ham::AshkinTellerHamiltonian, latt::AbstractLattice, site) = neighbor_fields(ham.colors, ham.params, latt, site)
-# neighbor_fields(ham::AshkinTellerHamiltonian, latt, site) = neighbor_fields(ham.colors, ham.params, latt, site)
-
-# TODO: get rid of this maybe? Only use the ham::AbstractTwoColorAshkinTellerHamiltonian version?
-# function DoF_energy( colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt::AbstractLattice, site, site_values::SVector{3} ) where {T}
 function DoF_energy( ham::AshkinTellerHamiltonian{T}, latt, site, site_values::SVector{3} ) where {T}
     effective_fields::SVector = neighbor_fields(ham, ham.params, latt, site)    
     en = zero(T)
@@ -59,14 +52,6 @@ function DoF_energy( ham::AshkinTellerHamiltonian{T}, latt, site, site_values::S
     return -en
 end
 
-# DoF_energy(ham::AshkinTellerHamiltonian, latt::AbstractLattice, site, site_values::SVector{3}) = DoF_energy(ham.colors, ham.params, latt, site, site_values)
-# DoF_energy(ham::AbstractAshkinTeller, latt, site, site_values::SVector{3}) = DoF_energy(spins(ham), ham.params, latt, site, site_values)
-# TODO: get rid of this maybe? Only use the ham::AbstractTwoColorAshkinTellerHamiltonian version?
-# DoF_energy(colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt::AbstractLattice, site) where {T} = DoF_energy(colors, hamparams, latt, site, @SVector [ colors[site, AT_sigma], colors[site, AT_tau], site_Baxter(colors, site) ])
-# DoF_energy(colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt, site) where {T} = DoF_energy(colors, hamparams, latt, site, @SVector [ colors[site, AT_sigma], colors[site, AT_tau], site_Baxter(colors, site) ])
-
-# TODO: get rid of this maybe? Only use the ham::AbstractTwoColorAshkinTellerHamiltonian version?
-# function energy( colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt::AbstractLattice ) where {T}
 function energy( colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt ) where {T}
     en = DoF_energy( colors, hamparams, latt, 1 )
     for site ∈ 2:num_sites(latt)
@@ -75,12 +60,6 @@ function energy( colors::AbstractVector, hamparams::AshkinTellerParameters{T}, l
     return 0.5 * en
 end
 
-# DoF_energy(ham::AbstractAshkinTeller, latt::AbstractLattice, site) = DoF_energy( ham, latt, site, @SVector [ ham[site, AT_sigma], ham[site, AT_tau], site_Baxter(ham, site) ] )
-DoF_energy(ham::AbstractAshkinTeller, latt, site) = DoF_energy( ham, latt, site, @SVector [ ham[site, AT_sigma], ham[site, AT_tau], site_Baxter(ham, site) ] )
-# energy(ham::AbstractAshkinTeller, latt::AbstractLattice) = energy(ham.colors, ham.params, latt)
-energy(ham::AbstractAshkinTeller, latt) = energy(ham.colors, ham.params, latt)
-
-# function DoF_energy_change(ham::AshkinTellerHamiltonian, latt::AbstractLattice, site, color = AT_sigma)
 function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color = AT_sigma)
     σ_value = -ham[site, AT_sigma]
     τ_value = ham[site, AT_tau]
