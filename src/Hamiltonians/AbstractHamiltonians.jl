@@ -47,7 +47,7 @@ energy_change(ham::AbstractHamiltonian, args...) = throw(MethodError(energy_chan
 Return the energy for a given degree of freedom (DoF) of a given [`AbstractHamiltonian`](@ref).
 The specific DoF should be specified by the `args`.
 """
-DoF_energy(ham::AbstractHamiltonian, args...) = throw(MethodError(DoF_energy, ham, args...))
+# DoF_energy(ham::AbstractHamiltonian, args...) = throw(MethodError(DoF_energy, ham, args...))
 """
     num_DoF(::AbstractHamiltonian) -> MethodError
 

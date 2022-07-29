@@ -43,7 +43,8 @@ abstract type AbstractModel end
 
 Returns the lattice or geometry of an [`AbstractModel`](@ref) `subtype`.
 """
-Lattice(model::AbstractModel) = throw(MethodError(lattice, model))
+# Lattice(model::AbstractModel) = throw(MethodError(lattice, model))
+Lattice(model::AbstractModel) = model.lattice
 
 """
     Hamiltonian(::AbstractModel) -> MethodError
