@@ -1,4 +1,5 @@
 
+import Base: iterate, enumerate
 export iterate, enumerate
 
 """
@@ -81,10 +82,10 @@ Hamiltonian(ham::HamiltonianIterator) = ham.iter
 
 Wrapper for `iterate(HamiltonianIterator(ham, scheme), args...)`.
 """
-iterate(scheme::Type{<: HamiltonianIterationScheme}, ham, args...) = iterate( HamiltonianIterator(ham, scheme), args...)
+iterate(scheme::Type{<: HamiltonianIterationScheme}, ham::AbstractHamiltonian, args...) = iterate( HamiltonianIterator(ham, scheme), args...)
 """
     enumerate(scheme::Type{<: HamiltonianIterationScheme}, ham)
 
 Wrapper for `enumerate(HamiltonianIterator(ham, scheme))`.
 """
-enumerate(scheme::Type{<: HamiltonianIterationScheme}, ham) = enumerate(HamiltonianIterator(ham, scheme))
+enumerate(scheme::Type{<: HamiltonianIterationScheme}, ham::AbstractHamiltonian) = enumerate(HamiltonianIterator(ham, scheme))

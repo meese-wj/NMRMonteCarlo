@@ -1,6 +1,5 @@
 
-import Base: enumerate
-export energy, energy_change, DoF_energy, num_DoF, enumerate
+export energy, energy_change, DoF_energy, num_DoF
 
 """
     abstract type AbstractHamiltonian end 
@@ -17,7 +16,9 @@ These `methods` _must_ be defined for every `<: AbstractHamiltonian`. By default
 - [`energy_change`](@ref)
 - [`DoF_energy`](@ref)
 - [`num_DoF`](@ref)
-- [`enumerate`](@ref)
+
+In addition to these required methods, one must define the `iterate` interface for a 
+given `<:` [`AbstractHamiltonian`](@ref) using a [`HamiltonianIterator`](@ref).
 
 # Default Interface Methods
 
@@ -53,25 +54,6 @@ DoF_energy(ham::AbstractHamiltonian, args...) = throw(MethodError(DoF_energy, ha
 Return the number of degrees of freedom of a given [`AbstractHamiltonian`](@ref).
 """
 num_DoF(ham::AbstractHamiltonian) = throw(MethodError(num_DoF, ham))
-"""
-    enumerate(::AbstractHamiltonian, ::Type{<: HamiltonianIterationScheme}) -> MethodError
-
-Define a set of enumeration iterators to traverse an [`AbstractHamiltonian`](@ref) with 
-according to a specific [`HamiltonianIterationScheme`](@ref).
-
-Should always return `(idx, value)`-`Tuple`s.
-"""
-enumerate(ham::AbstractHamiltonian, type::Type{<: HamiltonianIterationScheme}) = throw(MethodError(enumerate_DoFs, ham, type))
-"""
-    enumerate(::AbstractHamiltonian, ::Type{IterateByDoFType}) -> MethodError
-
-Define a set of enumeration iterators to traverse an [`AbstractHamiltonian`](@ref) with 
-according to [`IterateByDoFType`](@ref) scheme. This is _required_ for defining generic
-sweeps through a system.
-
-Should always return `(idx, value)`-`Tuple`s.
-"""
-enumerate(ham::AbstractHamiltonian, type::Type{IterateByDoFType}) = throw(MethodError(enumerate_DoFs, ham, type))
 
 # Default Interface Methods
 
