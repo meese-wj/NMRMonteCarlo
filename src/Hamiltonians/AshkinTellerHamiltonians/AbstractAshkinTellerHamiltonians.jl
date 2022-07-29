@@ -73,7 +73,7 @@ Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) by the spin typ
 """
 function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state = (one(Int), one(Int), one(Int)))
     ham = Hamiltonian(iter)
-    site_idx = state[begin]
+    site_idx = state[1]
     iterations = state[2]
     color = Index(AshkinTellerColor, Val{state[end]})
     ham.color_update = color

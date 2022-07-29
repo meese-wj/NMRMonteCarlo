@@ -18,15 +18,9 @@ end
 
 metropolis_accepted(ΔE, β) = ( ΔE < zero(ΔE) || rand() < exp(-β * ΔE) )::Bool
 
-# function metropolis_update!( model::Model{L, AT_Hamiltonian{T}}, site, beta ) where {L <: AbstractLattice, T <: AbstractFloat}
 function metropolis_update!( model::AbstractModel, beta, site )
-    # ΔE = AT_site_energy_change( model.ham, model.latt, site, model.ham.color_update )
-    ham = Hamiltonian(model)
-    ΔE = DoF_energy_change( ham, Lattice(model), site )
-    if metropolis_accepted( ΔE, beta )
-        # AT_site_flip!( model.ham, site )
-        site_flip!( ham, site )
-    end
+    ΔE = DoF_energy_change( Hamiltonian(model), Lattice(model), site )
+    site_flip!( metropolis_accepted( ΔE, beta ), Hamiltonian(model), site )
     return nothing
 end
 
@@ -35,7 +29,7 @@ function metropolis_sweep!( model::AbstractModel, beta )
 
     # # TODO: Generalize this loop to something like this:
     for (iteration, dof_site_val) ∈ enumerate( IterateByDoFType, Hamiltonian(model) )
-        metropolis_update!(model, beta, dof_site_val[begin])
+        metropolis_update!(model, beta, dof_site_val[1])
     end
 
     # for dof_color ∈ 1:NUM_AT_COLORS

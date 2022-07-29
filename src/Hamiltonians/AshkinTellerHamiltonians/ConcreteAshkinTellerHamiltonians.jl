@@ -71,8 +71,8 @@ function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color = col
     return DoF_energy( ham, latt, site, @SVector [ σ_value - ham[site, AT_sigma], τ_value - ham[site, AT_tau], bax_val - site_Baxter(ham, site) ] )
 end
 
-function site_flip!( ham::AshkinTellerHamiltonian, site )
-    ham[site, ham.color_update] *= -one(ham[site, ham.color_update])
+function site_flip!( condition::Bool, ham::AshkinTellerHamiltonian, site )
+    ham[site, color_update(ham)] = ifelse( condition, ham[site, color_update(ham)], -ham[site, color_update(ham)] )
     return nothing
 end
 
