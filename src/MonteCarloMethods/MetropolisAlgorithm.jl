@@ -22,7 +22,7 @@ metropolis_accepted(ΔE, β) = ( ΔE < zero(ΔE) || rand() < exp(-β * ΔE) )::B
 function metropolis_update!( model::AbstractModel, beta, site )
     # ΔE = AT_site_energy_change( model.ham, model.latt, site, model.ham.color_update )
     ham = Hamiltonian(model)
-    ΔE = DoF_energy_change( ham, Lattice(model), site, ham.color_update )
+    ΔE = DoF_energy_change( ham, Lattice(model), site )
     if metropolis_accepted( ΔE, beta )
         # AT_site_flip!( model.ham, site )
         site_flip!( ham, site )

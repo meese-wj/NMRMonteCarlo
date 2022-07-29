@@ -46,24 +46,24 @@ end
 function DoF_energy( ham::AshkinTellerHamiltonian{T}, latt, site, site_values::SVector{3} ) where {T}
     effective_fields::SVector = neighbor_fields(ham, ham.params, latt, site)    
     en = zero(T)
-    @inbounds for idx ∈ 1:length(effective_fields)
-        en += site_values[idx] * effective_fields[idx]
+    @inbounds for (idx, eff_field) ∈ enumerate(effective_fields)
+        en += site_values[idx] * eff_field
     end
     return -en
 end
 
-function energy( colors::AbstractVector, hamparams::AshkinTellerParameters{T}, latt ) where {T}
-    en = DoF_energy( colors, hamparams, latt, 1 )
-    for site ∈ 2:num_sites(latt)
-        en += DoF_energy( colors, hamparams, latt, site)
+function energy( ham::AshkinTellerHamiltonian{T}, latt ) where {T}
+    en = zero(T)
+    @inbounds for (iter, dof_location_value) ∈ enumerate(ham)
+        en += DoF_energy( ham, latt, dof_location_value[begin])
     end
     return 0.5 * en
 end
 
-function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color = AT_sigma)
+function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color = color_update(ham))
     σ_value = -ham[site, AT_sigma]
     τ_value = ham[site, AT_tau]
-    if color == AT_tau
+    if color === AT_tau
         σ_value *= -one(eltype(ham))
         τ_value *= -one(eltype(ham))
     end
