@@ -24,13 +24,7 @@ mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAs
     end
 end
   
-site_Baxter( ham::AbstractTwoColorAshkinTellerHamiltonian, site ) = ham[site, AT_sigma] * ham[site, AT_tau]
 function switch_color_update!(ham::AbstractTwoColorAshkinTellerHamiltonian)
-    # if ham.color_update == AT_sigma
-    #     ham.color_update = AT_tau
-    #     return nothing
-    # end
-    # ham.color_update = AT_sigma
     ifelse(ham.color_update == AT_sigma, AT_tau, AT_sigma)
     return nothing
 end

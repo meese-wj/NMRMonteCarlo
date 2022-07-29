@@ -15,12 +15,16 @@ getTypename(::Type{T}) where T = isempty(T.parameters) ? T : T.name.wrapper
 ############################################################################
 
 abstract type AbstractAshkinTeller <: AbstractHamiltonian end
+
 num_colors(::Type{T}) where {T <: AbstractAshkinTeller} = throw(MethodError(num_colors, T))
 num_colors(::ATType) where ATType = num_colors(ATType)
+
 spin_index(::Type{T}, site_idx, color_idx) where {T <: AbstractAshkinTeller} = num_colors(T) * (site_idx - one(Int)) + color_idx
-spin_index(::ATType, site_idx, color_idx) where ATType = num_colors(ATType) * (site_idx - one(Int)) + color_idx
-site_index(::Type{T}, spin_idx) where {T <: AbstractAshkinTeller} = one(Int) + spin_idx ÷ num_colors(T)
+spin_index(::ATType, site_idx, color_idx) where ATType = spin_index(ATType, site_idx, color_idx)
+
+site_index(::Type{T}, spin_idx) where {T <: AbstractAshkinTeller} = one(Int) + (spin_idx - one(Int)) ÷ num_colors(T)
 site_index(::ATType, spin_idx) where ATType = site_index(ATType, spin_idx)
+
 spins(ham::AbstractAshkinTeller) = ham.spins
 color_update(ham::AbstractAshkinTeller) = ham.color_update
 
@@ -47,6 +51,7 @@ end
 abstract type AbstractTwoColorAshkinTellerHamiltonian <: AbstractAshkinTeller end
 const TwoC_ATH = AbstractTwoColorAshkinTellerHamiltonian
 @inline num_colors(::Type{<: TwoC_ATH}) = 2
+@inline site_Baxter( ham::AbstractTwoColorAshkinTellerHamiltonian, site ) = ham[site, AT_sigma] * ham[site, AT_tau]
 
 """
     iterate(::HamiltonianIterator{<: AbstractTwoColorAshkinTellerHamiltonian, IterateByDefault}, [state])
@@ -56,24 +61,24 @@ Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) as it is laid o
 function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDefault}, state = (one(Int),))
     ham = Hamiltonian(iter)
     spin_idx, = state
-    dof_location_value = site_index(ham, spin_idx), spins(ham)[spin_idx]
-    return spin_idx <= length(ham) ? (dof_location_value, (spin_idx + one(Int),)) : nothing
+    next = (spin_idx + one(Int),)
+    return spin_idx <= length(ham) ? ((site_index(ham, spin_idx), spins(ham)[spin_idx]), next) : nothing
 end
 """
     iterate(::HamiltonianIterator{<: AbstractTwoColorAshkinTellerHamiltonian, IterateByDoFType}, [state])
 
 Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) by the spin types separately.
 """
-function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state = (one(Int), AT_sigma))
+function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state = (one(Int), one(Int), AT_sigma))
     ham = Hamiltonian(iter)
-    site_idx, color = state
+    site_idx, iterations, color = state
     ham.color_update = color
-    next = site_idx + one(Int), color
-    iteration_complete = false
+    next_site = site_idx + one(Int)
+    next_iter = iterations + one(Int)
+    next_color = color
     if site_idx == num_sites(ham)
-        next = one(Int), ifelse( color === AT_sigma, AT_tau, AT_sigma )
-        iteration_complete = color === AT_tau
+        next_site = one(Int)
+        next_color = ifelse( color === AT_sigma, AT_tau, AT_sigma )
     end
-    dof_location_value = site_idx, ham[site_idx, color]
-    return iteration_complete ? nothing : ( dof_location_value, next )
+    return iterations <= length(ham) ? ( (site_idx, ham[site_idx, color]), (next_site, next_iter, next_color) ) : nothing
 end
