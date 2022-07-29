@@ -1,6 +1,6 @@
 using Parameters2JSON
 
-import ..Hamiltonians: Hamiltonian
+import ..Hamiltonians: Hamiltonian   # Automatically submodulizes this code
 export sweeps_per_export, lattice, Hamiltonian, observables
 
 abstract type AbstractMonteCarloParameters end

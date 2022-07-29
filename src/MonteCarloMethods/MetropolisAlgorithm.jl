@@ -1,6 +1,6 @@
 using Parameters2JSON
 
-import ..Hamiltonians: IterateByDoFType, Hamiltonian
+import ..Hamiltonians: IterateByDoFType, Hamiltonian   # Automatically submodulizes this code
 export MetropolisParameters, thermalize!, sweep_and_measure!
 
 @jsonable struct MetropolisParameters{T <: AbstractFloat} <: AbstractMonteCarloParameters
