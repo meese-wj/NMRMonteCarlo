@@ -20,7 +20,7 @@ metropolis_accepted(ΔE, β) = ( ΔE < zero(ΔE) || rand() < exp(-β * ΔE) )::B
 # function metropolis_update!( model::Model{L, AT_Hamiltonian{T}}, site, beta ) where {L <: AbstractLattice, T <: AbstractFloat}
 function metropolis_update!( model::AbstractModel, beta, site )
     # ΔE = AT_site_energy_change( model.ham, model.latt, site, model.ham.color_update )
-    ham = hamiltonian(model)
+    ham = Hamiltonian(model)
     ΔE = AT_site_energy_change( ham, lattice(model), site, ham.color_update )
     if metropolis_accepted( ΔE, beta )
         # AT_site_flip!( model.ham, site )
@@ -33,7 +33,7 @@ end
 function metropolis_sweep!( model::AbstractModel, beta )
 
     # # TODO: Generalize this loop to something like this:
-    # for (iteration, dof_site_val) ∈ enumerate( hamiltonian(model), IterateByDoFType )
+    # for (iteration, dof_site_val) ∈ enumerate( Hamiltonian(model), IterateByDoFType )
     #     metropolis_update!(model, beta, dof_site_val[begin])
     # end
 
@@ -43,7 +43,7 @@ function metropolis_sweep!( model::AbstractModel, beta )
     #         metropolis_update!( model, site, beta )
     #     end
     #     # switch_color_update!(model.ham)
-    #     switch_color_update!(hamiltonian(model))
+    #     switch_color_update!(Hamiltonian(model))
     # end
     return nothing
 end
@@ -69,7 +69,7 @@ function sweep_and_measure!( model::AbstractModel, beta, mc_params::AbstractMont
         # Only write out observables if the state container is defined
         if length(state_container) > 0
             # export_state!( state_container, model.ham, write )
-            export_state!( state_container, hamiltonian(model), write )
+            export_state!( state_container, Hamiltonian(model), write )
         end
     end
     return nothing
