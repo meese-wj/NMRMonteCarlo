@@ -1,7 +1,7 @@
 using Parameters2JSON
 
 import ..Hamiltonians: Hamiltonian   # Automatically submodulizes this code
-export sweeps_per_export, lattice, Hamiltonian, observables
+export sweeps_per_export, Lattice, Hamiltonian, Observables
 
 abstract type AbstractMonteCarloParameters end
 sweeps_per_export(params::AbstractMonteCarloParameters) = params.measure_sweeps <= params.total_measurements ? 1 : params.measure_sweeps ÷ params.total_measurements
@@ -26,37 +26,38 @@ of an `<: AbstractModel` is uniquely defined by _three_ fields:
 These `methods` _must_ be defined for every `<: AbstractModel`. By default they
 `throw` `MethodError`s if not implemented.
 
-- [`lattice`](@ref)
-- [`Hamiltonian`](@ref)
-- [`observables`](@ref)
-
 # Default Interface Methods
 
 These `methods` are implemented by default for any `<: AbstractModel`. One is free 
 to overload any of them for any peculiar `subtype`s.
+
+- [`lattice`](@ref)
+- [`Hamiltonian`](@ref)
+- [`observables`](@ref)
 """
 abstract type AbstractModel end
 
 # Required Interface Methods
 """
-    lattice(::AbstractModel) -> MethodError
+    Lattice(::AbstractModel) -> MethodError
 
 Returns the lattice or geometry of an [`AbstractModel`](@ref) `subtype`.
 """
-lattice(model::AbstractModel) = throw(MethodError(lattice, model))
+Lattice(model::AbstractModel) = throw(MethodError(lattice, model))
 
 """
     Hamiltonian(::AbstractModel) -> MethodError
 
 Returns the system in an [`AbstractModel`](@ref) `subtype`.
 """
-Hamiltonian(model::AbstractModel) = throw(MethodError(Hamiltonian, model))
+# Hamiltonian(model::AbstractModel) = throw(MethodError(Hamiltonian, model))
+Hamiltonian(model::AbstractModel) = model.hamiltonian
 
 """
-    observables(::AbstractModel) -> MethodError
+    Observables(::AbstractModel) -> MethodError
 
 Returns the set of defined observables for an [`AbstractModel`](@ref) `subtype`.
 """
-observables(model::AbstractModel) = throw(MethodError(observables, model))
+Observables(model::AbstractModel) = throw(MethodError(observables, model))
 
 # Default Interface Methods

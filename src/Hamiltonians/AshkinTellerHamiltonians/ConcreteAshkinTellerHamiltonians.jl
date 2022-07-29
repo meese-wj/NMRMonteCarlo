@@ -2,6 +2,7 @@
 
 using Parameters2JSON
 import StaticArrays: @SVector, SVector
+import ..Lattices: nearest_neighbors
 export AshkinTellerHamiltonian, AshkinTellerParameters
 
 @jsonable struct AshkinTellerParameters{T <: AbstractFloat}

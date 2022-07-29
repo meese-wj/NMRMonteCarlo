@@ -1,7 +1,8 @@
 using Parameters2JSON
 
-import ..Hamiltonians: IterateByDoFType, Hamiltonian   # Automatically submodulizes this code
-export MetropolisParameters, thermalize!, sweep_and_measure!
+# Automatically submodulizes this code
+import ..Hamiltonians: IterateByDoFType, Hamiltonian, DoF_energy_change, site_flip!
+export MetropolisParameters, metropolis_sweep!, thermalize!, sweep_and_measure!
 
 @jsonable struct MetropolisParameters{T <: AbstractFloat} <: AbstractMonteCarloParameters
     βvalues::Vector{T}
@@ -21,10 +22,10 @@ metropolis_accepted(ΔE, β) = ( ΔE < zero(ΔE) || rand() < exp(-β * ΔE) )::B
 function metropolis_update!( model::AbstractModel, beta, site )
     # ΔE = AT_site_energy_change( model.ham, model.latt, site, model.ham.color_update )
     ham = Hamiltonian(model)
-    ΔE = AT_site_energy_change( ham, lattice(model), site, ham.color_update )
+    ΔE = DoF_energy_change( ham, Lattice(model), site, ham.color_update )
     if metropolis_accepted( ΔE, beta )
         # AT_site_flip!( model.ham, site )
-        AT_site_flip!( ham, site )
+        site_flip!( ham, site )
     end
     return nothing
 end
@@ -33,13 +34,13 @@ end
 function metropolis_sweep!( model::AbstractModel, beta )
 
     # # TODO: Generalize this loop to something like this:
-    for (iteration, dof_site_val) ∈ enumerate( Hamiltonian(model), IterateByDoFType )
+    for (iteration, dof_site_val) ∈ enumerate( IterateByDoFType, Hamiltonian(model) )
         metropolis_update!(model, beta, dof_site_val[begin])
     end
 
     # for dof_color ∈ 1:NUM_AT_COLORS
     #     # for site ∈ 1:num_sites(model.latt)
-    #     for site ∈ 1:num_sites(lattice(model))
+    #     for site ∈ 1:num_sites(Lattice(model))
     #         metropolis_update!( model, site, beta )
     #     end
     #     # switch_color_update!(model.ham)

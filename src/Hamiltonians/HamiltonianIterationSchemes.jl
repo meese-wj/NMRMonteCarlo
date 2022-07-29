@@ -87,8 +87,20 @@ Wrapper for `iterate(HamiltonianIterator(ham, scheme), args...)`.
 """
 iterate(scheme::Type{<: HamiltonianIterationScheme}, ham::AbstractHamiltonian, args...) = iterate( HamiltonianIterator(ham, scheme), args...)
 """
+    iterate(::AbstractHamiltonian, args...)
+
+Default wrapper around `iterate(IterateByDefault,::AbstractHamiltonian, args...)`.
+"""
+iterate(ham::AbstractHamiltonian, args...) = iterate(IterateByDefault, ham, args...)
+"""
     enumerate(scheme::Type{<: HamiltonianIterationScheme}, ham)
 
 Wrapper for `enumerate(HamiltonianIterator(ham, scheme))`.
 """
 enumerate(scheme::Type{<: HamiltonianIterationScheme}, ham::AbstractHamiltonian) = enumerate(HamiltonianIterator(ham, scheme))
+"""
+    enumerate(::AbstractHamiltonian)
+
+Wrapper for `enumerate(IterateByDefault, ::AbstractHamiltonian)`.
+"""
+enumerate(ham::AbstractHamiltonian) = enumerate(IterateByDefault, ham)
