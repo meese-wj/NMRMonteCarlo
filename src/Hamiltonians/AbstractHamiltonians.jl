@@ -1,5 +1,5 @@
 
-export energy, energy_change, DoF_energy, num_DoF
+export energy, energy_change, DoF_energy, DoF_energy_change, num_DoF
 
 """
     abstract type AbstractHamiltonian end 
