@@ -40,7 +40,7 @@ end
 struct CleanAshkinTellerModel{T <: AbstractFloat} <: AbstractModel
     lattice::CubicLattice2D
     hamiltonian::AshkinTellerHamiltonian{T}
-    observables::Vector{TimeSeries}
+    observables::Vector{TimeSeries{T}}
 
     CleanAshkinTellerModel(args...) = CleanAshkinTellerModel{Float64}(args...)
     function CleanAshkinTellerModel{T}( Lx, Ly, Jex = 1, Kex = 0, num_meas = 0 ) where T
@@ -57,7 +57,7 @@ struct CleanAshkinTellerModel{T <: AbstractFloat} <: AbstractModel
 end
 
 function update_observables!(model::CleanAshkinTellerModel)
-    for idx ∈ eachindex(Observables(model))
+    @inbounds for idx ∈ eachindex(Observables(model))
         update_observable!(model, ObservableType(CATMObservable, idx))
     end
     return Observables(model)
