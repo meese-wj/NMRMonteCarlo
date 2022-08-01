@@ -6,7 +6,7 @@ export
 # Base overloads
        getindex, setindex!, eltype, length,
 # Ashkin-Teller functionality
-       num_colors, spins, AT_sigma, AT_tau, Index
+       num_colors, spins, AT_sigma, AT_tau, ColorIndex
 
 getTypename(::Type{T}) where T = isempty(T.parameters) ? T : T.name.wrapper
 
@@ -40,13 +40,16 @@ for (idx, col) ∈ enumerate(ATColorList)
     @eval struct $col <: AshkinTellerColor end
     @eval color_update(::Type{$col}) = $col()
     @eval color_update(::$col) = $col()
-    @eval @inline Index(::Type{$col}) = $idx
-    @eval @inline Index(::$col) = Index($col)
-    @eval @inline Index(::Type{AshkinTellerColor}, ::Type{Val{$idx}}) = $col()
-    @eval @inline spin_index(::ATType, site, type::Type{$col}) where ATType = spin_index(ATType, site, Index(type)) 
+    @eval @inline ColorIndex(::Type{$col}) = $idx
+    @eval @inline ColorIndex(::$col) = ColorIndex($col)
+    @eval @inline ColorIndex(::Type{AshkinTellerColor}, ::Type{Val{$idx}}) = $col()
+    @eval @inline spin_index(::ATType, site, type::Type{$col}) where ATType = spin_index(ATType, site, ColorIndex(type)) 
     @eval getindex(ham::AbstractAshkinTeller, site, ::Type{$col}) = spins(ham)[spin_index(ham, site, $col)]
+    @eval getindex(ham::AbstractAshkinTeller, site, ::$col) = ham[site, $col]
     @eval setindex!(ham::AbstractAshkinTeller, value, site, ::Type{$col}) = spins(ham)[spin_index(ham, site, $col)] = value
+    @eval setindex!(ham::AbstractAshkinTeller, value, site, ::$col) = ham[site, $col] = value
 end
+ATDefaultColor() = ColorIndex(AshkinTellerColor, Val{1})
 
 ############################################################################
 #        Abstract Two-Color Ashkin-Teller Hamiltonian Interface            #
@@ -78,14 +81,14 @@ function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state
     ham = Hamiltonian(iter)
     site_idx = state[1]
     iterations = state[2]
-    color = Index(AshkinTellerColor, Val{state[end]})
+    color = ColorIndex(AshkinTellerColor, Val{state[end]})
     ham.color_update = color
     next_site = site_idx + one(Int)
     next_iter = iterations + one(Int)
-    next_color_int = Index(color)
+    next_color_int = ColorIndex(color)
     if site_idx == num_sites(ham)
         next_site = one(Int)
-        next_color_int = ifelse( color === AT_sigma, Index(AT_tau), Index(AT_sigma) )
+        next_color_int = ifelse( color === AT_sigma, ColorIndex(AT_tau), ColorIndex(AT_sigma) )
     end
     return iterations <= length(ham) ? ( (site_idx, ham[site_idx, color]), (next_site, next_iter, next_color_int) ) : nothing
 end

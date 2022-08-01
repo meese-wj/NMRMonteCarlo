@@ -15,13 +15,13 @@ reciprocal_type(obj) = reciprocal_type(typeof(obj))
 reciprocal_type(ty::Type{AshkinTellerParameters{T}}) where {T} = AshkinTellerHamiltonian{T}
 
 mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAshkinTellerHamiltonian
-    color_update::Type{<: AshkinTellerColor}
+    color_update::AshkinTellerColor
     params::AshkinTellerParameters{T}
     spins::Vector{T}
 
     function AshkinTellerHamiltonian(latt, params::AshkinTellerParameters{T}) where T
         ndofs = num_colors(AshkinTellerHamiltonian) * num_sites(latt)
-        return new{T}(AT_sigma, params, rand([one(T) -one(T)], ndofs))
+        return new{T}(ATDefaultColor(), params, rand([one(T) -one(T)], ndofs))
     end
 end
   
@@ -60,10 +60,10 @@ function energy( ham::AshkinTellerHamiltonian{T}, latt ) where {T}
     return 0.5 * en
 end
 
-function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color_idx = Index(color_update(ham)))
+function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color_idx = ColorIndex(color_update(ham)))
     old_σ, old_τ, old_bax = ham[site, AT_sigma], ham[site, AT_tau], site_Baxter(ham, site)
-    σ_value = ifelse( color_idx == Index(AT_sigma), -old_σ, old_σ )
-    τ_value = ifelse( color_idx == Index(AT_tau), -old_τ, old_τ )
+    σ_value = ifelse( color_idx == ColorIndex(AT_sigma), -old_σ, old_σ )
+    τ_value = ifelse( color_idx == ColorIndex(AT_tau), -old_τ, old_τ )
     # σ_value = -ham[site, AT_sigma]
     # τ_value = ham[site, AT_tau]
     # if color === AT_tau
