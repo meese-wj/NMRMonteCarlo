@@ -92,6 +92,19 @@ function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDefault}, state
 end
 
 """
+    iterate(::HamiltonianIterator{<: AbstractTwoColorAshkinTellerHamiltonian, IterateBySite}, [state])
+
+Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) and return an SVector of sigma, tau, and
+Baxter values.
+"""
+function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateBySite}, state = (one(Int),))
+    ham = Hamiltonian(iter)
+    site, = state
+    next = (site + one(Int), )
+    return site <= num_sites(ham) ? ((site, (@SVector [ ham[site, AT_sigma], ham[site, AT_tau], site_Baxter(ham, site) ])), next) : nothing
+end
+
+"""
     iterate(::HamiltonianIterator{<: AbstractTwoColorAshkinTellerHamiltonian, IterateByDoFType}, [state])
 
 Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) by the spin types separately.

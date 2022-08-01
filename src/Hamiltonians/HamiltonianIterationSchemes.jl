@@ -23,7 +23,7 @@ struct IterateByDefault <: HamiltonianIterationScheme end
 """
     IterateBySite <: HamiltonianIterationScheme
 
-Traverse the degrees of freedom by outputting a `Tuple` of values at each define site
+Traverse the degrees of freedom by outputting a `Tuple` of values at each defined site
 or within each unit cell.
 """
 struct IterateBySite <: HamiltonianIterationScheme end

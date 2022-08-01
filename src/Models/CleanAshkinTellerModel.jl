@@ -2,9 +2,10 @@
 import ..Lattices: CubicLattice2D
 import ..Hamiltonians: AshkinTellerHamiltonian, AshkinTellerParameters, 
                        energy, num_sites, spins, AT_sigma, AT_tau, num_colors,
-                       site_Baxter
+                       site_Baxter, ColorIndex
 import ..MonteCarloMethods: AbstractModel, Lattice, Hamiltonian, Observables
 import StaticArrays: @SVector
+import Statistics: mean
 import Base: getindex, setindex!
 using MonteCarloMeasurementUncertainty
 
@@ -59,26 +60,26 @@ function update_observables!(model::CleanAshkinTellerModel)
     for idx ∈ eachindex(Observables(model))
         update_observable!(model, ObservableType(CATMObservable, idx))
     end
+    return Observables(model)
 end
 
 # Individual observable definitions
 function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Energy})
-    @show en = energy(Hamiltonian(model))
-    push!( obs, energy(Hamiltonian(model)) / num_sites(Hamiltonian(model)) )
+    push!( obs, energy(Hamiltonian(model), Lattice(model)) / num_sites(Hamiltonian(model)) )
 end
 
 function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Energy2})
-    push!( obs, (energy(Hamiltonian(model)) / num_sites(Hamiltonian(model)))^2 )
+    push!( obs, (energy(Hamiltonian(model), Lattice(model)) / num_sites(Hamiltonian(model)))^2 )
 end
 
 function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Sigma})
     ham = Hamiltonian(model)
-    push!( obs, sum( @view spins(ham)[ColorIndex(AT_sigma):num_colors(ham):end] ) )
+    push!( obs, mean( @view spins(ham)[ColorIndex(AT_sigma):num_colors(ham):end] ) )
 end
 
 function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Tau})
     ham = Hamiltonian(model)
-    push!( obs, mean( @view spins(ham)[ColorIndex(Tau):num_colors(ham):end] ) )
+    push!( obs, mean( @view spins(ham)[ColorIndex(AT_tau):num_colors(ham):end] ) )
 end
 
 function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Baxter})

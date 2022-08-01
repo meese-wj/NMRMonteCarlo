@@ -54,8 +54,8 @@ end
 
 function energy( ham::AshkinTellerHamiltonian{T}, latt ) where {T}
     en = zero(T)
-    @inbounds for (iter, dof_location_value) ∈ enumerate(ham)
-        en += DoF_energy( ham, latt, dof_location_value[begin])
+    @inbounds for (iter, dof_location_val) ∈ enumerate(IterateBySite, ham)
+        en += DoF_energy( ham, latt, dof_location_val...)
     end
     return 0.5 * en
 end
