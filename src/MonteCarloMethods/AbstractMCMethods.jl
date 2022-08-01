@@ -59,6 +59,6 @@ Hamiltonian(model::AbstractModel) = model.hamiltonian
 
 Returns the set of defined observables for an [`AbstractModel`](@ref) `subtype`.
 """
-Observables(model::AbstractModel) = throw(MethodError(observables, model))
+Observables(model::AbstractModel) = model.observables
 
 # Default Interface Methods
