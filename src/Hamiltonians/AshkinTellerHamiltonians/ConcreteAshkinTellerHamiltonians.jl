@@ -44,7 +44,7 @@ function neighbor_fields(ham::TwoC_ATH, hamparams::AshkinTellerParameters{T}, la
 end
 
 function DoF_energy( ham::AshkinTellerHamiltonian{T}, latt, site, site_values::SVector{3} ) where {T}
-    effective_fields::SVector = neighbor_fields(ham, ham.params, latt, site)    
+    effective_fields::SVector{3, T} = neighbor_fields(ham, ham.params, latt, site)    
     en = zero(T)
     @inbounds for (idx, eff_field) ∈ enumerate(effective_fields)
         en += site_values[idx] * eff_field
@@ -60,15 +60,19 @@ function energy( ham::AshkinTellerHamiltonian{T}, latt ) where {T}
     return 0.5 * en
 end
 
-function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color = color_update(ham))
-    σ_value = -ham[site, AT_sigma]
-    τ_value = ham[site, AT_tau]
-    if color === AT_tau
-        σ_value *= -one(eltype(ham))
-        τ_value *= -one(eltype(ham))
-    end
+function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color_idx = Index(color_update(ham)))
+    old_σ, old_τ, old_bax = ham[site, AT_sigma], ham[site, AT_tau], site_Baxter(ham, site)
+    σ_value = ifelse( color_idx == Index(AT_sigma), -old_σ, old_σ )
+    τ_value = ifelse( color_idx == Index(AT_tau), -old_τ, old_τ )
+    # σ_value = -ham[site, AT_sigma]
+    # τ_value = ham[site, AT_tau]
+    # if color === AT_tau
+    #     σ_value *= -one(eltype(ham))
+    #     τ_value *= -one(eltype(ham))
+    # end
     bax_val = σ_value * τ_value
-    return DoF_energy( ham, latt, site, @SVector [ σ_value - ham[site, AT_sigma], τ_value - ham[site, AT_tau], bax_val - site_Baxter(ham, site) ] )
+    # return DoF_energy( ham, latt, site, @SVector [ σ_value - ham[site, AT_sigma], τ_value - ham[site, AT_tau], bax_val - site_Baxter(ham, site) ] )
+    return DoF_energy( ham, latt, site, @SVector [ σ_value - old_σ, τ_value - old_τ, bax_val - old_bax ] )
 end
 
 function site_flip!( condition::Bool, ham::AshkinTellerHamiltonian, site )

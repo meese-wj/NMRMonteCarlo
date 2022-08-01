@@ -38,8 +38,11 @@ abstract type AshkinTellerColor end
 const ATColorList = @SVector [ :AT_sigma, :AT_tau ]
 for (idx, col) ∈ enumerate(ATColorList)
     @eval struct $col <: AshkinTellerColor end
+    @eval color_update(::Type{$col}) = $col()
+    @eval color_update(::$col) = $col()
     @eval @inline Index(::Type{$col}) = $idx
-    @eval @inline Index(::Type{AshkinTellerColor}, ::Type{Val{$idx}}) = $col
+    @eval @inline Index(::$col) = Index($col)
+    @eval @inline Index(::Type{AshkinTellerColor}, ::Type{Val{$idx}}) = $col()
     @eval @inline spin_index(::ATType, site, type::Type{$col}) where ATType = spin_index(ATType, site, Index(type)) 
     @eval getindex(ham::AbstractAshkinTeller, site, ::Type{$col}) = spins(ham)[spin_index(ham, site, $col)]
     @eval setindex!(ham::AbstractAshkinTeller, value, site, ::Type{$col}) = spins(ham)[spin_index(ham, site, $col)] = value
