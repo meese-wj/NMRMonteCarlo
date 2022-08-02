@@ -1,7 +1,7 @@
 using Parameters2JSON
 
 import ..Hamiltonians: Hamiltonian   # Automatically submodulizes this code
-export sweeps_per_export, Lattice, Hamiltonian, Observables
+export sweeps_per_export, Lattice, Hamiltonian, Observables, update_observables!
 
 abstract type AbstractMonteCarloParameters end
 sweeps_per_export(params::AbstractMonteCarloParameters) = params.measure_sweeps <= params.total_measurements ? 1 : params.measure_sweeps ÷ params.total_measurements
