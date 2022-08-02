@@ -2,17 +2,13 @@ using DrWatson
 @quickactivate :NMRMonteCarlo
 using Profile
 
-struct ATModel <: MonteCarloMethods.AbstractModel
-    lattice::CubicLattice2D
-    hamiltonian::AshkinTellerHamiltonian{Float64}
-end
-
 function create_test_suite()
     latt = CubicLattice2D(64, 64)
     atparams = AshkinTellerParameters(1., 0.)
     ham = AshkinTellerHamiltonian(latt, atparams)
+    metroparams = MetropolisParameters{Float64}([0.3], 1024, 1024, 1024)
 
-    model = ATModel(latt, ham)
+    model = CleanAshkinTellerModel( latt.params.Lx, latt.params.Ly, atparams.Jex, atparams.Kex, metroparams.total_measurements )
     return latt, atparams, ham, model
 end
 
@@ -20,8 +16,7 @@ end
 function memtest()
     latt, atparams, ham, model = create_test_suite()
 
-    timer = @timed MonteCarloMethods.metropolis_update!(model, 0.5, 5)
-    timer = @timed MonteCarloMethods.metropolis_sweep!(model, 0.5)
+    timer = @timed update_observables!(model)
     println("$(timer.time) seconds")
     println("$(timer.bytes) bytes allocated")
     println("$(round(num_DoF(ham) / timer.time; sigdigits = 4)) updates per second")

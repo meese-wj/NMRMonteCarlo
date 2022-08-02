@@ -21,10 +21,9 @@ for (idx, obs) ∈ enumerate(CATM_observables)
     @eval getindex(vec::AbstractArray, ::$obs_symb) = vec[$obs_symb]
     @eval ObservableString(::Type{$obs_symb}) = String(Symbol($obs_symb))
     @eval ObservableString(::$obs_symb) = ObservableString($obs_symb)
-    @eval ObservableType(::Type{CATMObservable}, ::Type{Val{$idx}}) = $obs_symb
+    @eval ObservableType(::Type{CATMObservable}, ::Type{Val{$idx}}) = $obs_symb()
 end
 ObservableString(s::Symbol) = ObservableString(eval(s))
-ObservableType(type::Type{CATMObservable}, idx) = ObservableType(type, Val{idx})
 
 struct CleanAshkinTellerModelParameters{T <: AbstractFloat}
     Lx::Int
@@ -56,9 +55,13 @@ struct CleanAshkinTellerModel{T <: AbstractFloat} <: AbstractModel
     CleanAshkinTellerModel{T}(params::CleanAshkinTellerModelParameters{T}) where T = CleanAshkinTellerModel( params.Lx, params.Ly, params.Jex, params.Kex, params.num_measurements )
 end
 
+update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::T) where {T <: CATMObservable} = update_observable!(obs, model, T)
+update_observable!(model::CleanAshkinTellerModel, ::T) where {T <: CATMObservable} = update_observable!(model, T)
+update_observable!(model::CleanAshkinTellerModel, idx::Int) = update_observable!(model, ObservableType(CATMObservable, Val{idx}))
+
 function update_observables!(model::CleanAshkinTellerModel)
-    @inbounds for (idx, obs) ∈ enumerate(Observables(model))
-        update_observable!(model, ObservableType(CATMObservable, idx))
+    @inbounds for (idx, obs) ∈ enumerate(CATM_observables)
+        update_observable!(model, idx)
     end
     return Observables(model)
 end
