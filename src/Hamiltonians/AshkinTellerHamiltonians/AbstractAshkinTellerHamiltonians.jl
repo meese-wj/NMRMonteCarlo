@@ -70,7 +70,7 @@ end
 # Have a cutoff for the ATColorList for AbstractTwoColorAshkinTellerHamiltonian
 ColorIndex(::Type{AbstractTwoColorAshkinTellerHamiltonian}, ::Type{Val{num_colors(TwoC_ATH) + one(Int)}}) = ATDefaultColor()
 # Overload the ColorIndex inverse to take any idx index to a specific singleton
-ColorIndex(type::Type{AshkinTellerColor}, idx) = ColorIndex(type, Val{idx})
+ColorIndex(::Type{T}, idx::Int) where {T <: AshkinTellerColor} = ColorIndex(T, Val{idx})
 # Create a default value for the Ashkin Teller colors
 ATDefaultColor() = ColorIndex(AshkinTellerColor, one(Int))
 
@@ -118,8 +118,9 @@ function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state
     site_idx = state[1]
     iterations = state[2]
     @show state
-    color = ifelse( state[end] <= num_colors(ham), ColorIndex(TwoC_ATH, Val{state[end]}), ColorIndex(TwoC_ATH, Val{state[end]}) )
-    ham.color_update = color
+    # color = ifelse( state[end] <= num_colors(ham), ColorIndex(TwoC_ATH, Val{state[end]}), ColorIndex(TwoC_ATH, Val{state[end]}) )
+    color = state[end]
+    ham.color_update = ColorIndex(TwoC_ATH, Val{color})
     next_iter = iterations + one(Int)
     next_site = one(Int) + iterations % num_sites(ham)
     next_color_int = one(Int) + iterations ÷ num_sites(ham)
@@ -127,5 +128,5 @@ function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state
     #     next_site = one(Int)
     #     @show next_color_int = ifelse( color === AT_sigma, ColorIndex(AT_tau), ColorIndex(AT_sigma) )
     # end
-    return iterations <= length(ham) ? ( (site_idx, ham[site_idx, color]), (next_site, next_iter, next_color_int) ) : nothing
+    return iterations <= length(ham) ? ( (site_idx, ham[site_idx, color_update(ham)]), (next_site, next_iter, next_color_int) ) : nothing
 end
