@@ -57,7 +57,7 @@ struct CleanAshkinTellerModel{T <: AbstractFloat} <: AbstractModel
 end
 
 function update_observables!(model::CleanAshkinTellerModel)
-    @inbounds for idx ∈ eachindex(Observables(model))
+    @inbounds for (idx, obs) ∈ enumerate(Observables(model))
         update_observable!(model, ObservableType(CATMObservable, idx))
     end
     return Observables(model)
