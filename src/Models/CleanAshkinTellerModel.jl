@@ -3,7 +3,7 @@ import ..Lattices: CubicLattice2D
 import ..Hamiltonians: AshkinTellerHamiltonian, AshkinTellerParameters, 
                        energy, num_sites, spins, AT_sigma, AT_tau, num_colors,
                        site_Baxter, ColorIndex
-import ..MonteCarloMethods: AbstractModel, Lattice, Hamiltonian, Observables
+import ..MonteCarloMethods: AbstractModel, Lattice, Hamiltonian, Observables, update_observables!
 import StaticArrays: @SVector
 import Statistics: mean
 import Base: getindex, setindex!

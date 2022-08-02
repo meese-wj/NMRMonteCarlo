@@ -53,19 +53,19 @@ function thermalize!( model::AbstractModel, beta, mc_params::AbstractMonteCarloP
 end
 
 # function sweep_and_measure!( model::Model{L, H}, beta, mc_params::AbstractMonteCarloParameters, mc_sweep::Function, state_container::AbstractArray = [] ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
-function sweep_and_measure!( model::AbstractModel, beta, mc_params::AbstractMonteCarloParameters, mc_sweep::Function, state_container::AbstractArray = [] )
+function sweep_and_measure!( model::AbstractModel, beta, mc_params::AbstractMonteCarloParameters, mc_sweep::Function )
     total_exports = mc_params.total_measurements
     spe = sweeps_per_export(mc_params)
     @inbounds for write ∈ (1:total_exports)
         @inbounds for sweep ∈ (1:spe)
             mc_sweep(model, beta)
         end
-
+        update_observables!(model)
         # Only write out observables if the state container is defined
-        if length(state_container) > 0
-            # export_state!( state_container, model.ham, write )
-            export_state!( state_container, Hamiltonian(model), write )
-        end
+        # if length(state_container) > 0
+        #     # export_state!( state_container, model.ham, write )
+        #     export_state!( state_container, Hamiltonian(model), write )
+        # end
     end
     return nothing
 end
