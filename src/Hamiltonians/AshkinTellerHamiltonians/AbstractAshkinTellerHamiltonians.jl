@@ -48,6 +48,8 @@ for (idx, col) ∈ enumerate(ATColorList)
     @eval @inline ColorIndex(::$col) = ColorIndex($col)
     # Invert the ColorIndex function from integers to singletons
     @eval @inline ColorIndex(::Type{AshkinTellerColor}, ::Type{Val{$idx}}) = $col()
+    # Create an equivalent inversion for the AbstractTwoColorAshkinTellerHamiltonian
+    @eval @inline ColorIndex(::Type{TwoC_ATH}, ::Type{Val{$idx}}) = ColorIndex(AshkinTellerColor, Val{$idx})
     # ******************************************************************************
 
     # ******************************************************************************
@@ -65,10 +67,12 @@ for (idx, col) ∈ enumerate(ATColorList)
     @eval setindex!(ham::AbstractAshkinTeller, value, site, ::$col) = ham[site, $col] = value
     # ******************************************************************************
 end
+# Have a cutoff for the ATColorList for AbstractTwoColorAshkinTellerHamiltonian
+ColorIndex(::Type{AbstractTwoColorAshkinTellerHamiltonian}, ::Type{Val{num_colors(TwoC_ATH) + one(Int)}}) = ATDefaultColor()
 # Overload the ColorIndex inverse to take any idx index to a specific singleton
 ColorIndex(type::Type{AshkinTellerColor}, idx) = ColorIndex(type, Val{idx})
 # Create a default value for the Ashkin Teller colors
-ATDefaultColor() = ColorIndex(AshkinTellerColor, 1)
+ATDefaultColor() = ColorIndex(AshkinTellerColor, one(Int))
 
 ############################################################################
 #        Abstract Two-Color Ashkin-Teller Hamiltonian Interface            #
@@ -113,14 +117,15 @@ function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state
     ham = Hamiltonian(iter)
     site_idx = state[1]
     iterations = state[2]
-    color = ColorIndex(AshkinTellerColor, Val{state[end]})
+    @show state
+    color = ifelse( state[end] <= num_colors(ham), ColorIndex(TwoC_ATH, Val{state[end]}), ColorIndex(TwoC_ATH, Val{state[end]}) )
     ham.color_update = color
-    next_site = site_idx + one(Int)
     next_iter = iterations + one(Int)
-    next_color_int = ColorIndex(color)
-    if site_idx == num_sites(ham)
-        next_site = one(Int)
-        next_color_int = ifelse( color === AT_sigma, ColorIndex(AT_tau), ColorIndex(AT_sigma) )
-    end
+    next_site = one(Int) + iterations % num_sites(ham)
+    next_color_int = one(Int) + iterations ÷ num_sites(ham)
+    # if site_idx == num_sites(ham)
+    #     next_site = one(Int)
+    #     @show next_color_int = ifelse( color === AT_sigma, ColorIndex(AT_tau), ColorIndex(AT_sigma) )
+    # end
     return iterations <= length(ham) ? ( (site_idx, ham[site_idx, color]), (next_site, next_iter, next_color_int) ) : nothing
 end

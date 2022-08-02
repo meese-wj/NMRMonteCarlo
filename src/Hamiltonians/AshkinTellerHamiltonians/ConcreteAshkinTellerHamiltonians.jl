@@ -79,6 +79,7 @@ function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color_idx =
 end
 
 function site_flip!( condition::Bool, ham::AshkinTellerHamiltonian, site )
+    @show site, color_update(ham)
     ham[site, color_update(ham)] = ifelse( condition, -ham[site, color_update(ham)], ham[site, color_update(ham)] )
     return nothing
 end
