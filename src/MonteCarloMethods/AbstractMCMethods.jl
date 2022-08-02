@@ -26,18 +26,23 @@ of an `<: AbstractModel` is uniquely defined by _three_ fields:
 These `methods` _must_ be defined for every `<: AbstractModel`. By default they
 `throw` `MethodError`s if not implemented.
 
+- [`update_observables!`](@ref)
+
 # Default Interface Methods
 
 These `methods` are implemented by default for any `<: AbstractModel`. One is free 
 to overload any of them for any peculiar `subtype`s.
 
-- [`lattice`](@ref)
+- [`Lattice`](@ref)
 - [`Hamiltonian`](@ref)
-- [`observables`](@ref)
+- [`Observables`](@ref)
 """
 abstract type AbstractModel end
 
 # Required Interface Methods
+function update_observables!(::AbstractModel) end
+
+# Default Interface Methods
 """
     Lattice(::AbstractModel) -> MethodError
 
@@ -60,5 +65,3 @@ Hamiltonian(model::AbstractModel) = model.hamiltonian
 Returns the set of defined observables for an [`AbstractModel`](@ref) `subtype`.
 """
 Observables(model::AbstractModel) = model.observables
-
-# Default Interface Methods
