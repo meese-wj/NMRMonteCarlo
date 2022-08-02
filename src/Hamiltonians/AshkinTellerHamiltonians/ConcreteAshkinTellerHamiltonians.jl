@@ -3,7 +3,7 @@
 using Parameters2JSON
 import StaticArrays: @SVector, SVector
 import ..Lattices: nearest_neighbors
-export AshkinTellerHamiltonian, AshkinTellerParameters
+export AshkinTellerHamiltonian, AshkinTellerParameters, sigma_values, tau_values
 
 @jsonable struct AshkinTellerParameters{T <: AbstractFloat}
     Jex::T  # Ising exchanges in the AT model. Jex > 0 is ferromagnetic
@@ -24,6 +24,9 @@ mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAs
         return new{T}(ATDefaultColor(), params, rand([one(T) -one(T)], ndofs))
     end
 end
+
+sigma_values(ham::AbstractTwoColorAshkinTellerHamiltonian) = @view spins(ham)[ColorIndex(AT_sigma):num_colors(ham):end]
+tau_values(ham::AbstractTwoColorAshkinTellerHamiltonian)   = @view spins(ham)[ColorIndex(AT_tau):num_colors(ham):end]
   
 function switch_color_update!(ham::AbstractTwoColorAshkinTellerHamiltonian)
     ifelse(ham.color_update == AT_sigma, AT_tau, AT_sigma)
