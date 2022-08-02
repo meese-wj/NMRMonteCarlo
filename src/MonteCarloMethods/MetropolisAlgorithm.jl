@@ -20,6 +20,7 @@ metropolis_accepted(ΔE, β) = ( ΔE < zero(ΔE) || rand() < exp(-β * ΔE) )::B
 
 function metropolis_update!( model::AbstractModel, beta, site )
     ΔE = DoF_energy_change( Hamiltonian(model), Lattice(model), site )
+    # @show ΔE, beta, metropolis_accepted(ΔE, beta)
     site_flip!( metropolis_accepted( ΔE, beta ), Hamiltonian(model), site )
     return nothing
 end
