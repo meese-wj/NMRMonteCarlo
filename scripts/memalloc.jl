@@ -3,7 +3,7 @@ using DrWatson
 using Profile
 
 function create_test_suite()
-    latt = CubicLattice2D(2*8192, 2*8192)
+    latt = CubicLattice2D(64, 64)
     atparams = AshkinTellerParameters(1., 0.)
     ham = AshkinTellerHamiltonian(latt, atparams)
     metroparams = MetropolisParameters{Float64}([0.3], 1024, 1024, 1024)
