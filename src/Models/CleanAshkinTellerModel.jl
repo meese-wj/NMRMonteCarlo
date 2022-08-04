@@ -13,9 +13,11 @@ export CleanAshkinTellerModel, CleanAshkinTellerModelParameters, update_observab
 
 abstract type CATMObservable end
 const CATM_observables = @SVector ["Energy", "Energy2", "Sigma", "Tau", "Baxter"]
+CATM_temp_obs_types = []
 for (idx, obs) ∈ enumerate(CATM_observables)
     obs_symb = Symbol(obs)
     @eval struct $obs_symb <: CATMObservable end
+    @eval push!(CATM_temp_obs_types, $obs_symb)
     @eval ObservableIndex(::Type{$obs_symb}) = $idx
     @eval getindex(vec::AbstractArray, ::Type{$obs_symb}) = vec[ObservableIndex($obs_symb)]
     @eval getindex(vec::AbstractArray, ::$obs_symb) = vec[$obs_symb]
@@ -23,6 +25,7 @@ for (idx, obs) ∈ enumerate(CATM_observables)
     @eval ObservableString(::$obs_symb) = ObservableString($obs_symb)
     @eval ObservableType(::Type{CATMObservable}, ::Type{Val{$idx}}) = $obs_symb()
 end
+const CATM_observable_types = @SVector [ type for type ∈ CATM_temp_obs_types ]
 ObservableString(s::Symbol) = ObservableString(eval(s))
 
 struct CleanAshkinTellerModelParameters{T <: AbstractFloat}
@@ -55,15 +58,35 @@ struct CleanAshkinTellerModel{T <: AbstractFloat} <: AbstractModel
     CleanAshkinTellerModel{T}(params::CleanAshkinTellerModelParameters{T}) where T = CleanAshkinTellerModel( params.Lx, params.Ly, params.Jex, params.Kex, params.num_measurements )
 end
 
-update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::T) where {T <: CATMObservable} = update_observable!(obs, model, T)
-update_observable!(model::CleanAshkinTellerModel, ::T) where {T <: CATMObservable} = update_observable!(model, T)
-update_observable!(model::CleanAshkinTellerModel, idx::Int) = update_observable!(model, ObservableType(CATMObservable, Val{idx}))
+"""
+    @generated update_observables!(::CleanAshkinTellerModel)
 
-function update_observables!(model::CleanAshkinTellerModel)
-    @inbounds for (idx, obs) ∈ enumerate(CATM_observables)
-        update_observable!(model, idx)
+Function to update all of the (possibly-many) observable 
+types for the CleanAshkinTellerModel.
+
+!!! note
+    The naive way of doing this is type-unstable as the iterable
+    observable `Type`s are different, and so the iterator itself is 
+    type-unstable. So a generated function is needed to to manually
+    unroll the for-loop over the observables. The naive function 
+    defintion looks something like the following:
+
+    ```julia
+    function update_observables!(model::CleanAshkinTellerModel)
+        for type ∈ CATM_observable_types
+            update_observable!(model, type)
+        end
+        return Observables(model)
     end
-    return Observables(model)
+    ```
+"""
+@generated function update_observables!(model::CleanAshkinTellerModel)
+    expr = :()
+    for type ∈ CATM_observable_types
+        expr = :( $expr; update_observable!(model, $type) )
+    end
+    expr = :( $expr; return model )
+    return expr
 end
 
 # Individual observable definitions
