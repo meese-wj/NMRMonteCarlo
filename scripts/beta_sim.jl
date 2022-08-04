@@ -29,4 +29,7 @@ function simulate!( model, metroparams )
 end
 
 metroparams, model = create_test_suite()
-simulate!(model, metroparams)
+timer = @timed simulate!(model, metroparams)
+println()
+@info "$(round( (metroparams.therm_sweeps + metroparams.measure_sweeps) * num_DoF(Hamiltonian(model)) / timer.time, sigdigits = 4) ) updates/second"
+@info "$( timer.bytes / 1000 ) KiB allocated"
