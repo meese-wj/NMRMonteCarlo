@@ -1,10 +1,10 @@
 
 import StaticArrays: @SVector, @MVector
-import Base: getindex, setindex!
+import Base: getindex, setindex!, to_index
 import ..Lattices: num_sites  # Automatically submodulizes this code
 export 
 # Base overloads
-       getindex, setindex!, eltype, length,
+       getindex, setindex!, eltype, length, to_index,
 # Ashkin-Teller functionality
        num_colors, spins, AT_sigma, AT_tau, ColorIndex
 
@@ -34,45 +34,47 @@ num_sites( ham::AbstractAshkinTeller ) = length(ham) ÷ num_colors(ham)
 # Base.size( ham::AbstractAshkinTeller ) = ( num_sites(ham), num_sites(ham) )
 num_DoF( ham::AbstractAshkinTeller ) = length(ham)
 
-abstract type AshkinTellerColor end
-const ATColorList = @SVector [ :AT_sigma, :AT_tau ]
-for (idx, col) ∈ enumerate(ATColorList)
-    # ******************************************************************************
-    # Conversions between indices and singletons
-    # ******************************************************************************
-    # Define the singleton type
-    @eval struct $col <: AshkinTellerColor end
-    # Convert the singleton type to an index
-    @eval @inline ColorIndex(::Type{$col}) = $idx
-    # Dispatch from the Type to values of that singleton type (for stability)
-    @eval @inline ColorIndex(::$col) = ColorIndex($col)
-    # Invert the ColorIndex function from integers to singletons
-    @eval @inline ColorIndex(::Type{AshkinTellerColor}, ::Type{Val{$idx}}) = $col()
-    # Create an equivalent inversion for the AbstractTwoColorAshkinTellerHamiltonian
-    @eval @inline ColorIndex(::Type{TwoC_ATH}, ::Type{Val{$idx}}) = ColorIndex(AshkinTellerColor, Val{$idx})
-    # ******************************************************************************
+@enum AshkinTellerColor AT_sigma=1 AT_tau
+@inline to_index(color::AshkinTellerColor) = Int(color)
+@inline to_AshkinTellerColor(idx) = instances(AshkinTellerColor)[idx]
+# const ATColorList = @SVector [ :AT_sigma, :AT_tau ]
+# for (idx, col) ∈ enumerate(ATColorList)
+#     # ******************************************************************************
+#     # Conversions between indices and singletons
+#     # ******************************************************************************
+#     # Define the singleton type
+#     @eval struct $col <: AshkinTellerColor end
+#     # Convert the singleton type to an index
+#     @eval @inline ColorIndex(::Type{$col}) = $idx
+#     # Dispatch from the Type to values of that singleton type (for stability)
+#     @eval @inline ColorIndex(::$col) = ColorIndex($col)
+#     # Invert the ColorIndex function from integers to singletons
+#     @eval @inline ColorIndex(::Type{AshkinTellerColor}, ::Type{Val{$idx}}) = $col()
+#     # Create an equivalent inversion for the AbstractTwoColorAshkinTellerHamiltonian
+#     @eval @inline ColorIndex(::Type{TwoC_ATH}, ::Type{Val{$idx}}) = ColorIndex(AshkinTellerColor, Val{$idx})
+#     # ******************************************************************************
 
-    # ******************************************************************************
-    # Array access functionality
-    # ******************************************************************************
-    # Map a singleton type to a specific index and access the spin from it
-    @eval @inline spin_index(::ATType, site, type::Type{$col}) where ATType = spin_index(ATType, site, ColorIndex(type)) 
-    # Overload getindex for an AbstractAshkinTeller Hamiltonian with a singleton type index
-    @eval getindex(ham::AbstractAshkinTeller, site, ::Type{$col}) = spins(ham)[spin_index(ham, site, $col)]
-    # Overload getindex for an AbstractAshkinTeller Hamiltonian with a singleton index (for type stability)
-    @eval getindex(ham::AbstractAshkinTeller, site, ::$col) = ham[site, $col]
-    # Overload setindex! for an AbstractAshkinTeller Hamiltonian with a singleton type index
-    @eval setindex!(ham::AbstractAshkinTeller, value, site, ::Type{$col}) = spins(ham)[spin_index(ham, site, $col)] = value
-    # Overload setindex! for an AbstractAshkinTeller Hamiltonian with a singleton index (for type stability)
-    @eval setindex!(ham::AbstractAshkinTeller, value, site, ::$col) = ham[site, $col] = value
-    # ******************************************************************************
-end
-# Have a cutoff for the ATColorList for AbstractTwoColorAshkinTellerHamiltonian
-ColorIndex(::Type{AbstractTwoColorAshkinTellerHamiltonian}, ::Type{Val{num_colors(TwoC_ATH) + one(Int)}}) = ATDefaultColor()
-# Overload the ColorIndex inverse to take any idx index to a specific singleton
-ColorIndex(::Type{T}, idx::Int) where {T <: AshkinTellerColor} = ColorIndex(T, Val{idx})
-# Create a default value for the Ashkin Teller colors
-ATDefaultColor() = ColorIndex(AshkinTellerColor, one(Int))
+#     # ******************************************************************************
+#     # Array access functionality
+#     # ******************************************************************************
+#     # Map a singleton type to a specific index and access the spin from it
+#     @eval @inline spin_index(::ATType, site, type::Type{$col}) where ATType = spin_index(ATType, site, ColorIndex(type)) 
+#     # Overload getindex for an AbstractAshkinTeller Hamiltonian with a singleton type index
+#     @eval getindex(ham::AbstractAshkinTeller, site, ::Type{$col}) = spins(ham)[spin_index(ham, site, $col)]
+#     # Overload getindex for an AbstractAshkinTeller Hamiltonian with a singleton index (for type stability)
+#     @eval getindex(ham::AbstractAshkinTeller, site, ::$col) = ham[site, $col]
+#     # Overload setindex! for an AbstractAshkinTeller Hamiltonian with a singleton type index
+#     @eval setindex!(ham::AbstractAshkinTeller, value, site, ::Type{$col}) = spins(ham)[spin_index(ham, site, $col)] = value
+#     # Overload setindex! for an AbstractAshkinTeller Hamiltonian with a singleton index (for type stability)
+#     @eval setindex!(ham::AbstractAshkinTeller, value, site, ::$col) = ham[site, $col] = value
+#     # ******************************************************************************
+# end
+# # Have a cutoff for the ATColorList for AbstractTwoColorAshkinTellerHamiltonian
+# ColorIndex(::Type{AbstractTwoColorAshkinTellerHamiltonian}, ::Type{Val{num_colors(TwoC_ATH) + one(Int)}}) = ATDefaultColor()
+# # Overload the ColorIndex inverse to take any idx index to a specific singleton
+# ColorIndex(::Type{T}, idx::Int) where {T <: AshkinTellerColor} = ColorIndex(T, Val{idx})
+# # Create a default value for the Ashkin Teller colors
+# ATDefaultColor() = ColorIndex(AshkinTellerColor, one(Int))
 
 ############################################################################
 #        Abstract Two-Color Ashkin-Teller Hamiltonian Interface            #
