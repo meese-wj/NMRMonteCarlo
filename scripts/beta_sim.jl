@@ -2,6 +2,7 @@
 using DrWatson
 @quickactivate :NMRMonteCarlo
 using MonteCarloMeasurementUncertainty
+import OnlineLogBinning: BinningAnalysisResult
 
 function create_test_suite(temperature = 2.5, Lx=32, Ly=Lx)
     latt = CubicLattice2D(Lx, Ly)
@@ -17,19 +18,29 @@ function simulate!( model, metroparams )
     @info "Start of simulation."
 
     beta = metroparams.βvalues[begin]
-    @show @allocated thermalize!(model, beta, metroparams, metropolis_sweep!)
-    @show @allocated sweep_and_measure!(model, beta, metroparams, metropolis_sweep!)
+    println("\nBeginning thermalization.")
+    @time thermalize!(model, beta, metroparams, metropolis_sweep!)
+    println("End of thermalization.")
+
+    println("\nBeginning measurement sweeps.")
+    @time sweep_and_measure!(model, beta, metroparams, metropolis_sweep!)
+    println("End of measurement sweeps.")
     
+    println("\nBeginning statistical analysis.")
+    result_statistics = BinningAnalysisResult[]
     for obs ∈ Observables(model)
         @show name(obs)
-        @show binning_analysis(obs)
+        @show res = binning_analysis(obs)
+        push!(result_statistics, res)
     end
+    println("End of statistical analysis.\n")
 
     @info "End of simulation."
+    return result_statistics
 end
 
 metroparams, model = create_test_suite()
-timer = @timed simulate!(model, metroparams)
+timer = @timed results = simulate!(model, metroparams)
 @info "Simulation time: $(round(timer.time; sigdigits=4)) seconds"
 @info "$(round( (metroparams.therm_sweeps + metroparams.measure_sweeps) * num_DoF(Hamiltonian(model)) / timer.time; sigdigits = 4) ) updates/second"
 @info "$( timer.bytes / 1000 ) KiB allocated"

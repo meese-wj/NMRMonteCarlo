@@ -21,7 +21,7 @@ mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAs
 
     function AshkinTellerHamiltonian(latt, params::AshkinTellerParameters{T}) where T
         ndofs = num_colors(AshkinTellerHamiltonian) * num_sites(latt)
-        return new{T}(ATDefaultColor(AshkinTellerHamiltonian), params, rand([one(T) -one(T)], ndofs))
+        return new{T}(ATDefaultColor(AshkinTellerHamiltonian), params, rand([one(T), -one(T)], ndofs) )
     end
 end
 
