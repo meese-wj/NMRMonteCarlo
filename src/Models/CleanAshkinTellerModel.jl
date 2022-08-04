@@ -90,25 +90,25 @@ types for the CleanAshkinTellerModel.
 end
 
 # Individual observable definitions
-function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Energy})
+@inline function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Energy})
     push!( obs, energy(Hamiltonian(model), Lattice(model)) / num_sites(Hamiltonian(model)) )
 end
 
-function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Energy2})
+@inline function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Energy2})
     push!( obs, (energy(Hamiltonian(model), Lattice(model)) / num_sites(Hamiltonian(model)))^2 )
 end
 
-function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Sigma})
+@inline function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Sigma})
     ham = Hamiltonian(model)
     push!( obs, mean( sigma_values(Hamiltonian(model)) ) )
 end
 
-function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Tau})
+@inline function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Tau})
     ham = Hamiltonian(model)
     push!( obs, mean( tau_values(Hamiltonian(model)) ) )
 end
 
-function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Baxter})
+@inline function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Baxter})
     ham = Hamiltonian(model)
     push!( obs, mean( site_idx -> site_Baxter(ham, site_idx), (1:num_sites(ham)) ) )
 end
@@ -116,6 +116,6 @@ end
 # Dispatch on observable types
 for obs_str ∈ CATM_observables
     obs_symb = Symbol(obs_str)
-    @eval update_observable!( model::CleanAshkinTellerModel, ::Type{$obs_symb} ) = update_observable!( Observables(model)[$obs_symb], model, $obs_symb )
+    @eval @inline update_observable!( model::CleanAshkinTellerModel, ::Type{$obs_symb} ) = update_observable!( Observables(model)[$obs_symb], model, $obs_symb )
 end
 

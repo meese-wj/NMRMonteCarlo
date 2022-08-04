@@ -17,13 +17,13 @@ struct CubicLattice2D <: AbstractCubicLattice
     params::CubicLattice2DParams
     neighbors::Matrix{Int32}
 end
-num_sites_CL2D(Lx, Ly) = Lx * Ly
-num_sites_CL2D(lattparams) = (lattparams.Lx * lattparams.Ly)::Int
-num_sites( latt::CubicLattice2D ) = num_sites_CL2D( latt.params.Lx, latt.params.Ly )
+@inline num_sites_CL2D(Lx, Ly) = Lx * Ly
+@inline num_sites_CL2D(lattparams) = num_sites_CL2D(lattparams.Lx, lattparams.Ly)
+@inline num_sites( latt::CubicLattice2D ) = num_sites_CL2D( latt.params )
 Base.getindex( latt::CubicLattice2D, site, neighbor ) = latt.neighbors[ site, neighbor ]
 Base.setindex!( latt::CubicLattice2D, value, site, neighbor ) = latt.neighbors[ site, neighbor ] = value 
-site_index( latt::CubicLattice2D, indices::Tuple{Int, Int} ) = latt.params.Lx * ( indices[2] - 1 ) + indices[1]
-indices_from_site( latt::CubicLattice2D, origin_site::Int ) = ( 1 + (origin_site - 1) % latt.params.Lx, 1 + (origin_site - 1) ÷ latt.params.Lx )
+@inline site_index( latt::CubicLattice2D, indices::Tuple{Int, Int} ) = latt.params.Lx * ( indices[2] - 1 ) + indices[1]
+@inline indices_from_site( latt::CubicLattice2D, origin_site::Int ) = ( 1 + (origin_site - 1) % latt.params.Lx, 1 + (origin_site - 1) ÷ latt.params.Lx )
 function pbc_add(x1, x2, Lsize) 
     output = x1 + x2
     while output > Lsize

@@ -8,31 +8,29 @@ export
 # Ashkin-Teller functionality
        num_colors, spins, AT_sigma, AT_tau, ColorIndex
 
-getTypename(::Type{T}) where T = isempty(T.parameters) ? T : T.name.wrapper
-
 ############################################################################
 #             Abstract Ashkin-Teller Hamiltonian Interface                 #
 ############################################################################
 
 abstract type AbstractAshkinTeller <: AbstractHamiltonian end
 
-num_colors(::Type{T}) where {T <: AbstractAshkinTeller} = throw(MethodError(num_colors, T))
-num_colors(::ATType) where ATType = num_colors(ATType)
+@inline num_colors(::Type{T}) where {T <: AbstractAshkinTeller} = throw(MethodError(num_colors, T))
+@inline num_colors(::ATType) where ATType = num_colors(ATType)
 
 spin_index(::Type{T}, site_idx, color_idx) where {T <: AbstractAshkinTeller} = num_colors(T) * (site_idx - one(Int)) + to_index(color_idx)
 spin_index(::ATType, site_idx, color_idx) where ATType = spin_index(ATType, site_idx, color_idx)
 
-site_index(::Type{T}, spin_idx) where {T <: AbstractAshkinTeller} = one(Int) + (spin_idx - one(Int)) ÷ num_colors(T)
-site_index(::ATType, spin_idx) where ATType = site_index(ATType, spin_idx)
+@inline site_index(::Type{T}, spin_idx) where {T <: AbstractAshkinTeller} = one(Int) + (spin_idx - one(Int)) ÷ num_colors(T)
+@inline site_index(::ATType, spin_idx) where ATType = site_index(ATType, spin_idx)
 
-spins(ham::AbstractAshkinTeller) = ham.spins
-color_update(ham::AbstractAshkinTeller) = ham.color_update
+@inline spins(ham::AbstractAshkinTeller) = ham.spins
+@inline color_update(ham::AbstractAshkinTeller) = ham.color_update
 
-Base.eltype(ham::AbstractAshkinTeller) = eltype(spins(ham))
-Base.length( ham::AbstractAshkinTeller ) = length(spins(ham))
-num_sites( ham::AbstractAshkinTeller ) = length(ham) ÷ num_colors(ham)
+@inline Base.eltype(ham::AbstractAshkinTeller) = eltype(spins(ham))
+@inline Base.length( ham::AbstractAshkinTeller ) = length(spins(ham))
+@inline num_sites( ham::AbstractAshkinTeller ) = length(ham) ÷ num_colors(ham)
 # Base.size( ham::AbstractAshkinTeller ) = ( num_sites(ham), num_sites(ham) )
-num_DoF( ham::AbstractAshkinTeller ) = length(ham)
+@inline num_DoF( ham::AbstractAshkinTeller ) = length(ham)
 
 @enum AshkinTellerColor AT_sigma=1 AT_tau
 @inline to_index(color::AshkinTellerColor) = Int(color)

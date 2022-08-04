@@ -16,31 +16,19 @@ function MetropolisParameters{T}(; params_file = joinpath(@__DIR__, "default_Met
     return import_json_and_display(params_file, MetropolisParameters{T}, display_io)
 end
 
-metropolis_accepted(ΔE, β) = ( ΔE < zero(ΔE) || rand() < exp(-β * ΔE) )::Bool
+@inline metropolis_accepted(ΔE, β) = ( ΔE < zero(ΔE) || rand() < exp(-β * ΔE) )::Bool
 
-function metropolis_update!( model::AbstractModel, beta, site )
+@inline function metropolis_update!( model::AbstractModel, beta, site )
     ΔE = DoF_energy_change( Hamiltonian(model), Lattice(model), site )
-    # @show ΔE, beta, metropolis_accepted(ΔE, beta)
     site_flip!( metropolis_accepted( ΔE, beta ), Hamiltonian(model), site )
     return nothing
 end
 
 # function metropolis_sweep!( model::Model{L, H}, beta ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
-function metropolis_sweep!( model::AbstractModel, beta )
-
-    # # TODO: Generalize this loop to something like this:
+@inline function metropolis_sweep!( model::AbstractModel, beta )
     for (iteration, dof_site_val) ∈ enumerate( IterateByDoFType, Hamiltonian(model) )
         metropolis_update!(model, beta, dof_site_val[1])
     end
-
-    # for dof_color ∈ 1:NUM_AT_COLORS
-    #     # for site ∈ 1:num_sites(model.latt)
-    #     for site ∈ 1:num_sites(Lattice(model))
-    #         metropolis_update!( model, site, beta )
-    #     end
-    #     # switch_color_update!(model.ham)
-    #     switch_color_update!(Hamiltonian(model))
-    # end
     return nothing
 end
 
