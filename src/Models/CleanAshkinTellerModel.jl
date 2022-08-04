@@ -12,7 +12,7 @@ using MonteCarloMeasurementUncertainty
 export CleanAshkinTellerModel, CleanAshkinTellerModelParameters, update_observables!
 
 abstract type CATMObservable end
-const CATM_observables = ["Energy", "Energy2", "Sigma", "Tau", "Baxter"]
+const CATM_observables = @SVector ["Energy", "Energy2", "Sigma", "Tau", "Baxter"]
 for (idx, obs) ∈ enumerate(CATM_observables)
     obs_symb = Symbol(obs)
     @eval struct $obs_symb <: CATMObservable end
