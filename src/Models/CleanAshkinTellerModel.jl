@@ -2,7 +2,7 @@
 import ..Lattices: CubicLattice2D
 import ..Hamiltonians: AshkinTellerHamiltonian, AshkinTellerParameters, 
                        energy, num_sites, spins, AT_sigma, AT_tau, num_colors,
-                       site_Baxter, ColorIndex
+                       site_Baxter, sigma_values, tau_values
 import ..MonteCarloMethods: AbstractModel, Lattice, Hamiltonian, Observables, update_observables!
 import StaticArrays: @SVector
 import Statistics: mean
@@ -77,12 +77,12 @@ end
 
 function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Sigma})
     ham = Hamiltonian(model)
-    push!( obs, mean( @view spins(ham)[ColorIndex(AT_sigma):num_colors(ham):end] ) )
+    push!( obs, mean( sigma_values(Hamiltonian(model)) ) )
 end
 
 function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Tau})
     ham = Hamiltonian(model)
-    push!( obs, mean( @view spins(ham)[ColorIndex(AT_tau):num_colors(ham):end] ) )
+    push!( obs, mean( tau_values(Hamiltonian(model)) ) )
 end
 
 function update_observable!(obs::MonteCarloMeasurement, model::CleanAshkinTellerModel, ::Type{Baxter})

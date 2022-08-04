@@ -21,12 +21,12 @@ mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAs
 
     function AshkinTellerHamiltonian(latt, params::AshkinTellerParameters{T}) where T
         ndofs = num_colors(AshkinTellerHamiltonian) * num_sites(latt)
-        return new{T}(ATDefaultColor(), params, rand([one(T) -one(T)], ndofs))
+        return new{T}(ATDefaultColor(AshkinTellerHamiltonian), params, rand([one(T) -one(T)], ndofs))
     end
 end
 
-sigma_values(ham::AbstractTwoColorAshkinTellerHamiltonian) = @view spins(ham)[ColorIndex(AT_sigma):num_colors(ham):end]
-tau_values(ham::AbstractTwoColorAshkinTellerHamiltonian)   = @view spins(ham)[ColorIndex(AT_tau):num_colors(ham):end]
+sigma_values(ham::AbstractTwoColorAshkinTellerHamiltonian) = @view spins(ham)[to_index(AT_sigma):num_colors(ham):end]
+tau_values(ham::AbstractTwoColorAshkinTellerHamiltonian)   = @view spins(ham)[to_index(AT_tau):num_colors(ham):end]
   
 function switch_color_update!(ham::AbstractTwoColorAshkinTellerHamiltonian)
     ifelse(ham.color_update == AT_sigma, AT_tau, AT_sigma)
@@ -63,10 +63,10 @@ function energy( ham::AshkinTellerHamiltonian{T}, latt ) where {T}
     return 0.5 * en
 end
 
-function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color_idx = ColorIndex(color_update(ham)))
+function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color = color_update(ham))
     old_σ, old_τ, old_bax = ham[site, AT_sigma], ham[site, AT_tau], site_Baxter(ham, site)
-    σ_value = ifelse( color_idx == ColorIndex(AT_sigma), -old_σ, old_σ )
-    τ_value = ifelse( color_idx == ColorIndex(AT_tau), -old_τ, old_τ )
+    σ_value = ifelse( color == AT_sigma, -old_σ, old_σ )
+    τ_value = ifelse( color == AT_tau, -old_τ, old_τ )
     # σ_value = -ham[site, AT_sigma]
     # τ_value = ham[site, AT_tau]
     # if color === AT_tau
@@ -79,7 +79,7 @@ function DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color_idx =
 end
 
 function site_flip!( condition::Bool, ham::AshkinTellerHamiltonian, site )
-    @show site, color_update(ham)
+    # @show site, color_update(ham)
     ham[site, color_update(ham)] = ifelse( condition, -ham[site, color_update(ham)], ham[site, color_update(ham)] )
     return nothing
 end

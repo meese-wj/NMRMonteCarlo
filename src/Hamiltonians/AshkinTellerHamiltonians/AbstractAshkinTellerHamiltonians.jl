@@ -19,7 +19,7 @@ abstract type AbstractAshkinTeller <: AbstractHamiltonian end
 num_colors(::Type{T}) where {T <: AbstractAshkinTeller} = throw(MethodError(num_colors, T))
 num_colors(::ATType) where ATType = num_colors(ATType)
 
-spin_index(::Type{T}, site_idx, color_idx) where {T <: AbstractAshkinTeller} = num_colors(T) * (site_idx - one(Int)) + color_idx
+spin_index(::Type{T}, site_idx, color_idx) where {T <: AbstractAshkinTeller} = num_colors(T) * (site_idx - one(Int)) + to_index(color_idx)
 spin_index(::ATType, site_idx, color_idx) where ATType = spin_index(ATType, site_idx, color_idx)
 
 site_index(::Type{T}, spin_idx) where {T <: AbstractAshkinTeller} = one(Int) + (spin_idx - one(Int)) ÷ num_colors(T)
@@ -37,6 +37,8 @@ num_DoF( ham::AbstractAshkinTeller ) = length(ham)
 @enum AshkinTellerColor AT_sigma=1 AT_tau
 @inline to_index(color::AshkinTellerColor) = Int(color)
 @inline to_AshkinTellerColor(idx) = instances(AshkinTellerColor)[idx]
+@inline getindex(ham::T, site, color) where {T <: AbstractAshkinTeller} = spins(ham)[spin_index(T, site, color)]
+@inline setindex!(ham::T, value, site, color) where {T <: AbstractAshkinTeller} = spins(ham)[spin_index(T, site, color)] = value
 # const ATColorList = @SVector [ :AT_sigma, :AT_tau ]
 # for (idx, col) ∈ enumerate(ATColorList)
 #     # ******************************************************************************
@@ -84,6 +86,7 @@ abstract type AbstractTwoColorAshkinTellerHamiltonian <: AbstractAshkinTeller en
 const TwoC_ATH = AbstractTwoColorAshkinTellerHamiltonian
 @inline num_colors(::Type{<: TwoC_ATH}) = 2
 @inline site_Baxter( ham::AbstractTwoColorAshkinTellerHamiltonian, site ) = ham[site, AT_sigma] * ham[site, AT_tau]
+@inline ATDefaultColor(::Type{<: TwoC_ATH}) = AT_sigma
 
 """
     iterate(::HamiltonianIterator{<: AbstractTwoColorAshkinTellerHamiltonian, IterateByDefault}, [state])
@@ -115,14 +118,14 @@ end
 
 Traverse a `<:`[`AbstractTwoColorAshkinTellerHamiltonian`](@ref) by the spin types separately.
 """
-function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state = (one(Int), one(Int), one(Int)))
+function iterate(iter::HamiltonianIterator{T, IterateByDoFType}, state = (one(Int), one(Int), to_index(ATDefaultColor(T)))) where {T <: TwoC_ATH}
     ham = Hamiltonian(iter)
     site_idx = state[1]
     iterations = state[2]
-    @show state
+    # @show state
     # color = ifelse( state[end] <= num_colors(ham), ColorIndex(TwoC_ATH, Val{state[end]}), ColorIndex(TwoC_ATH, Val{state[end]}) )
-    color = state[end]
-    ham.color_update = ColorIndex(TwoC_ATH, Val{color})
+    # color = state[end]
+    ham.color_update = state[end] <= num_colors(ham) ? to_AshkinTellerColor(state[end]) : ATDefaultColor(T)
     next_iter = iterations + one(Int)
     next_site = one(Int) + iterations % num_sites(ham)
     next_color_int = one(Int) + iterations ÷ num_sites(ham)
@@ -130,5 +133,7 @@ function iterate(iter::HamiltonianIterator{<: TwoC_ATH, IterateByDoFType}, state
     #     next_site = one(Int)
     #     @show next_color_int = ifelse( color === AT_sigma, ColorIndex(AT_tau), ColorIndex(AT_sigma) )
     # end
-    return iterations <= length(ham) ? ( (site_idx, ham[site_idx, color_update(ham)]), (next_site, next_iter, next_color_int) ) : nothing
+    return iterations <= length(ham) ? 
+               ( (site_idx, ham[site_idx, color_update(ham)]), (next_site, next_iter, next_color_int) ) : 
+               nothing
 end
