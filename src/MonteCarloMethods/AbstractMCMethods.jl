@@ -49,7 +49,7 @@ function update_observables!(::AbstractModel) end
 Returns the lattice or geometry of an [`AbstractModel`](@ref) `subtype`.
 """
 # Lattice(model::AbstractModel) = throw(MethodError(lattice, model))
-Lattice(model::AbstractModel) = model.lattice
+@inline Lattice(model::AbstractModel) = model.lattice
 
 """
     Hamiltonian(::AbstractModel) -> MethodError
@@ -57,11 +57,11 @@ Lattice(model::AbstractModel) = model.lattice
 Returns the system in an [`AbstractModel`](@ref) `subtype`.
 """
 # Hamiltonian(model::AbstractModel) = throw(MethodError(Hamiltonian, model))
-Hamiltonian(model::AbstractModel) = model.hamiltonian
+@inline Hamiltonian(model::AbstractModel) = model.hamiltonian
 
 """
     Observables(::AbstractModel) -> MethodError
 
 Returns the set of defined observables for an [`AbstractModel`](@ref) `subtype`.
 """
-Observables(model::AbstractModel) = model.observables
+@inline Observables(model::AbstractModel) = model.observables
