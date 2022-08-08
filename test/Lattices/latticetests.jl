@@ -3,11 +3,14 @@
 @time @testset "CubicLattice2D" begin
     latt = CubicLattice2D( 4, 4 )
 
+    println("  Testing Structure")
     @time @testset "Structure" begin
         @test Lattices.num_sites(latt) == 16
         @test size(latt.neighbors) == (16, 4)
     end
+    println()
 
+    println("  Testing Neighborhood")
     @time @testset "Neighborhood" begin
         @testset "y = 1" begin
             @test nearest_neighbors(latt, 1) == [13, 4, 2, 5]
@@ -37,5 +40,8 @@
             @test nearest_neighbors(latt, 16) == [12, 15, 13, 4]
         end
     end
+    println()
+
+    println("  Total testset timing:")
 end
 @info "End of CubicLattice2D tests."

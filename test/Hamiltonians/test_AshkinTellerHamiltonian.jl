@@ -5,15 +5,18 @@ function create_latt_ham(Lx=16, Ly=Lx, Jex=1.0, Kex=0.0)
 end
 
 @info "Testing AshkinTellerHamiltonian..."
-@testset "AshkinTellerHamiltonian" begin
+@time @testset "AshkinTellerHamiltonian" begin
     
+    println("  Testing Structure")
     @time @testset "Structure" begin
         latt, ham = create_latt_ham()
         @test eltype(ham) === Float64
         @test num_sites(ham) == num_sites(latt)
         @test num_DoF(ham) == num_colors(ham) * num_sites(ham)
     end
+    println()
 
+    println("  Testing Ground State Properties")
     @time @testset "Ground State Properties" begin
         size_list = [ (128, 64), (64, 128), (128, 128) ]
         K_list = LinRange(0, 1, 5) 
@@ -35,10 +38,12 @@ end
             end
         end
     end
+    println()
 
+    println("  Testing Iterators")
     @time @testset "Iterators" begin
         
-        @inline _alloctest_Iterator(itertype, ham) = for (idx, vals) ∈ enumerate( itertype, ham ) end
+        @inline _alloctest_Iterator(itertype, ham) = for tup ∈ enumerate( itertype, ham ) end
 
         @time @testset "IterateByDefault" begin
             latt, ham = create_latt_ham()
@@ -113,6 +118,8 @@ end
         end
 
     end
+    println()
 
+    println("  Total testset timing:")
 end
 @info "End of AshkinTellerHamiltonian tests."
