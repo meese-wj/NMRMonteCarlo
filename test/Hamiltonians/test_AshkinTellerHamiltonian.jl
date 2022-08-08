@@ -38,7 +38,7 @@ end
 
     @time @testset "Iterators" begin
         
-        _alloctest_Iterator(itertype, ham) = for (idx, vals) ∈ enumerate( itertype, ham ) end
+        @inline _alloctest_Iterator(itertype, ham) = for (idx, vals) ∈ enumerate( itertype, ham ) end
 
         @time @testset "IterateByDefault" begin
             latt, ham = create_latt_ham()
