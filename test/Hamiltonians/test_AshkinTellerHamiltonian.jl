@@ -36,18 +36,80 @@ end
         end
     end
 
-    @testset "Iterators" begin
+    @time @testset "Iterators" begin
         
-        @testset "IterateByDefault" begin
-            
+        _alloctest_Iterator(itertype, ham) = for (idx, vals) ∈ enumerate( itertype, ham ) end
+
+        @time @testset "IterateByDefault" begin
+            latt, ham = create_latt_ham()
+            # First, check that the iterator is non-allocating
+            bm = @benchmark $_alloctest_Iterator( Hamiltonians.IterateByDefault, $ham)
+            @test bm.allocs == zero(bm.allocs)
+            @test bm.memory == zero(bm.memory)
+            # Second, check that its indices and values are correct.
+            indices = Int[]
+            sites = Int[]
+            values = eltype(ham)[]
+            for (idx, site_val) ∈ enumerate( Hamiltonians.IterateByDefault, ham ) 
+                push!(indices, idx)
+                push!(sites, site_val[1])
+                push!(values, site_val[2])
+            end
+            @test all( indices .== collect(1:num_DoF(ham)) )
+            @test all( sites .== [ Hamiltonians.site_index(ham, dof_idx) for dof_idx ∈ 1:num_DoF(ham) ] )
+            @test all( values .== spins(ham) )
         end
         
-        @testset "IterateBySite" begin
-            
+        @time @testset "IterateBySite" begin
+            latt, ham = create_latt_ham()
+            # First, check that the iterator is non-allocating
+            bm = @benchmark $_alloctest_Iterator( Hamiltonians.IterateBySite, $ham)
+            @test bm.allocs == zero(bm.allocs)
+            @test bm.memory == zero(bm.memory)
+            # Second, check that its iterations and values are correct.
+            iterations = Int[]
+            sites = Int[]
+            σvals = eltype(ham)[]
+            τvals = eltype(ham)[]
+            baxvals = eltype(ham)[]
+            for (idx, site_vals) ∈ enumerate( Hamiltonians.IterateBySite, ham ) 
+                push!(iterations, idx)
+                push!(sites, site_vals[1])
+                push!(σvals, site_vals[2][1])
+                push!(τvals, site_vals[2][2])
+                push!(baxvals, site_vals[2][3])
+            end
+            @test all( iterations .== collect(1:num_sites(ham)) )
+            @test all( sites .== collect(1:num_sites(ham)) )
+            @test all( σvals .== Hamiltonians.sigma_values(ham) )
+            @test all( τvals .== Hamiltonians.tau_values(ham) )
+            @test all( baxvals .== [ Hamiltonians.site_Baxter(ham, site) for site ∈ sites ] )
         end
         
         @testset "IterateByDoFType" begin
-            
+            latt, ham = create_latt_ham()
+            # First, check that the iterator is non-allocating
+            bm = @benchmark $_alloctest_Iterator( Hamiltonians.IterateByDoFType, $ham)
+            @test bm.allocs == zero(bm.allocs)
+            @test bm.memory == zero(bm.memory)
+            # Second, check that its iterations and values are correct.
+            iterations = Int[]
+            sites = Int[]
+            σvals = eltype(ham)[]
+            τvals = eltype(ham)[]
+            for (idx, site_vals) ∈ enumerate( Hamiltonians.IterateByDoFType, ham ) 
+                push!(iterations, idx)
+                push!(sites, site_vals[1])
+                if idx <= num_sites(ham)
+                    push!(σvals, site_vals[2])
+                else
+                    push!(τvals, site_vals[2])
+                end
+            end
+            @test all( iterations .== collect(1:num_DoF(ham)) )
+            @test all( sites .== collect( Iterators.flatten((1:num_sites(ham), 1:num_sites(ham))) ) )
+            @test all( σvals .== Hamiltonians.sigma_values(ham) )
+            @test all( τvals .== Hamiltonians.tau_values(ham) )
         end
 
     end

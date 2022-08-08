@@ -1,7 +1,7 @@
 using DrWatson
 @quickactivate :NMRMonteCarlo
 
-using Test
+using Test, BenchmarkTools
 
 test_timer = @timed @testset "NMRMonteCarlo" begin
     include(joinpath("Lattices", "latticetests.jl"))
