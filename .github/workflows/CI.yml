@@ -2,11 +2,12 @@ name: CI
 on:
   push:
     branches:
-      - main
+#       - main
+      - DrWatsonify
     tags: '*'
   pull_request:
   schedule:
-    - cron: '0 0/24 * * *'
+    - cron: '0 0/6 * * *'
 concurrency:
   # Skip intermediate builds: always.
   # Cancel intermediate builds: only if it is a pull request build.
