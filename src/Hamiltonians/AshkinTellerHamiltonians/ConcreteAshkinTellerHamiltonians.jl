@@ -25,22 +25,6 @@ mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAs
     end
 end
 
-@inline sigma_values(ham::AbstractTwoColorAshkinTellerHamiltonian) = @view spins(ham)[to_index(AT_sigma):num_colors(ham):end]
-@inline tau_values(ham::AbstractTwoColorAshkinTellerHamiltonian)   = @view spins(ham)[to_index(AT_tau):num_colors(ham):end]
-
-@inline function neighbor_fields(ham::TwoC_ATH, hamparams::AshkinTellerParameters{T}, latt, site) where {T}
-    near_neighbors = nearest_neighbors(latt, site)
-    σ_field = zero(T)
-    τ_field = σ_field
-    bax_field = σ_field
-    @inbounds for nn ∈ near_neighbors
-        σ_field += ham[nn, AT_sigma]
-        τ_field += ham[nn, AT_tau]
-        bax_field += site_Baxter(ham, nn)
-    end
-    return @SVector [ hamparams.Jex * σ_field, hamparams.Jex * τ_field, hamparams.Kex * bax_field ]
-end
-
 @inline function DoF_energy( ham::AshkinTellerHamiltonian{T}, latt, site, site_values::SVector{3} ) where {T}
     effective_fields::SVector{3, T} = neighbor_fields(ham, ham.params, latt, site)    
     en = zero(T)
