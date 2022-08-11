@@ -25,19 +25,12 @@ mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAs
     end
 end
 
-@inline function DoF_energy( ham::AshkinTellerHamiltonian{T}, latt, site, site_values::SVector{3} ) where {T}
-    effective_fields::SVector{3, T} = neighbor_fields(ham, ham.params, latt, site)    
-    en = zero(T)
-    @inbounds for (idx, eff_field) ∈ enumerate(effective_fields)
-        en += site_values[idx] * eff_field
-    end
-    return -en
-end
+@inline site_energy(ham::AshkinTellerHamiltonian{T}, latt, site, site_values::SVector{3}) where {T} = _base_site_energy(ham, latt, site, site_values)
 
 @inline function energy( ham::AshkinTellerHamiltonian{T}, latt ) where {T}
     en = zero(T)
     @inbounds for (iter, dof_location_val) ∈ enumerate(IterateBySite, ham)
-        en += DoF_energy( ham, latt, dof_location_val...)
+        en += site_energy( ham, latt, dof_location_val...)
     end
     return 0.5 * en
 end
@@ -58,8 +51,8 @@ end
     #     τ_value *= -one(T)
     # end
     bax_val = σ_value * τ_value
-    # return DoF_energy( ham, latt, site, @SVector [ σ_value - ham[site, AT_sigma], τ_value - ham[site, AT_tau], bax_val - site_Baxter(ham, site) ] )
-    return DoF_energy( ham, latt, site, @SVector [ σ_value - old_σ, τ_value - old_τ, bax_val - old_bax ] )
+    # return site_energy( ham, latt, site, @SVector [ σ_value - ham[site, AT_sigma], τ_value - ham[site, AT_tau], bax_val - site_Baxter(ham, site) ] )
+    return site_energy( ham, latt, site, @SVector [ σ_value - old_σ, τ_value - old_τ, bax_val - old_bax ] )
 end
 
 @inline function site_flip!( condition::Bool, ham::AshkinTellerHamiltonian, site )
