@@ -35,25 +35,8 @@ end
     return 0.5 * en
 end
 
-@inline function DoF_energy_change(ham::AshkinTellerHamiltonian{T}, latt, site, color = color_update(ham)) where T
-    old_σ, old_τ, old_bax = ham[site, AT_sigma], ham[site, AT_tau], site_Baxter(ham, site)
-    # σ_value = ifelse( color == AT_sigma, -ham[site, AT_sigma], ham[site, AT_sigma] )
-    # τ_value = ifelse( color == AT_tau, -ham[site, AT_tau], ham[site, AT_tau] )
-    cond = color === AT_sigma
-    σ_value = ham[site, AT_sigma] * ( cond ? -one(T) : one(T) )  # color === AT_sigma, cond == true
-    τ_value = ham[site, AT_tau]   * ( !cond ? -one(T) : one(T) ) # color === AT_tau,   cond == false
-    # σ_value = -ham[site, AT_sigma]
-    # τ_value = ham[site, AT_tau]
-    # if color === AT_tau
-    #     # σ_value *= -one(eltype(ham))
-    #     # τ_value *= -one(eltype(ham))
-    #     σ_value *= -one(T)
-    #     τ_value *= -one(T)
-    # end
-    bax_val = σ_value * τ_value
-    # return site_energy( ham, latt, site, @SVector [ σ_value - ham[site, AT_sigma], τ_value - ham[site, AT_tau], bax_val - site_Baxter(ham, site) ] )
-    return site_energy( ham, latt, site, @SVector [ σ_value - old_σ, τ_value - old_τ, bax_val - old_bax ] )
-end
+@inline DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color = color_update(ham)) = _base_DoF_energy_change(ham, latt, site, color)
+
 
 @inline function site_flip!( condition::Bool, ham::AshkinTellerHamiltonian, site )
     ham[site, color_update(ham)] = condition ? -ham[site, color_update(ham)] : ham[site, color_update(ham)]

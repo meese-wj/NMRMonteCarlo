@@ -146,3 +146,20 @@ H = -\sum_{\langle ij \rangle} \left[ J\left( \sigma_i\sigma_j + \tau_i\tau_j \r
     end
     return -en
 end
+
+"""
+    _base_DoF_energy_change(::AbstractTwoColorAshkinTellerHamiltonian, latt, site, [color = color_update(ham)])
+
+Calculate the change in energy for a single `color` at a single site for a base two-color Ashkin-Teller Hamiltonian.
+This function works by calling [`_base_site_energy`](@ref) while setting temporarily one of the primary field `site_values`
+opposite to itself. Then, the _difference_ between the temporary copy of the DoF values and the real ones are used as the
+new `site_values`.
+"""
+@inline function _base_DoF_energy_change(ham::TwoC_ATH, latt, site, color = color_update(ham))
+    old_σ, old_τ, old_bax = ham[site, AT_sigma], ham[site, AT_tau], site_Baxter(ham, site)
+    cond = color === AT_sigma
+    σ_value = ham[site, AT_sigma] * ( cond ? -one(eltype(ham)) : one(eltype(ham)) )  # color === AT_sigma, cond == true
+    τ_value = ham[site, AT_tau]   * ( !cond ? -one(eltype(ham)) : one(eltype(ham)) ) # color === AT_tau,   cond == false
+    bax_val = σ_value * τ_value
+    return site_energy( ham, latt, site, @SVector [ σ_value - old_σ, τ_value - old_τ, bax_val - old_bax ] )
+end
