@@ -147,6 +147,24 @@ H = -\sum_{\langle ij \rangle} \left[ J\left( \sigma_i\sigma_j + \tau_i\tau_j \r
     return -en
 end
 
+@doc raw"""
+    _base_energy(::TwoC_ATH, latt)
+
+Calculate the base energy for a pure Ashkin-Teller Hamiltonian given
+on a given `latt`ice by the following Hamiltonian:
+
+```math
+H = -\sum_{\langle ij \rangle} \left[ J\left( \sigma_i\sigma_j + \tau_i\tau_j \right) + K\sigma_i\tau_i\sigma_j\tau_j \right].
+```
+"""
+@inline function _base_energy( ham::TwoC_ATH, latt )
+    en = zero(eltype(ham))
+    @inbounds for (iter, dof_location_val) ∈ enumerate(IterateBySite, ham)
+        en += site_energy( ham, latt, dof_location_val...)
+    end
+    return 0.5 * en
+end
+
 """
     _base_DoF_energy_change(::AbstractTwoColorAshkinTellerHamiltonian, latt, site, [color = color_update(ham)])
 

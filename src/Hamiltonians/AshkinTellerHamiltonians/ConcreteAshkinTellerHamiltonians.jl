@@ -25,18 +25,11 @@ mutable struct AshkinTellerHamiltonian{T <: AbstractFloat} <: AbstractTwoColorAs
     end
 end
 
-@inline site_energy(ham::AshkinTellerHamiltonian{T}, latt, site, site_values::SVector{3}) where {T} = _base_site_energy(ham, latt, site, site_values)
+@inline site_energy(ham::AshkinTellerHamiltonian, latt, site, site_values) = _base_site_energy(ham, latt, site, site_values)
 
-@inline function energy( ham::AshkinTellerHamiltonian{T}, latt ) where {T}
-    en = zero(T)
-    @inbounds for (iter, dof_location_val) ∈ enumerate(IterateBySite, ham)
-        en += site_energy( ham, latt, dof_location_val...)
-    end
-    return 0.5 * en
-end
+@inline energy(ham::AshkinTellerHamiltonian, latt) = _base_energy(ham, latt)
 
 @inline DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color = color_update(ham)) = _base_DoF_energy_change(ham, latt, site, color)
-
 
 @inline function site_flip!( condition::Bool, ham::AshkinTellerHamiltonian, site )
     ham[site, color_update(ham)] = condition ? -ham[site, color_update(ham)] : ham[site, color_update(ham)]
