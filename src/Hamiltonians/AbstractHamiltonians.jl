@@ -26,6 +26,12 @@ These `methods` are implemented by default for any `<: AbstractModel`. One is fr
 to overload any of them for any peculiar `subtype`s.
 """
 abstract type AbstractHamiltonian end
+"""
+    abstract type AbstractHamiltonianParameters end
+
+Define a `supertype` for all parameter types used in `AbstractHamiltonian`s.
+"""
+abstract type AbstractHamiltonianParameters end
 
 # Required Interface Methods
 """

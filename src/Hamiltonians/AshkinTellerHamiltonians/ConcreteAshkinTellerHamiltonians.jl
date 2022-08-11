@@ -5,7 +5,7 @@ import StaticArrays: @SVector, SVector
 import ..Lattices: nearest_neighbors
 export AshkinTellerHamiltonian, AshkinTellerParameters, sigma_values, tau_values
 
-@jsonable struct AshkinTellerParameters{T <: AbstractFloat}
+@jsonable struct AshkinTellerParameters{T <: AbstractFloat} <: AbstractTwoColorAshkinTellerParameters
     Jex::T  # Ising exchanges in the AT model. Jex > 0 is ferromagnetic
     Kex::T  # Baxter exchange measured in units of Jex
 end
