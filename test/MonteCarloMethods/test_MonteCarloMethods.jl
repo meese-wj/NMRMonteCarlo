@@ -38,6 +38,7 @@ end
         # @test timer.bytes == zero(timer.bytes)
         @test timer.gctime == zero(timer.gctime)
     end
+    println()
     
     println("  Total testset timing:")
 end
