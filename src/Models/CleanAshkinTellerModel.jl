@@ -1,6 +1,6 @@
 
 import ..Lattices: CubicLattice2D
-import ..Hamiltonians: AshkinTellerHamiltonian, AshkinTellerParameters, 
+import ..Hamiltonians: BasicAshkinTellerHamiltonian, AshkinTellerParameters, 
                        energy, num_sites, spins, AT_sigma, AT_tau, num_colors,
                        site_Baxter, sigma_values, tau_values
 import ..MonteCarloMethods: AbstractModel, Lattice, Hamiltonian, Observables, update_observables!
@@ -41,14 +41,14 @@ end
 
 struct CleanAshkinTellerModel{T <: AbstractFloat} <: AbstractModel
     lattice::CubicLattice2D
-    hamiltonian::AshkinTellerHamiltonian{T}
+    hamiltonian::BasicAshkinTellerHamiltonian{T}
     observables::Vector{TimeSeries{T}}
 
     CleanAshkinTellerModel(args...) = CleanAshkinTellerModel{Float64}(args...)
     function CleanAshkinTellerModel{T}( Lx, Ly, Jex = 1, Kex = 0, num_meas = 0 ) where T
         latt = CubicLattice2D(Int(Lx), Int(Ly))
         atparams = AshkinTellerParameters( T(Jex), T(Kex) )
-        ham = AshkinTellerHamiltonian(latt, atparams)
+        ham = BasicAshkinTellerHamiltonian(latt, atparams)
         obs_list = TimeSeries{T}[]
         for obs ∈ CATM_observables
             push!(obs_list, TimeSeries{T}( obs, num_meas ))

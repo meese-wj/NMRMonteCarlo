@@ -1,11 +1,11 @@
 function create_latt_ham(Lx=16, Ly=Lx, Jex=1.0, Kex=0.0)
     latt = CubicLattice2D(Lx, Ly)
-    ham = AshkinTellerHamiltonian( latt, AshkinTellerParameters(Jex, Kex) )
+    ham = BasicAshkinTellerHamiltonian( latt, AshkinTellerParameters(Jex, Kex) )
     return latt, ham
 end
 
-@info "Testing AshkinTellerHamiltonian..."
-@time @testset "AshkinTellerHamiltonian" begin
+@info "Testing BasicAshkinTellerHamiltonian..."
+@time @testset "BasicAshkinTellerHamiltonian" begin
     
     println("  Testing Structure")
     @time @testset "Structure" begin
@@ -122,4 +122,4 @@ end
 
     println("  Total testset timing:")
 end
-@info "End of AshkinTellerHamiltonian tests."
+@info "End of BasicAshkinTellerHamiltonian tests."

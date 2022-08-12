@@ -5,7 +5,7 @@ using Profile
 function create_test_suite()
     latt = CubicLattice2D(64, 64)
     atparams = AshkinTellerParameters(1., 0.)
-    ham = AshkinTellerHamiltonian(latt, atparams)
+    ham = BasicAshkinTellerHamiltonian(latt, atparams)
     metroparams = MetropolisParameters{Float64}([0.3], 1024, 1024, 1024)
 
     model = CleanAshkinTellerModel( latt.params.Lx, latt.params.Ly, atparams.Jex, atparams.Kex, metroparams.total_measurements )

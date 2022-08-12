@@ -7,7 +7,7 @@ import OnlineLogBinning: BinningAnalysisResult
 function create_test_suite(temperature = 2.5, Lx=32, Ly=Lx)
     latt = CubicLattice2D(Lx, Ly)
     atparams = AshkinTellerParameters(1., 0.)
-    ham = AshkinTellerHamiltonian(latt, atparams)
+    ham = BasicAshkinTellerHamiltonian(latt, atparams)
     metroparams = MetropolisParameters{Float64}([1/temperature], 2^16, 2^16, 2^16)
 
     model = CleanAshkinTellerModel( latt.params.Lx, latt.params.Ly, atparams.Jex, atparams.Kex, metroparams.total_measurements )
