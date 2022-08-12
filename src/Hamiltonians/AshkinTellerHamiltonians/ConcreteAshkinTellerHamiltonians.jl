@@ -31,10 +31,7 @@ end
 
 @inline DoF_energy_change(ham::AshkinTellerHamiltonian, latt, site, color = color_update(ham)) = _base_DoF_energy_change(ham, latt, site, color)
 
-@inline function site_flip!( condition::Bool, ham::AshkinTellerHamiltonian, site )
-    ham[site, color_update(ham)] = condition ? -ham[site, color_update(ham)] : ham[site, color_update(ham)]
-    return nothing
-end
+@inline accept_move!(condition::Bool, ham::AshkinTellerHamiltonian, site) = _base_accept_move!(condition, ham, site)
 
 function export_state!(state_container::AbstractArray, ham::AshkinTellerHamiltonian, export_index)
     state_container[:, export_index] .= ham.colors

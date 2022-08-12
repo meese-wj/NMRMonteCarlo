@@ -1,7 +1,7 @@
 using Parameters2JSON
 
 # Automatically submodulizes this code
-import ..Hamiltonians: IterateByDoFType, Hamiltonian, DoF_energy_change, site_flip!
+import ..Hamiltonians: IterateByDoFType, Hamiltonian, DoF_energy_change, accept_move!
 export MetropolisParameters, metropolis_sweep!, thermalize!, sweep_and_measure!
 
 @jsonable struct MetropolisParameters{T <: AbstractFloat} <: AbstractMonteCarloParameters
@@ -20,7 +20,7 @@ end
 
 @inline function metropolis_update!( model::AbstractModel, beta, site )
     ΔE = DoF_energy_change( Hamiltonian(model), Lattice(model), site )
-    site_flip!( metropolis_accepted( ΔE, beta ), Hamiltonian(model), site )
+    accept_move!( metropolis_accepted( ΔE, beta ), Hamiltonian(model), site )
     return nothing
 end
 

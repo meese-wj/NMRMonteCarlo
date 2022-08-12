@@ -181,3 +181,14 @@ new `site_values`.
     bax_val = σ_value * τ_value
     return site_energy( ham, latt, site, @SVector [ σ_value - old_σ, τ_value - old_τ, bax_val - old_bax ] )
 end
+
+"""
+    _base_accept_move!(::Bool, ::AbstractTwoColorAshkinTellerHamiltonian, site)
+
+Defines a binary operation of how to accept a single-DoF spin flip move if the `Bool`ean is 
+evaluated to `true`. This `Bool`ean may be, for example, the Metropolis acceptance condition.
+"""
+@inline function _base_accept_move!( condition::Bool, ham::TwoC_ATH, site )
+    ham[site, color_update(ham)] = condition ? -ham[site, color_update(ham)] : ham[site, color_update(ham)]
+    return nothing
+end
