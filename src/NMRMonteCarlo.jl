@@ -13,11 +13,13 @@ import Reexport: @reexport
 include( joinpath( "Lattices", "Lattices.jl" ) )
 include( joinpath( "Hamiltonians", "Hamiltonians.jl" ) )
 include( joinpath( "MonteCarloMethods", "MonteCarloMethods.jl" ) )
+include( joinpath( "SimulatingNMR", "SimulatingNMR.jl" ) )
 include( joinpath( "Models", "Models.jl") )
 
 @reexport using .Lattices
 @reexport using .Hamiltonians
 @reexport using .MonteCarloMethods
+@reexport using .SimulatingNMR
 @reexport using .Models
 
 end # NMRMonteCarlo
