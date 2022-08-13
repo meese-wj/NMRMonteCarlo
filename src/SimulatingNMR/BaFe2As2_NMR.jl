@@ -250,11 +250,34 @@ end
     single_hyperfine_fluct( field )
 
 Calculate the instantaneous `field` fluctuations that contribute to the NMR
-spin-lattice relaxation rate. For example, if the field is ``\vec{h}`` **in 
+spin-lattice relaxation rate. For example, if the `field` is ``\vec{h}`` **in 
 spin-space**, then the instantaneous proxy spin-lattice relaxation rate is
 
 ```math
 \Omega = h_x^2 + h_y^2.
 ```
+
+!!! note 
+    By definition, in **spin-space**, the ̂z direction points along the
+    external field which doesn't couple to the As nuclear moment's 
+    raising and lowering operators.
 """
 single_hyperfine_fluct( field ) = field[1] * field[1] + field[2] * field[2]
+
+"""
+    inst_hyperfine_fluctuations(ty, state, ::CubicLattice2D, site)
+
+Return the pair of proxy spin-lattice relaxation rates in a single 
+unit cell. 
+
+# Arguments
+
+1. `ty::Type{<: AbstractNMRConstruct}`: defines which magnetic spin construct to implement
+1. `state::AbstractArray`: the field of spins
+1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
+1. `site`: which unit cell to operate on
+"""
+function inst_hyperfine_fluctuations(ty, state, latt::CubicLattice2D, site )
+    fields = hyperfine_fields(ty, state, latt, site)
+    return @SVector [ single_hyperfine_fluct(fields[1]), single_hyperfine_fluct(fields[2]) ]
+end
