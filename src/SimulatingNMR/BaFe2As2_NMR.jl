@@ -1,9 +1,8 @@
 
 using StaticArrays
 # Automatically submodulizes this code
-import ..Lattices: CubicLattice2D
+import ..Lattices: CubicLattice2D, site_index
 using ..Hamiltonians
-
 
 const hyp_Aaa = 0.66
 const hyp_Acc = 0.47
@@ -130,73 +129,73 @@ its expected behavior in the crystallographic basis. Later, one uses the
 """
 mag_vector(ty::Type{T}, args...) where {T <: AbstractNMRConstruct} = throw(MethodError(mag_vector, ty, args...))
 """
-    mag_vector(::Type{Out_of_Plane}, state, site, color)
+    mag_vector(::Type{Out_of_Plane}, ham, site, color)
 
 Model the magnetic spins to point out of the basal plane, so along the 
 crystallographic ̂c axis.
 """
-mag_vector(::Type{Out_of_Plane}, state, site, color) = @SVector [0,0, state[site, color]]
+mag_vector(::Type{Out_of_Plane}, ham, site, color) = @SVector [0,0, ham[site, color]]
 """
-    mag_vector(::Type{Easy_Axis_In_Plane}, state, site, color)
+    mag_vector(::Type{Easy_Axis_In_Plane}, ham, site, color)
 
 Model the magnetic spins to point in the basal plane along the 
 crystallographic ̂a axis.
 """
-mag_vector(::Type{Easy_Axis_In_Plane}, state, site, color) = @SVector [state[site, color], 0, 0]
+mag_vector(::Type{Easy_Axis_In_Plane}, ham, site, color) = @SVector [ham[site, color], 0, 0]
 """
-    mag_vector(::Type{Spin_Orbit_Coupling}, state, site, color)
+    mag_vector(::Type{Spin_Orbit_Coupling}, ham, site, color)
 
 Model the magnetic spins to point in the basal plane along either the 
 crystallographic ̂a or ̂b axes, depending on the local nematic.
 """
-function mag_vector(::Type{Spin_Orbit_Coupling}, state, site, color)
-    if site_Baxter(state, site) == one(eltype(state))
-        return @SVector [state[site, color], 0, 0]
+function mag_vector(::Type{Spin_Orbit_Coupling}, ham, site, color)
+    if site_Baxter(ham, site) == one(eltype(ham))
+        return @SVector [ham[site, color], 0, 0]
     end
-    return @SVector [0, state[site, color], 0]
+    return @SVector [0, ham[site, color], 0]
 end
 
 """
-    hyperfine_plus_vectors(ty, state, ::CubicLattice2D, site)
+    hyperfine_plus_vectors(ty, ham, ::CubicLattice2D, site)
 
 Return the set of four hyperfine field vectors for the `As_plus` atom of the [`As_atoms`](@ref) `Enum`.
 
     # Arguments:
 
 1. `ty::Type{<: AbstractNMRConstruct}`: defines which magnetic spin construct to implement
-1. `state::AbstractArray`: the field of spins
+1. `ham`: the Hamiltonian of spins
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function hyperfine_plus_vectors(ty, state, latt::CubicLattice2D, site )
-    Atau0     = hyperfine_Amats[4] * mag_vector(ty, state, site, AT_tau)
-    Atau0p1   = -hyperfine_Amats[1] * mag_vector(ty, state, site_index(latt, site, (0, 1)), AT_tau)
-    Asigma0   = hyperfine_Amats[3] * mag_vector(ty, state, site, AT_sigma)
-    Asigma1p0 = -hyperfine_Amats[2] * mag_vector(ty, state, site_index(latt, site, (1, 0)), AT_sigma)
+function hyperfine_plus_vectors(ty, ham, latt::CubicLattice2D, site )
+    Atau0     = hyperfine_Amats[4] * mag_vector(ty, ham, site, AT_tau)
+    Atau0p1   = -hyperfine_Amats[1] * mag_vector(ty, ham, site_index(latt, site, (0, 1)), AT_tau)
+    Asigma0   = hyperfine_Amats[3] * mag_vector(ty, ham, site, AT_sigma)
+    Asigma1p0 = -hyperfine_Amats[2] * mag_vector(ty, ham, site_index(latt, site, (1, 0)), AT_sigma)
     return @SVector [ Asigma0, Atau0, Asigma1p0, Atau0p1 ]
 end
 """
-    hyperfine_plus_vectors(ty, state, ::CubicLattice2D, site)
+    hyperfine_plus_vectors(ty, ham, ::CubicLattice2D, site)
 
 Return the set of four hyperfine field vectors for the `As_plus` atom of the [`As_atoms`](@ref) `Enum`.
 
 # Arguments:
 
 1. `ty::Type{<: AbstractNMRConstruct}`: defines which magnetic spin construct to implement
-1. `state::AbstractArray`: the field of spins
+1. `ham`: the Hamiltonian of spins
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function hyperfine_minus_vectors(ty, state, latt::CubicLattice2D, site )
-    Asigma0   = hyperfine_Amats[1] * mag_vector(ty, state, site, AT_sigma)
-    Asigma0m1 = -hyperfine_Amats[4] * mag_vector(ty, state, site_index(latt, site, (0, -1)), AT_sigma)
-    Atau0     = hyperfine_Amats[2] * mag_vector(ty, state, site, AT_tau)
-    Atau1m0   = -hyperfine_Amats[3] * mag_vector(ty, state, site_index(latt, site, (-1, 0)), AT_tau)
+function hyperfine_minus_vectors(ty, ham, latt::CubicLattice2D, site )
+    Asigma0   = hyperfine_Amats[1] * mag_vector(ty, ham, site, AT_sigma)
+    Asigma0m1 = -hyperfine_Amats[4] * mag_vector(ty, ham, site_index(latt, site, (0, -1)), AT_sigma)
+    Atau0     = hyperfine_Amats[2] * mag_vector(ty, ham, site, AT_tau)
+    Atau1m0   = -hyperfine_Amats[3] * mag_vector(ty, ham, site_index(latt, site, (-1, 0)), AT_tau)
     return @SVector [ Asigma0, Asigma0m1, Atau0, Atau1m0 ]
 end
 
 """
-    hyperfine_plus(ty, state, ::CubicLattice2D, site)
+    hyperfine_plus(ty, ham, ::CubicLattice2D, site)
 
 Sum the set of hyperfine fields and then rotate them from the 
 crystallographic axes into the spin-space basis.
@@ -204,16 +203,16 @@ crystallographic axes into the spin-space basis.
 # Arguments:
 
 1. `ty::Type{<: AbstractNMRConstruct}`: defines which magnetic spin construct to implement
-1. `state::AbstractArray`: the field of spins
+1. `ham`: the Hamiltonian of spins
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function hyperfine_plus(ty, state, latt::CubicLattice2D, site )
-    return rotation_mat * sum( hyperfine_plus_vectors(ty, state, latt, site) )
+function hyperfine_plus(ty, ham, latt::CubicLattice2D, site )
+    return rotation_mat * sum( hyperfine_plus_vectors(ty, ham, latt, site) )
 end
 
 """
-    hyperfine_minus(ty, state, ::CubicLattice2D, site)
+    hyperfine_minus(ty, ham, ::CubicLattice2D, site)
 
 Sum the set of hyperfine fields and then rotate them from the 
 crystallographic axes into the spin-space basis.
@@ -221,16 +220,16 @@ crystallographic axes into the spin-space basis.
 # Arguments:
 
 1. `ty::Type{<: AbstractNMRConstruct}`: defines which magnetic spin construct to implement
-1. `state::AbstractArray`: the field of spins
+1. `ham`: the Hamiltonian of spins
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function hyperfine_minus(ty, state, latt::CubicLattice2D, site )
-    return rotation_mat * sum( hyperfine_minus_vectors(ty, state, latt, site ) )
+function hyperfine_minus(ty, ham, latt::CubicLattice2D, site )
+    return rotation_mat * sum( hyperfine_minus_vectors(ty, ham, latt, site ) )
 end
 
 """
-    hyperfine_fields(ty, state, ::CubicLattice2D, site)
+    hyperfine_fields(ty, ham, ::CubicLattice2D, site)
 
 Return the set of [`hyperfine_plus`](@ref) and [`hyperfine_minus`](@ref) fields acting on
 the As atoms within a unit cell. 
@@ -238,12 +237,12 @@ the As atoms within a unit cell.
 # Arguments:
 
 1. `ty::Type{<: AbstractNMRConstruct}`: defines which magnetic spin construct to implement
-1. `state::AbstractArray`: the field of spins
+1. `ham`: the Hamiltonian of spins
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function hyperfine_fields(ty, state, latt::CubicLattice2D, site )
-    return @SVector [ hyperfine_plus(ty, state, latt, site), hyperfine_minus(ty, state, latt, site) ]
+function hyperfine_fields(ty, ham, latt::CubicLattice2D, site )
+    return @SVector [ hyperfine_plus(ty, ham, latt, site), hyperfine_minus(ty, ham, latt, site) ]
 end
 
 @doc raw"""
@@ -265,7 +264,7 @@ spin-space**, then the instantaneous proxy spin-lattice relaxation rate is
 single_hyperfine_fluct( field ) = field[1] * field[1] + field[2] * field[2]
 
 """
-    inst_hyperfine_fluctuations(ty, state, ::CubicLattice2D, site)
+    inst_hyperfine_fluctuations(ty, ham, ::CubicLattice2D, site)
 
 Return the pair of proxy spin-lattice relaxation rates in a single 
 unit cell. 
@@ -273,11 +272,11 @@ unit cell.
 # Arguments
 
 1. `ty::Type{<: AbstractNMRConstruct}`: defines which magnetic spin construct to implement
-1. `state::AbstractArray`: the field of spins
+1. `ham`: the Hamiltonian of spins
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function inst_hyperfine_fluctuations(ty, state, latt::CubicLattice2D, site )
-    fields = hyperfine_fields(ty, state, latt, site)
+function inst_hyperfine_fluctuations(ty, ham, latt::CubicLattice2D, site )
+    fields = hyperfine_fields(ty, ham, latt, site)
     return @SVector [ single_hyperfine_fluct(fields[1]), single_hyperfine_fluct(fields[2]) ]
 end
