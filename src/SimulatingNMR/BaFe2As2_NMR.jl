@@ -3,6 +3,7 @@ using StaticArrays
 # Automatically submodulizes this code
 import ..Lattices: CubicLattice2D, site_index
 using ..Hamiltonians
+import ..Hamiltonians: site_Baxter
 
 const hyp_Aaa = 0.66
 const hyp_Acc = 0.47
@@ -127,21 +128,21 @@ Build the magnetic spin vector for a given [`AbstractNMRConstruct`] with respect
 its expected behavior in the crystallographic basis. Later, one uses the 
 [`rotation_mat`](@ref) to calculate the proxy spin-lattice relaxation rate.
 """
-mag_vector(ty::Type{T}, args...) where {T <: AbstractNMRConstruct} = throw(MethodError(mag_vector, ty, args...))
+@inline mag_vector(ty::Type{T}, args...) where {T <: AbstractNMRConstruct} = throw(MethodError(mag_vector, ty, args...))
 """
     mag_vector(::Type{Out_of_Plane}, ham, site, color)
 
 Model the magnetic spins to point out of the basal plane, so along the 
 crystallographic ̂c axis.
 """
-mag_vector(::Type{Out_of_Plane}, ham, site, color) = @SVector [0,0, ham[site, color]]
+@inline mag_vector(::Type{Out_of_Plane}, ham, site, color) = SVector{3, eltype(ham)}(zero(eltype(ham)), zero(eltype(ham)), ham[site, color])
 """
     mag_vector(::Type{Easy_Axis_In_Plane}, ham, site, color)
 
 Model the magnetic spins to point in the basal plane along the 
 crystallographic ̂a axis.
 """
-mag_vector(::Type{Easy_Axis_In_Plane}, ham, site, color) = @SVector [ham[site, color], 0, 0]
+@inline mag_vector(::Type{Easy_Axis_In_Plane}, ham, site, color) = SVector{3, eltype(ham)}(ham[site, color], zero(eltype(ham)), zero(eltype(ham)))
 """
     mag_vector(::Type{Spin_Orbit_Coupling}, ham, site, color)
 
@@ -150,9 +151,9 @@ crystallographic ̂a or ̂b axes, depending on the local nematic.
 """
 function mag_vector(::Type{Spin_Orbit_Coupling}, ham, site, color)
     if site_Baxter(ham, site) == one(eltype(ham))
-        return @SVector [ham[site, color], 0, 0]
+        return SVector{3, eltype(ham)}(ham[site, color], zero(eltype(ham)), zero(eltype(ham)))
     end
-    return @SVector [0, ham[site, color], 0]
+    return SVector{3, eltype(ham)}(zero(eltype(ham)), ham[site, color], zero(eltype(ham)))
 end
 
 """
@@ -167,7 +168,7 @@ Return the set of four hyperfine field vectors for the `As_plus` atom of the [`A
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function hyperfine_plus_vectors(ty, ham, latt::CubicLattice2D, site )
+@inline function hyperfine_plus_vectors(ty, ham, latt::CubicLattice2D, site )
     Atau0     = hyperfine_Amats[4] * mag_vector(ty, ham, site, AT_tau)
     Atau0p1   = -hyperfine_Amats[1] * mag_vector(ty, ham, site_index(latt, site, (0, 1)), AT_tau)
     Asigma0   = hyperfine_Amats[3] * mag_vector(ty, ham, site, AT_sigma)
@@ -175,7 +176,7 @@ function hyperfine_plus_vectors(ty, ham, latt::CubicLattice2D, site )
     return @SVector [ Asigma0, Atau0, Asigma1p0, Atau0p1 ]
 end
 """
-    hyperfine_plus_vectors(ty, ham, ::CubicLattice2D, site)
+    hyperfine_minus_vectors(ty, ham, ::CubicLattice2D, site)
 
 Return the set of four hyperfine field vectors for the `As_plus` atom of the [`As_atoms`](@ref) `Enum`.
 
@@ -186,7 +187,7 @@ Return the set of four hyperfine field vectors for the `As_plus` atom of the [`A
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function hyperfine_minus_vectors(ty, ham, latt::CubicLattice2D, site )
+@inline function hyperfine_minus_vectors(ty, ham, latt::CubicLattice2D, site )
     Asigma0   = hyperfine_Amats[1] * mag_vector(ty, ham, site, AT_sigma)
     Asigma0m1 = -hyperfine_Amats[4] * mag_vector(ty, ham, site_index(latt, site, (0, -1)), AT_sigma)
     Atau0     = hyperfine_Amats[2] * mag_vector(ty, ham, site, AT_tau)
