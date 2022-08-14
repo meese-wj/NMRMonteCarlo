@@ -105,5 +105,5 @@ end
 # Dispatch on observable types
 for obs_str ∈ BaseATMTimeSeriesObs
     obs_symb = Symbol(obs_str)
-    @eval @inline update_observable!( model::AbstractAshkinTellerModel, ::Type{$obs_symb} ) = update_observable!( Observables(model)[$obs_symb], model, $obs_symb )
+    @eval @inline update_observable!( model::AbstractAshkinTellerModel, ::Type{$obs_symb} ) = update_observable!( TimeSeriesObservables(model)[$obs_symb], model, $obs_symb )
 end

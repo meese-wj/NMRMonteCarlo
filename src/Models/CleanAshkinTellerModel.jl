@@ -35,3 +35,5 @@ struct CleanAshkinTellerModel{T <: AbstractFloat} <: AbstractAshkinTellerModel
     end
     CleanAshkinTellerModel{T}(params::CleanAshkinTellerModelParameters{T}) where T = CleanAshkinTellerModel( params.Lx, params.Ly, params.Jex, params.Kex, params.num_measurements )
 end
+
+@inline TimeSeriesObservables(model::CleanAshkinTellerModel) = Observables(model)
