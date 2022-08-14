@@ -2,6 +2,8 @@
 import StaticArrays: @SVector, @MVector
 import Base: getindex, setindex!, to_index
 import ..Lattices: num_sites  # Automatically submodulizes this code
+import MuladdMacro: @muladd 
+
 export 
 # Base overloads
        getindex, setindex!, eltype, length, to_index,
@@ -142,7 +144,7 @@ H = -\sum_{\langle ij \rangle} \left[ J\left( \sigma_i\sigma_j + \tau_i\tau_j \r
     effective_fields = neighbor_fields(ham, ham.params, latt, site)    
     en = zero(eltype(ham))
     @inbounds for (idx, eff_field) ∈ enumerate(effective_fields)
-        en += site_values[idx] * eff_field
+        @muladd en = en + site_values[idx] * eff_field
     end
     return -en
 end
