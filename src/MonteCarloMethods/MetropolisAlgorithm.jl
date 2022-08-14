@@ -16,7 +16,7 @@ function MetropolisParameters{T}(; params_file = joinpath(@__DIR__, "default_Met
     return import_json_and_display(params_file, MetropolisParameters{T}, display_io)
 end
 
-@inline metropolis_accepted(ΔE, β) = ( ΔE < zero(ΔE) || rand() < exp(-β * ΔE) )::Bool
+@inline metropolis_accepted(ΔE, β) = ( ΔE < zero(ΔE) || rand() < @fastmath exp(-β * ΔE) )::Bool
 
 @inline function metropolis_update!( model::AbstractModel, beta, site )
     ΔE = DoF_energy_change( Hamiltonian(model), Lattice(model), site )
