@@ -5,6 +5,8 @@ import ..Lattices: CubicLattice2D, site_index
 using ..Hamiltonians
 import ..Hamiltonians: site_Baxter
 
+export inst_hyperfine_fluctuations
+
 const hyp_Aaa = 0.66
 const hyp_Acc = 0.47
 const hyp_Aac = 0.43

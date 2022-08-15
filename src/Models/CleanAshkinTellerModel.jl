@@ -4,6 +4,8 @@ import ..Hamiltonians: BasicAshkinTellerHamiltonian, AshkinTellerParameters,
                        energy, num_sites, spins, AT_sigma, AT_tau, num_colors,
                        site_Baxter, sigma_values, tau_values, IterateBySite
 
+using ..SimulatingNMR
+
 export CleanAshkinTellerModel, CleanNMRAshkinTellerModel, CleanAshkinTellerModelParameters
 
 struct CleanAshkinTellerModelParameters{T <: AbstractFloat}
@@ -43,6 +45,7 @@ struct CleanAshkinTellerModel{T <: AbstractFloat} <: AbstractAshkinTellerModel
 end
 
 @inline TimeSeriesObservables(model::CleanAshkinTellerModel) = Observables(model)
+@inline update_observables!(model::CleanAshkinTellerModel) = update_TimeSeriesObservables!(model)
 
 """
     NMRObservables{T <: Number}
@@ -91,3 +94,18 @@ end
 
 @inline TimeSeriesObservables(model::CleanNMRAshkinTellerModel) = Observables(model).time_series_obs
 @inline AccumulatedSeriesObservables(model::CleanNMRAshkinTellerModel) = Observables(model).acc_series_obs
+
+function update_NMR_values!(model::CleanNMRAshkinTellerModel, ty)
+    for (site, val) ∈ enumerate(IterateBySite, Hamiltonian(model))
+        Ωvals = inst_hyperfine_fluctuations(ty, Hamiltonian(model), Lattice(model), site)
+        push!( AccumulatedSeriesObservables(model)[site], Ωvals[1] )
+        push!( AccumulatedSeriesObservables(model)[site], Ωvals[2] )
+    end
+    return AccumulatedSeriesObservables(model)
+end
+
+function update_observables!(model::CleanNMRAshkinTellerModel, ty = SimulatingNMR.Easy_Axis_In_Plane)
+    update_TimeSeriesObservables!(model)
+    update_NMR_values!(model, ty)
+    return Observables(model)
+end

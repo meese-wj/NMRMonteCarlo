@@ -48,7 +48,7 @@ const BaseATM_observable_types = @SVector [ type for type ∈ BaseATM_temp_obs_t
 ObservableString(s::Symbol) = ObservableString(eval(s))
 
 """
-    @generated update_observables!(::AbstractAshkinTellerModel)
+    @generated update_TimeSeriesObservables!(::AbstractAshkinTellerModel)
 
 Function to update all of the (possibly-many) observable 
 types for the AbstractAshkinTellerModel.
@@ -61,7 +61,7 @@ types for the AbstractAshkinTellerModel.
     defintion looks something like the following:
 
     ```julia
-    function update_observables!(model::AbstractAshkinTellerModel)
+    function update_TimeSeriesObservables!(model::AbstractAshkinTellerModel)
         for type ∈ BaseATM_observable_types
             update_observable!(model, type)
         end
@@ -69,7 +69,7 @@ types for the AbstractAshkinTellerModel.
     end
     ```
 """
-@generated function update_observables!(model::AbstractAshkinTellerModel)
+@generated function update_TimeSeriesObservables!(model::AbstractAshkinTellerModel)
     expr = :()
     for type ∈ BaseATM_observable_types
         expr = :( $expr; update_observable!(model, $type) )
