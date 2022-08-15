@@ -98,8 +98,8 @@ end
 function update_NMR_values!(model::CleanNMRAshkinTellerModel, ty)
     for (site, val) ∈ enumerate(IterateBySite, Hamiltonian(model))
         Ωvals = inst_hyperfine_fluctuations(ty, Hamiltonian(model), Lattice(model), site)
-        push!( AccumulatedSeriesObservables(model)[site], Ωvals[1] )
-        push!( AccumulatedSeriesObservables(model)[site], Ωvals[2] )
+        push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_plus)],  Ωvals[As_plus] )
+        push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_minus)], Ωvals[As_minus] )
     end
     return AccumulatedSeriesObservables(model)
 end

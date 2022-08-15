@@ -1,11 +1,12 @@
 
+import Base: to_index
 using StaticArrays
 # Automatically submodulizes this code
 import ..Lattices: CubicLattice2D, site_index
 using ..Hamiltonians
 import ..Hamiltonians: site_Baxter
 
-export inst_hyperfine_fluctuations
+export inst_hyperfine_fluctuations, to_index, As_atom_index, As_atoms, As_plus, As_minus
 
 const hyp_Aaa = 0.66
 const hyp_Acc = 0.47
@@ -85,6 +86,9 @@ const NUM_As_ATOMS = Int(As_enum_end) - Int(As_plus)
 Return the number of atoms relevant for As NMR.
 """
 @inline num_atoms(::Type{As_atoms}) = Int(As_enum_end) - Int(As_plus)
+
+@inline to_index(atom::As_atoms) = Int(atom)
+@inline As_atom_index(site_idx, atom::As_atoms) = num_atoms(As_atoms) * (site_idx - one(site_idx)) + to_index(atom)
 
 """
     abstract type AbstractNMRConstruct end
