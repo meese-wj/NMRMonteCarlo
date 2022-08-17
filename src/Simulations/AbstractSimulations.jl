@@ -1,12 +1,15 @@
 
-import ..MonteCarloMethods: thermalize!, sweep_and_measure!
+import ..MonteCarloMethods: thermalize!, sweep_and_measure!, Lattice, Hamiltonian, Observables
 
-export SimulationParameters, SimulationModel, SimulationMethod, simulate!
+export SimulationParameters, SimulationModel, SimulationMethod, simulate!, Lattice, Hamiltonian, Observables
 
 abstract type AbstractMCMCSimulation end
 
 SimulationParameters(sim::AbstractMCMCSimulation) = sim.parameters
 SimulationModel(sim::AbstractMCMCSimulation) = sim.model
+Lattice(sim::AbstractMCMCSimulation) = Lattice(SimulationModel(sim))
+Hamiltonian(sim::AbstractMCMCSimulation) = Hamiltonian(SimulationModel(sim))
+Observables(sim::AbstractMCMCSimulation) = Observables(SimulationModel(sim))
 function SimulationMethod(sim::AbstractMCMCSimulation) end
 
 function simulate!(sim::AbstractMCMCSimulation)

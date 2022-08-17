@@ -32,7 +32,7 @@ struct CleanNMRATMSimulation{T <: AbstractFloat} <: AbstractMCMCSimulation
 end
 
 function CleanNMRATMSimulation(; Lx = 8, Ly = Lx, Jex = 1.0, Kex = 0.0, 
-                                 Ntherm = 2^16, Lτ = 2^18, Nmeas = 2^16, βvalue = 2.269 )
+                                 Ntherm = 2^16, Lτ = 2^18, Nmeas = 2^16, βvalue = 1/2.269 )
     Jex, Kex, βvalue = promote(Jex, Kex, βvalue)
     params = CleanNMRATMParameters{typeof(Jex)}( Lx, Ly, Jex, Kex, Ntherm, Lτ, Nmeas, βvalue )
     model = CleanNMRAshkinTellerModel{typeof(Jex)}( Lx, Ly, Jex, Kex, Nmeas )
