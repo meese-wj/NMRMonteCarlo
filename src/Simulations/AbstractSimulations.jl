@@ -8,15 +8,78 @@ export
 #      AbstractSimulations exports
        SimulationParameters, SimulationModel, SimulationMethod, simulate!, Lattice, Hamiltonian, Observables
 
+"""
+    abstract type AbstractMCMCSimulation end
+
+Supertype for all simulations that will be run.
+
+# Required fields
+
+There are only two required fields for a `<: AbstractMCMCSimulation`:
+    
+1. `parameters`: Encoding all information needed to run a particular simulation. Must be `<:` [`AbstractMonteCarloParameters`](@ref).
+1. `model`: The actual `<:` [`AbstractModel`](@ref) to be [`simulate!`](@ref)d.
+
+# Required Interface Methods
+
+* [`SimulationMethod`](@ref)
+
+# Default Interface Methods
+
+* [`SimulationParameters`](@ref)
+* [`SimulationModel`](@ref)
+* [`SimulationMethod`](@ref)
+* [`Lattice`](@ref) (forwarded from [`MonteCarloMethods`](@ref))
+* [`Hamiltonian`](@ref) (forwarded from [`MonteCarloMethods`](@ref))
+* [`Observables`](@ref) (forwarded from [`MonteCarloMethods`](@ref))
+
+"""
 abstract type AbstractMCMCSimulation end
 
+"""
+    SimulationParameters(::AbstractMCMCSimulation) = sim.parameters
+
+Extract the parameters for a given `<:` [`AbstractMCMCSimulation`](@ref).
+"""
 SimulationParameters(sim::AbstractMCMCSimulation) = sim.parameters
+"""
+    SimulationModel(::AbstractMCMCSimulation) = sim.model
+
+Extract the model for a given `<:` [`AbstractMCMCSimulation`](@ref).
+"""
 SimulationModel(sim::AbstractMCMCSimulation) = sim.model
+"""
+    Lattice(sim::AbstractMCMCSimulation)
+
+Convenience wrapper around `Lattice(SimulationModel(sim))`.
+"""
 Lattice(sim::AbstractMCMCSimulation) = Lattice(SimulationModel(sim))
+"""
+    Hamiltonian(sim::AbstractMCMCSimulation)
+
+Convenience wrapper around `Hamiltonian(SimulationModel(sim))`.
+"""
 Hamiltonian(sim::AbstractMCMCSimulation) = Hamiltonian(SimulationModel(sim))
+"""
+    Observables(sim::AbstractMCMCSimulation)
+
+Convenience wrapper around `Observables(SimulationModel(sim))`.
+"""
 Observables(sim::AbstractMCMCSimulation) = Observables(SimulationModel(sim))
+"""
+    SimulationMethod(::AbstractMCMCSimulation)
+
+Returns a function method that implements a specific Monte Carlo sweep technique 
+to be used in a given `<:` [`AbstractMCMCSimulation`](@ref). Returns `nothing` 
+if no method for a simulation subtype has been explicitly implemented.
+"""
 function SimulationMethod(sim::AbstractMCMCSimulation) end
 
+"""
+    show([io::IO = stdout], ::AbstractMCMCSimulation)
+
+`Base` overload to display [`AbstractMCMCSimulation`](@ref)s.
+"""
 function show(io::IO, sim::AbstractMCMCSimulation)
     tab = "  "
     params = SimulationParameters(sim)
@@ -37,16 +100,26 @@ function show(io::IO, sim::AbstractMCMCSimulation)
 end
 show(sim::AbstractMCMCSimulation) = show(stdout, sim)
 
-function simulate!(sim::AbstractMCMCSimulation)
+"""
+    simulate!(::AbstractMCMCSimulation, [thermalization = true])
+
+Default simulation that will may [`thermalize!`](@ref) and *will* perform
+Monte Carlo sweeps according to the [`SimulationMethod`](@ref) rule.
+"""
+function simulate!(sim::AbstractMCMCSimulation, thermalization = true)
     @info "Start of simulation."
 
     params = SimulationParameters(sim)
     model = SimulationModel(sim)
 
     beta = params.βvalue
-    println("\nBeginning thermalization.")
-    @time thermalize!(model, beta, params, SimulationMethod(sim))
-    println("End of thermalization.")
+    if thermalization
+        println("\nBeginning thermalization.")
+        @time thermalize!(model, beta, params, SimulationMethod(sim))
+        println("End of thermalization.")
+    else
+        println("\nNo thermalization to be performed.")
+    end
 
     println("\nBeginning measurement sweeps.")
     @time sweep_and_measure!(model, beta, params, SimulationMethod(sim))
