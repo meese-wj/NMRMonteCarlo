@@ -8,7 +8,6 @@ import ..Models: CleanNMRAshkinTellerModel
 
 export CleanNMRATMParameters, CleanNMRATMSimulation, thermalization_sweeps, sampling_sweeps, total_measurements
 
-
 struct CleanNMRATMParameters{T <: AbstractFloat} <: AbstractMonteCarloParameters
     Lx::Int
     Ly::Int
