@@ -10,6 +10,9 @@ export MetropolisParameters, metropolis_sweep!, thermalize!, sweep_and_measure!
     measure_sweeps::Int
     total_measurements::Int
 end
+thermalization_sweeps(params::MetropolisParameters) = params.therm_sweeps
+sampling_sweeps(params::MetropolisParameters) = params.measure_sweeps
+total_measurements(params::MetropolisParameters) = params.total_measurements
 
 function MetropolisParameters{T}(; params_file = joinpath(@__DIR__, "default_Metropolis_Params.jl"),
                                    display_io::IO = stdout) where {T}
