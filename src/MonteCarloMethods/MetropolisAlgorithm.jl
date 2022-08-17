@@ -34,7 +34,7 @@ end
 
 # function thermalize!( model::Model{L, H}, beta, mc_params::AbstractMonteCarloParameters, mc_sweep::Function ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
 function thermalize!( model::AbstractModel, beta, mc_params::AbstractMonteCarloParameters, mc_sweep::Function )
-    total_sweeps::Int64 = mc_params.therm_sweeps
+    total_sweeps = thermalization_sweeps(mc_params)
     @inbounds for sweep ∈ 1:total_sweeps
         mc_sweep(model, beta)
     end
@@ -43,7 +43,7 @@ end
 
 # function sweep_and_measure!( model::Model{L, H}, beta, mc_params::AbstractMonteCarloParameters, mc_sweep::Function, state_container::AbstractArray = [] ) where {L <: AbstractLattice, H <: AbstractHamiltonian}
 function sweep_and_measure!( model::AbstractModel, beta, mc_params::AbstractMonteCarloParameters, mc_sweep::Function )
-    total_exports = mc_params.total_measurements
+    total_exports = total_measurements(mc_params)
     spe = sweeps_per_export(mc_params)
     @inbounds for write ∈ (1:total_exports)
         @inbounds for sweep ∈ (1:spe)

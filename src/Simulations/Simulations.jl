@@ -3,12 +3,13 @@ module Simulations
 include("AbstractSimulations.jl")
 
 # Automatically submodulizes this code
-import ..MonteCarloMethods: AbstractModel
+import ..MonteCarloMethods: AbstractModel, AbstractMonteCarloParameters, thermalization_sweeps, sampling_sweeps, total_measurements, metropolis_sweep!
 import ..Models: CleanNMRAshkinTellerModel
 
-export CleanNMRATMParameters, CleanNMRATMSimulation
+export CleanNMRATMParameters, CleanNMRATMSimulation, thermalization_sweeps, sampling_sweeps, total_measurements
 
-struct CleanNMRATMParameters{T <: AbstractFloat}
+
+struct CleanNMRATMParameters{T <: AbstractFloat} <: AbstractMonteCarloParameters
     Lx::Int
     Ly::Int
     Jex::T
@@ -18,11 +19,15 @@ struct CleanNMRATMParameters{T <: AbstractFloat}
     Nmeas::Int
     βvalue::T
 end
+@inline thermalization_sweeps(params::CleanNMRATMParameters) = params.Ntherm
+@inline sampling_sweeps(params::CleanNMRATMParameters) = params.Lτ
+@inline total_measurements(params::CleanNMRATMParameters) = params.Nmeas
 
 struct CleanNMRATMSimulation{T <: AbstractFloat} <: AbstractMCMCSimulation
     parameters::CleanNMRATMParameters{T}
     model::CleanNMRAshkinTellerModel{T}
 
+    CleanNMRATMSimulation{T}(p::CleanNMRATMParameters{T}, m::CleanNMRAshkinTellerModel{T}) where {T} = new{T}(p, m)
     CleanNMRATMSimulation(args...) = CleanNMRATMSimulation{Float64}(args...)
 end
 
@@ -33,5 +38,7 @@ function CleanNMRATMSimulation(; Lx = 8, Ly = Lx, Jex = 1.0, Kex = 0.0,
     model = CleanNMRAshkinTellerModel{typeof(Jex)}( Lx, Ly, Jex, Kex, Nmeas )
     return CleanNMRATMSimulation{typeof(Jex)}( params, model )
 end
+
+SimulationMethod(sim::CleanNMRATMSimulation) = metropolis_sweep!
 
 end # Simulations

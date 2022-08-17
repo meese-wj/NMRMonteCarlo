@@ -3,8 +3,48 @@ using Parameters2JSON
 import ..Hamiltonians: Hamiltonian   # Automatically submodulizes this code
 export sweeps_per_export, Lattice, Hamiltonian, Observables, update_observables!
 
+"""
+    abstract type AbstractMonteCarloParameters end
+
+Supertype for all parameters used to run Monte Carlo methods, models, and simulations.
+
+# Required Interface Functions
+
+* [`thermalization_sweeps`](@ref)
+* [`sampling_sweeps`](@ref)
+* [`total_measurements`](@ref)
+
+# Default Interface Functions
+
+* [`sweeps_per_export`](@ref)
+"""
 abstract type AbstractMonteCarloParameters end
-sweeps_per_export(params::AbstractMonteCarloParameters) = params.measure_sweeps <= params.total_measurements ? 1 : params.measure_sweeps ÷ params.total_measurements
+"""
+    thermalization_sweeps(::AbstractMonteCarloParameters)
+
+Return the number of sweeps to spend thermalizing a sample.
+"""
+function thermalization_sweeps(params::AbstractMonteCarloParameters) end
+"""
+    sampling_sweeps(::AbstractMonteCarloParameters)
+
+Return the number of sweeps spent **after** thermalization to sample observables.
+This is the maximum number of [`total_measurements`](@ref) actually possible.
+"""
+function sampling_sweeps(params::AbstractMonteCarloParameters) end
+"""
+    total_measurements(::AbstractMonteCarloParameters)
+
+Return the total number of measurements of the observables one wishes to take.
+"""
+function total_measurements(params::AbstractMonteCarloParameters) end
+"""
+    sweeps_per_export(::AbstractMonteCarloParameters)
+
+Calculate how many sweeps are sampled in between points where the observables 
+are exported.
+"""
+sweeps_per_export(params::AbstractMonteCarloParameters) = sampling_sweeps(params) <= total_measurements(params) ? 1 : sampling_sweeps(params) ÷ total_measurements(params)
 
 # # TODO: Change this to an abstract type
 # struct Model{L <: AbstractLattice, H <: AbstractHamiltonian}

@@ -1,4 +1,6 @@
 
+import ..MonteCarloMethods: thermalize!, sweep_and_measure!
+
 export SimulationParameters, SimulationModel, SimulationMethod, simulate!
 
 abstract type AbstractMCMCSimulation end
