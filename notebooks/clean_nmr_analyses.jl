@@ -67,6 +67,22 @@ One can access its `parameters` and `model` with the help of `SimulationParamete
 # ╔═╡ 45da1ff2-6ab7-4cc6-a40e-e6430b72d016
 SimulationMethod(sim)
 
+# ╔═╡ 59e3f6f1-14e0-4b9d-bd29-3c77695b0430
+md"""
+Now we `simulate!` it.
+"""
+
+# ╔═╡ 35ceed2d-af0f-4331-ab4c-f493c547a522
+@time simulate!(sim)
+
+# ╔═╡ 0ec7b308-5ba2-43b1-bb21-760ef6e48cbb
+md"""
+## Now we analyze the simulation data
+"""
+
+# ╔═╡ d9c014df-27f5-4b3b-b910-6f720f0323c0
+
+
 # ╔═╡ Cell order:
 # ╟─69fa0e30-1d83-11ed-1719-6d028032aa3c
 # ╟─a73ee872-a1af-4223-83d5-47a4a7841875
@@ -77,3 +93,7 @@ SimulationMethod(sim)
 # ╠═560f5e5b-3d5e-4605-b3fb-d4ba3365d7f8
 # ╟─c9be49e2-0581-46b3-9e3a-a6ff61434a9c
 # ╠═45da1ff2-6ab7-4cc6-a40e-e6430b72d016
+# ╟─59e3f6f1-14e0-4b9d-bd29-3c77695b0430
+# ╠═35ceed2d-af0f-4331-ab4c-f493c547a522
+# ╟─0ec7b308-5ba2-43b1-bb21-760ef6e48cbb
+# ╠═d9c014df-27f5-4b3b-b910-6f720f0323c0
