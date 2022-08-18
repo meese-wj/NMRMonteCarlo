@@ -67,6 +67,7 @@ These `methods` _must_ be defined for every `<: AbstractModel`. By default they
 `throw` `MethodError`s if not implemented.
 
 - [`update_observables!`](@ref)
+- `Base.iterate` must be implemented for the `observables`
 
 # Default Interface Methods
 

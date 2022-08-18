@@ -1,4 +1,5 @@
 
+import Base: iterate, length
 import ..Lattices: CubicLattice2D
 import ..Hamiltonians: BasicAshkinTellerHamiltonian, AshkinTellerParameters, 
                        energy, num_sites, spins, AT_sigma, AT_tau, num_colors,
@@ -6,7 +7,11 @@ import ..Hamiltonians: BasicAshkinTellerHamiltonian, AshkinTellerParameters,
 
 using ..SimulatingNMR
 
-export CleanAshkinTellerModel, CleanNMRAshkinTellerModel, CleanAshkinTellerModelParameters
+export 
+# Base overloads
+       iterate, length,
+# Concrete type exports
+       CleanAshkinTellerModel, CleanNMRAshkinTellerModel, CleanAshkinTellerModelParameters
 
 struct CleanAshkinTellerModelParameters{T <: AbstractFloat}
     Lx::Int
@@ -24,6 +29,9 @@ end
 
 Basic _clean_ implementation of an Ashkin-Teller model. The [`Observables`](@ref)
 are only `TimeSeries` observables defined by [`BaseATM_observable_types`](@ref).
+
+!!! note 
+    `observables` iteration is implemented by default since it is a `Vector`.
 """
 struct CleanAshkinTellerModel{T <: AbstractFloat} <: AbstractAshkinTellerModel
     lattice::CubicLattice2D
@@ -54,10 +62,31 @@ Wrapper `struct` around two `Vector`s of `MonteCarloMeasurement`s:
 
 * `time_series_obs::Vector{TimeSeries{T}}`
 * `acc_series_obs::Vector{AccumulatedSeries{T}}`
+
+!!! note 
+    The `Base` `iterate` interface is explicitly defined.
 """
 struct NMRObservables{T <: Number}
     time_series_obs::Vector{TimeSeries{T}}
     acc_series_obs::Vector{AccumulatedSeries{T}}
+end
+"""
+    length(::NMRObservables)
+
+Return the total number of [`NMRObservables`](@ref) contained.
+"""
+length(all_obs::NMRObservables) = length(all_obs.time_series_obs) + length(all_obs.acc_series_obs)
+"""
+    iterate(::NMRObservables, [state = 1])
+
+`Base` iteration interface method to traverse the [`NMRObservables`](@ref).
+"""
+function iterate(all_obs::NMRObservables, state = 1)
+    # TODO: Maybe there is a better way to do this with Iterators.flatten?
+    index = one(state) + (state - one(state)) % length(all_obs.time_series_obs)
+    return state <= length(all_obs) ? 
+          ( state <= length(all_obs.time_series_obs) ? all_obs.time_series_obs[index] : all_obs.acc_series_obs[index], state + 1 ) : 
+          nothing
 end
 
 """

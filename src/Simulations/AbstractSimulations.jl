@@ -1,12 +1,14 @@
 
 import ..MonteCarloMethods: thermalize!, sweep_and_measure!, Lattice, Hamiltonian, Observables
 import Base: show
+using MonteCarloMeasurementUncertainty
+import OnlineLogBinning: BinningAnalysisResult
 
 export 
 #      Base overloads
        show,
 #      AbstractSimulations exports
-       SimulationParameters, SimulationModel, SimulationMethod, simulate!, Lattice, Hamiltonian, Observables
+       SimulationParameters, SimulationModel, SimulationMethod, simulate!, Lattice, Hamiltonian, Observables, analyze
 
 """
     abstract type AbstractMCMCSimulation end
@@ -22,9 +24,16 @@ There are only two required fields for a `<: AbstractMCMCSimulation`:
 
 # Required Interface Methods
 
+* `Base.iterate`  ← this method must be overloaded for each simulation's observables
 * [`SimulationMethod`](@ref)
 
 # Default Interface Methods
+
+## Base overloads
+
+* [`show`](@ref)
+
+## [`NMRMonteCarlo`](@ref) definitions
 
 * [`SimulationParameters`](@ref)
 * [`SimulationModel`](@ref)
@@ -32,6 +41,8 @@ There are only two required fields for a `<: AbstractMCMCSimulation`:
 * [`Lattice`](@ref) (forwarded from [`MonteCarloMethods`](@ref))
 * [`Hamiltonian`](@ref) (forwarded from [`MonteCarloMethods`](@ref))
 * [`Observables`](@ref) (forwarded from [`MonteCarloMethods`](@ref))
+* [`simulate!`](@ref)
+* [`analyze`](@ref)
 
 """
 abstract type AbstractMCMCSimulation end
@@ -131,4 +142,25 @@ function simulate!(sim::AbstractMCMCSimulation, thermalization = true)
 
     @info "End of simulation."
     return sim
+end
+"""
+    analyze(::AbstractMCMCSimulation)
+
+Run a `binning_analysis` on each of the [`Observables`](@ref) for a given
+`sim <:` [`AbstractMCMCSimulation`](@ref).
+
+Return **all** resulting `BinningAnalysisResult`s as a **single** `Vector`.
+It is up to the user to separate the indices appropriately for the different
+types of observables.
+
+!!! note
+    `binning_analysis` is taken from `MonteCarloMeasurementUncertainty.jl` and
+    `BinningAnalysisResult` comes from `OnlineLogBinning.jl`.
+"""
+function analyze(sim::AbstractMCMCSimulation)
+    results = BinningAnalysisResult{eltype(Hamiltonian(sim))}[]
+    for obs ∈ Observables(sim)
+        push!(results, binning_analysis(obs))
+    end
+    return results
 end
