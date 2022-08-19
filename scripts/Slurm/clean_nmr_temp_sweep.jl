@@ -34,7 +34,7 @@ println(sim)
 @info "End of the small simulation."
 
 @info "Starting real run."
-sim = CleanNMRATMSimulation(; Lx = 64, βvalue= my_bet, Ntherm = 2^18)
+sim = CleanNMRATMSimulation(; Lx = 64, βvalue= my_beta, Ntherm =2^18)
 @show sim
 
 @timev simulate!(sim)
