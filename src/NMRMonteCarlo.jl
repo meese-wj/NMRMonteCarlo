@@ -16,6 +16,7 @@ include( joinpath( "MonteCarloMethods", "MonteCarloMethods.jl" ) )
 include( joinpath( "SimulatingNMR", "SimulatingNMR.jl" ) )
 include( joinpath( "Models", "Models.jl" ) )
 include( joinpath( "Simulations", "Simulations.jl" ) )
+include( joinpath( "Utilities", "DrWatsonHelpers.jl" ) )
 
 @reexport using .Lattices
 @reexport using .Hamiltonians
@@ -23,5 +24,6 @@ include( joinpath( "Simulations", "Simulations.jl" ) )
 @reexport using .SimulatingNMR
 @reexport using .Models
 @reexport using .Simulations
+@reexport using .DrWatsonHelpers
 
 end # NMRMonteCarlo
