@@ -6,9 +6,10 @@
 #SBATCH --mail-user=meese022@umn.edu
 #SBATCH -o %x-%j.out
 #=
-    srun julia $(scontrol show job $SLURM_JOBID | awk -F= '/Command=/{print $2}')
+    pwd
+    srun julia clean_nmr_temp_sweep.jl
     exit
-# =#
+=#
 
 using DrWatson; @quickactivate :NMRMonteCarlo
 names(NMRMonteCarlo)
