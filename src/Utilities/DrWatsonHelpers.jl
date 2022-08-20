@@ -1,9 +1,11 @@
 module DrWatsonHelpers
 
-import DrWatson: scriptsdir
+import DrWatson: scriptsdir, datadir
 
-export slurmscriptsdir
+export slurmscriptsdir, agatedatadir
 
 slurmscriptsdir(args...) = scriptsdir("Slurm", args...)
+
+agatedatadir(args...) = datadir("Agate", args...)
 
 end # DrWatsonHelpers

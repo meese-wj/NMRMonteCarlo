@@ -16,6 +16,9 @@ using NMRMonteCarlo
 # ╔═╡ f6ac5743-88b6-422d-87d8-5bfc8bae1493
 using Plots, UncertainHistogramming, Measurements
 
+# ╔═╡ e3e8effc-0c7e-4739-94f2-e0a65f0c4381
+using JLD2
+
 # ╔═╡ 69fa0e30-1d83-11ed-1719-6d028032aa3c
 md"""
 # NMR Analyses of the Clean Ashkin-Teller Model
@@ -58,7 +61,7 @@ We will first generate a basic NMR simulation using a clean Ashkin-Teller model 
 """
 
 # ╔═╡ 560f5e5b-3d5e-4605-b3fb-d4ba3365d7f8
-sim = CleanNMRATMSimulation(; Lx = 24)
+sim = CleanNMRATMSimulation(; Lx = 4)
 
 # ╔═╡ c9be49e2-0581-46b3-9e3a-a6ff61434a9c
 md"""
@@ -144,6 +147,72 @@ Then, we can plot these distributions next to one another as:
 # ╔═╡ e7ab25a6-0bb5-4e67-a7d2-0c88a6128d29
 plot( gplot, uplot; link = :both )
 
+# ╔═╡ c3219a06-c628-4468-996d-92c29167e308
+md"""
+## Now for batch analyses from MSI
+"""
+
+# ╔═╡ 08df149d-6f09-474a-ac32-780b6d0c5340
+const Njobs = 50
+
+# ╔═╡ 76278ec5-8559-40ce-90fd-b8a4f5f6bdf7
+beta_vals = LinRange(1/3, 1/2, Njobs)
+
+# ╔═╡ 97e04998-0a02-435a-8919-b860b54c0e24
+const Ncompleted = 23
+
+# ╔═╡ f66a27d7-4df5-4af9-8498-ddf94606a490
+# begin
+# 	agate_sims = CleanNMRATMSimulation{Float64}[]
+# 	for idx ∈ 1:Ncompleted
+# 		temp_sim = CleanNMRATMSimulation(; Lx = 64, βvalue = beta_vals[idx], Ntherm = 2^20)
+# 		filename = savename("clean_temp_sweep", SimulationParameters(temp_sim) ) * "_#1.jld2"
+# 		push!( agate_sims, JLD2.load_object( agatedatadir( filename ) ) )
+# 	end
+# end
+
+# ╔═╡ 408bc59b-28aa-4453-a484-1c49167473ae
+# begin
+# 	job_ghists = GaussianHistogram{Float64}[]
+# 	for job ∈ agate_sims
+# 		job_results = analyze(job)
+# 		temp_ghist = GaussianHistogram()
+# 		for obs_idx ∈ start_idx:length(Observables(job))
+# 			push!(temp_ghist, measurement(job_results[obs_idx]))
+# 		end
+# 		push!(job_ghists, temp_ghist)
+# 	end
+# end
+
+# ╔═╡ 2967d4a8-2937-4d5a-9225-9a617ddfb947
+plot( 1 ./ beta_vals[1:Ncompleted], mean.(job_ghists); legend=false,
+	  xlabel = "Temperature", ylabel = "\$ \\bar{\\Omega} \$",
+	  markershape=:circle)
+
+# ╔═╡ d860b4c3-9753-40a2-8532-7592d60a3962
+plot( 1 ./ beta_vals[1:Ncompleted], std.(job_ghists); legend=false,
+	  xlabel = "Temperature", ylabel = "\$ \\Delta \\Omega \$",
+	  markershape=:circle)
+
+# ╔═╡ 5313b975-df0b-4bc8-b6a3-a8016cc3f6a8
+begin
+	test_plot = plot( Ωrange, job_ghists[1] )
+	plot!(test_plot, Ωrange, job_ghists[2]; linecolor = :orange)
+	plot!(test_plot, Ωrange, job_ghists[4]; linecolor = :green)
+	plot!(test_plot, Ωrange, job_ghists[10]; linecolor = :purple)
+	plot!(test_plot, Ωrange, job_ghists[Ncompleted]; linecolor = :red)
+	test_plot
+end
+
+# ╔═╡ fa425543-cbd1-4596-8444-c9b8ff82c6e6
+job_ghists[Ncompleted]
+
+# ╔═╡ 341ccb26-4b2c-4c4d-a821-3e5068879fd4
+std(job_ghists[Ncompleted])
+
+# ╔═╡ 3db8abc6-b58d-40cf-94cb-fa06283c58e2
+analyze(agate_sims[1])
+
 # ╔═╡ Cell order:
 # ╟─69fa0e30-1d83-11ed-1719-6d028032aa3c
 # ╟─a73ee872-a1af-4223-83d5-47a4a7841875
@@ -171,3 +240,16 @@ plot( gplot, uplot; link = :both )
 # ╠═7cf992b6-951d-48a9-8eaf-fa4e9185bd01
 # ╟─d50730bd-9959-4213-90f1-a20d91f0e1d4
 # ╠═e7ab25a6-0bb5-4e67-a7d2-0c88a6128d29
+# ╟─c3219a06-c628-4468-996d-92c29167e308
+# ╠═08df149d-6f09-474a-ac32-780b6d0c5340
+# ╠═76278ec5-8559-40ce-90fd-b8a4f5f6bdf7
+# ╠═97e04998-0a02-435a-8919-b860b54c0e24
+# ╠═e3e8effc-0c7e-4739-94f2-e0a65f0c4381
+# ╠═f66a27d7-4df5-4af9-8498-ddf94606a490
+# ╠═408bc59b-28aa-4453-a484-1c49167473ae
+# ╠═2967d4a8-2937-4d5a-9225-9a617ddfb947
+# ╠═d860b4c3-9753-40a2-8532-7592d60a3962
+# ╠═5313b975-df0b-4bc8-b6a3-a8016cc3f6a8
+# ╠═fa425543-cbd1-4596-8444-c9b8ff82c6e6
+# ╠═341ccb26-4b2c-4c4d-a821-3e5068879fd4
+# ╠═3db8abc6-b58d-40cf-94cb-fa06283c58e2
