@@ -152,6 +152,12 @@ md"""
 ## Now for batch analyses from MSI
 """
 
+# ╔═╡ 1cb6a5b4-cc67-4282-aabc-b93d14de64c7
+begin
+	const Lvalue = 64
+	const Kvalue = 0.0
+end
+
 # ╔═╡ 08df149d-6f09-474a-ac32-780b6d0c5340
 const Njobs = 50
 
@@ -159,40 +165,80 @@ const Njobs = 50
 beta_vals = LinRange(1/3, 1/2, Njobs)
 
 # ╔═╡ 97e04998-0a02-435a-8919-b860b54c0e24
-const Ncompleted = 23
+const Ncompleted = 50
 
 # ╔═╡ f66a27d7-4df5-4af9-8498-ddf94606a490
-# begin
-# 	agate_sims = CleanNMRATMSimulation{Float64}[]
-# 	for idx ∈ 1:Ncompleted
-# 		temp_sim = CleanNMRATMSimulation(; Lx = 64, βvalue = beta_vals[idx], Ntherm = 2^20)
-# 		filename = savename("clean_temp_sweep", SimulationParameters(temp_sim) ) * "_#1.jld2"
-# 		push!( agate_sims, JLD2.load_object( agatedatadir( filename ) ) )
-# 	end
-# end
+begin
+	agate_sims = CleanNMRATMSimulation{Float64}[]
+	for idx ∈ 1:Ncompleted
+		temp_sim = CleanNMRATMSimulation(; Lx = Lvalue, Kex = Kvalue, 
+										   βvalue = beta_vals[idx], Ntherm = 2^20,
+										   Nmeas=2^18, Lτ = 2^18)
+		filename = savename("clean_temp_sweep", SimulationParameters(temp_sim) ) * "_#1.jld2"
+		push!( agate_sims, JLD2.load_object( agatedatadir( filename ) ) )
+	end
+end
 
 # ╔═╡ 408bc59b-28aa-4453-a484-1c49167473ae
-# begin
-# 	job_ghists = GaussianHistogram{Float64}[]
-# 	for job ∈ agate_sims
-# 		job_results = analyze(job)
-# 		temp_ghist = GaussianHistogram()
-# 		for obs_idx ∈ start_idx:length(Observables(job))
-# 			push!(temp_ghist, measurement(job_results[obs_idx]))
-# 		end
-# 		push!(job_ghists, temp_ghist)
-# 	end
-# end
+begin
+	job_ghists = GaussianHistogram{Float64}[]
+	for (idx, job) ∈ enumerate(agate_sims)
+		job_results = analyze(job)
+		temp_ghist = GaussianHistogram()
+		failures = zero(Int)
+		for obs_idx ∈ start_idx:length(Observables(job))
+			push!(temp_ghist, measurement(job_results[obs_idx]))
+			# if job_results[obs_idx].plateau_found
+			# 	push!(temp_ghist, measurement(job_results[obs_idx]))
+			# else
+			# 	failures += one(failures)
+			# end
+		end
+		# @show idx, beta_vals[idx], failures
+		push!(job_ghists, temp_ghist)
+	end
+end
 
 # ╔═╡ 2967d4a8-2937-4d5a-9225-9a617ddfb947
-plot( 1 ./ beta_vals[1:Ncompleted], mean.(job_ghists); legend=false,
-	  xlabel = "Temperature", ylabel = "\$ \\bar{\\Omega} \$",
-	  markershape=:circle)
+begin
+	Ωplot = plot( 1 ./ beta_vals[1:Ncompleted], mean.(job_ghists); legend=false,
+		  		  xlabel = "Temperature", ylabel = "\$ \\bar{\\Omega} \$",
+		  		  markershape=:circle)
+	vline!(Ωplot, [2.269]; color = :orange, 
+		  label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
+	savefig(Ωplot, plotsdir("L=64_OmegaBar.png"))
+	Ωplot
+end
+
+# ╔═╡ cd7b7b5e-548a-4df3-9a0b-746785c2e651
+begin
+	T1Tplot = plot( 1 ./ beta_vals[1:Ncompleted], beta_vals[1:Ncompleted] .* mean.(job_ghists); legend=false,
+		  		  xlabel = "Temperature", ylabel = "\$ \\bar{\\Omega} / T \$",
+		  		  markershape=:circle)
+	vline!(T1Tplot, [2.269]; color = :orange, 
+		  label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
+	# savefig(T1Tplot, plotsdir("L=64_T1T.png"))
+	T1Tplot
+end
 
 # ╔═╡ d860b4c3-9753-40a2-8532-7592d60a3962
-plot( 1 ./ beta_vals[1:Ncompleted], std.(job_ghists); legend=false,
-	  xlabel = "Temperature", ylabel = "\$ \\Delta \\Omega \$",
-	  markershape=:circle)
+begin
+	ΔΩplot = plot( 1 ./ beta_vals[1:Ncompleted], std.(job_ghists); legend=false,
+		  		   xlabel = "Temperature", ylabel = "\$ \\Delta \\Omega \$",
+		  		   markershape=:circle)
+	vline!(ΔΩplot, [2.269]; color = :orange, 
+		   label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
+	# savefig(ΔΩplot, plotsdir("L=64_DeltaOmega.png"))
+	ΔΩplot
+end
+
+# ╔═╡ 3077bdf0-5f33-4dfd-aca8-8b230089e6a1
+md"""
+## Filtering by `OnlineLogBinning` convergence
+"""
+
+# ╔═╡ 0e51ce06-3e80-42e6-a1d7-09285ad380f4
+
 
 # ╔═╡ 5313b975-df0b-4bc8-b6a3-a8016cc3f6a8
 begin
@@ -241,6 +287,7 @@ analyze(agate_sims[1])
 # ╟─d50730bd-9959-4213-90f1-a20d91f0e1d4
 # ╠═e7ab25a6-0bb5-4e67-a7d2-0c88a6128d29
 # ╟─c3219a06-c628-4468-996d-92c29167e308
+# ╠═1cb6a5b4-cc67-4282-aabc-b93d14de64c7
 # ╠═08df149d-6f09-474a-ac32-780b6d0c5340
 # ╠═76278ec5-8559-40ce-90fd-b8a4f5f6bdf7
 # ╠═97e04998-0a02-435a-8919-b860b54c0e24
@@ -248,7 +295,10 @@ analyze(agate_sims[1])
 # ╠═f66a27d7-4df5-4af9-8498-ddf94606a490
 # ╠═408bc59b-28aa-4453-a484-1c49167473ae
 # ╠═2967d4a8-2937-4d5a-9225-9a617ddfb947
+# ╠═cd7b7b5e-548a-4df3-9a0b-746785c2e651
 # ╠═d860b4c3-9753-40a2-8532-7592d60a3962
+# ╟─3077bdf0-5f33-4dfd-aca8-8b230089e6a1
+# ╠═0e51ce06-3e80-42e6-a1d7-09285ad380f4
 # ╠═5313b975-df0b-4bc8-b6a3-a8016cc3f6a8
 # ╠═fa425543-cbd1-4596-8444-c9b8ff82c6e6
 # ╠═341ccb26-4b2c-4c4d-a821-3e5068879fd4
