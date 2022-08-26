@@ -4,13 +4,13 @@ using DrWatson
 using MonteCarloMeasurementUncertainty
 import OnlineLogBinning: BinningAnalysisResult
 
-function create_test_suite(temperature = 2.269, Lx=16, Ly=Lx)
+function create_test_suite(temperature = 2.269, Lx=8, Ly=Lx)
     latt = CubicLattice2D(Lx, Ly)
     atparams = AshkinTellerParameters(1., 0.)
     ham = BasicAshkinTellerHamiltonian(latt, atparams)
-    metroparams = MetropolisParameters{Float64}([1/temperature], 2^16, 2^20, 2^18)
+    metroparams = MetropolisParameters{Float64}([1/temperature], 2^16, 2^20, 2^16)
 
-    model = CleanNMRAshkinTellerModel( latt.params.Lx, latt.params.Ly, atparams.Jex, atparams.Kex, metroparams.total_measurements )
+    model = CleanNMRAshkinTellerModel( latt.params.Lx, latt.params.Ly, atparams.Jex, atparams.Kex, metroparams.total_measurements, SimulatingNMR.Out_of_Plane )
     return metroparams, model
 end
 

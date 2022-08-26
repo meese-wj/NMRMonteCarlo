@@ -5,6 +5,7 @@ include("AbstractSimulations.jl")
 # Automatically submodulizes this code
 import ..MonteCarloMethods: AbstractModel, AbstractMonteCarloParameters, thermalization_sweeps, sampling_sweeps, total_measurements, metropolis_sweep!
 import ..Models: CleanNMRAshkinTellerModel
+import ..SimulatingNMR
 
 export CleanNMRATMParameters, CleanNMRATMSimulation, thermalization_sweeps, sampling_sweeps, total_measurements
 
@@ -31,10 +32,11 @@ struct CleanNMRATMSimulation{T <: AbstractFloat} <: AbstractMCMCSimulation
 end
 
 function CleanNMRATMSimulation(; Lx = 8, Ly = Lx, Jex = 1.0, Kex = 0.0, 
-                                 Ntherm = 2^16, Lτ = 2^18, Nmeas = 2^16, βvalue = 1/2.269 )
+                                 Ntherm = 2^16, Lτ = 2^18, Nmeas = 2^16, βvalue = 1/2.269, 
+                                 nmr_spin_type = SimulatingNMR.Easy_Axis_In_Plane )
     Jex, Kex, βvalue = promote(Jex, Kex, βvalue)
     params = CleanNMRATMParameters{typeof(Jex)}( Lx, Ly, Jex, Kex, Ntherm, Lτ, Nmeas, βvalue )
-    model = CleanNMRAshkinTellerModel{typeof(Jex)}( Lx, Ly, Jex, Kex, Nmeas )
+    model = CleanNMRAshkinTellerModel{typeof(Jex)}( Lx, Ly, Jex, Kex, Nmeas, nmr_spin_type )
     return CleanNMRATMSimulation{typeof(Jex)}( params, model )
 end
 

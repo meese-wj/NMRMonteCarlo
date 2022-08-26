@@ -98,12 +98,13 @@ of the [`BaseATM_observable_types`](@ref) as `TimeSeries` and the set of local N
 spectra in each unit cell (Ω⁺, Ω⁻) as `AccumulatedSeries`.
 """
 struct CleanNMRAshkinTellerModel{T <: AbstractFloat} <: AbstractAshkinTellerModel
+    nmr_spin_type::Type
     lattice::CubicLattice2D
     hamiltonian::BasicAshkinTellerHamiltonian{T}
     observables::NMRObservables{T}
 
     CleanNMRAshkinTellerModel(args...) = CleanNMRAshkinTellerModel{Float64}(args...)
-    function CleanNMRAshkinTellerModel{T}( Lx, Ly, Jex = 1, Kex = 0, num_meas = 0 ) where T
+    function CleanNMRAshkinTellerModel{T}( Lx, Ly, Jex = 1, Kex = 0, num_meas = 0, spin_type = SimulatingNMR.Easy_Axis_In_Plane ) where T
         latt = CubicLattice2D(Int(Lx), Int(Ly))
         atparams = AshkinTellerParameters( T(Jex), T(Kex) )
         ham = BasicAshkinTellerHamiltonian(latt, atparams)
@@ -116,9 +117,9 @@ struct CleanNMRAshkinTellerModel{T <: AbstractFloat} <: AbstractAshkinTellerMode
             push!(acc_list, AccumulatedSeries{T}( "Site $(iter): Ω⁺", num_meas ))
             push!(acc_list, AccumulatedSeries{T}( "Site $(iter): Ω⁻", num_meas ))
         end
-        return new{T}( latt, ham, NMRObservables{T}( ts_list, acc_list ) )
+        return new{T}( spin_type, latt, ham, NMRObservables{T}( ts_list, acc_list ) )
     end
-    CleanNMRAshkinTellerModel{T}(params::CleanAshkinTellerModelParameters{T}) where T = CleanNMRAshkinTellerModel( params.Lx, params.Ly, params.Jex, params.Kex, params.num_measurements )
+    CleanNMRAshkinTellerModel{T}(params::CleanAshkinTellerModelParameters{T}, spin_type = SimulatingNMR.Easy_Axis_In_Plane) where T = CleanNMRAshkinTellerModel( params.Lx, params.Ly, params.Jex, params.Kex, params.num_measurements, spin_type )
 end
 
 @inline TimeSeriesObservables(model::CleanNMRAshkinTellerModel) = Observables(model).time_series_obs
@@ -133,7 +134,7 @@ function update_NMR_values!(model::CleanNMRAshkinTellerModel, ty)
     return AccumulatedSeriesObservables(model)
 end
 
-function update_observables!(model::CleanNMRAshkinTellerModel, ty = SimulatingNMR.Easy_Axis_In_Plane)
+function update_observables!(model::CleanNMRAshkinTellerModel, ty = model.nmr_spin_type)
     update_TimeSeriesObservables!(model)
     update_NMR_values!(model, ty)
     return Observables(model)
