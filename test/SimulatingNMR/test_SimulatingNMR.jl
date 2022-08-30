@@ -41,9 +41,11 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
 
     println("  Testing BaFe2As2 OOP & EAIP values")
     @time @testset "BaFe2As2 OOP & EAIP value tests" begin
-        OOP_vals =  ( 0., 1.6232, 2.9584, 3.5344 )
+        OOP_vals =  ( 2.9584, 1.4792, 0.0 )
+        OOP_degeneracies = (4, 8, 4)
+        
         EAIP_vals = ( 0., 2.4820, 2.9584, 6.9696 )
-        degeneracies = (4, 8, 2, 2)
+        EAIP_degeneracies = (4, 8, 2, 2)
 
         latt, atparams, ham = create_test_suite(NMRTests)
         
@@ -105,8 +107,8 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
             counts_EAIP = map( x -> count(==(x), calc_Ωvals_EAIP), unique_EAIP )
             @test all(unique_OOP  .== OOP_vals)
             @test all(unique_EAIP .== EAIP_vals)
-            @test all( counts_OOP .== degeneracies )
-            @test all( counts_EAIP .== degeneracies )
+            @test all( counts_OOP .== OOP_degeneracies )
+            @test all( counts_EAIP .== EAIP_degeneracies )
         end
 
         @testset "As⁻ atom tests" begin
@@ -167,8 +169,8 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
             counts_EAIP = map( x -> count(==(x), calc_Ωvals_EAIP), unique_EAIP )
             @test all(unique_OOP  .== OOP_vals)
             @test all(unique_EAIP .== EAIP_vals)
-            @test all( counts_OOP .== degeneracies )
-            @test all( counts_EAIP .== degeneracies )
+            @test all( counts_OOP .== OOP_degeneracies )
+            @test all( counts_EAIP .== EAIP_degeneracies )
         end
 
     end
