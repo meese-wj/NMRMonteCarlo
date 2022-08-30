@@ -45,18 +45,6 @@ const hyp_A4 = @SMatrix [ [ hyp_Aaa  hyp_Aab -hyp_Aac] ;
                           [-hyp_Aac -hyp_Aac  hyp_Acc] ]
 
 """
-    const rotation_mat
-
-This rotation matrix converts the spin-space coordinates
-of the As nuclear moment to the real-space coordinates
-where the crystallographic ̂b direction is the one chosen
-for the external NMR field.
-""" 
-const rotation_mat = @SMatrix [ [-1 0 0] ;
-                                [ 0 0 1] ;
-                                [ 0 1 0] ]
-
-"""
     const hyperfine_Amats
 
 A vector collecting of the hyperfine tensors as
@@ -132,8 +120,9 @@ const mag_vector_types = @SVector [Out_of_Plane, Easy_Axis_In_Plane, Spin_Orbit_
     mag_vector(::Type{<: AbstractNMRConstruct}, args...)
 
 Build the magnetic spin vector for a given [`AbstractNMRConstruct`] with respect to 
-its expected behavior in the crystallographic basis. Later, one uses the 
-[`rotation_mat`](@ref) to calculate the proxy spin-lattice relaxation rate.
+its expected behavior in the crystallographic basis. One must be careful about the 
+meaning of the ``x`` and ``y`` components of the internal field in **spin-space**
+in calculating the spin-lattice relaxation rate, for example in [`single_hyperfine_fluct`](@ref).
 """
 @inline mag_vector(ty::Type{T}, args...) where {T <: AbstractNMRConstruct} = throw(MethodError(mag_vector, ty, args...))
 """
@@ -205,8 +194,7 @@ end
 """
     hyperfine_plus(ty, ham, ::CubicLattice2D, site)
 
-Sum the set of hyperfine fields and then rotate them from the 
-crystallographic axes into the spin-space basis.
+Sum the set of hyperfine fields in real-space.
 
 # Arguments:
 
@@ -222,8 +210,7 @@ end
 """
     hyperfine_minus(ty, ham, ::CubicLattice2D, site)
 
-Sum the set of hyperfine fields and then rotate them from the 
-crystallographic axes into the spin-space basis.
+Sum the set of hyperfine fields in real-space.
 
 # Arguments:
 
