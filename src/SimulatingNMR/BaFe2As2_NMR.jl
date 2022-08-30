@@ -101,7 +101,8 @@ abstract type AbstractNMRConstruct end
 """
     struct Out_of_Plane <: AbstractNMRConstruct
 
-Construct `Type` denoting the Fe spin moments point out of the basal plane.
+Construct `Type` denoting the Fe spin moments point out of the basal plane
+with the external field applied in the same direction.
 
 See also [`mag_vector`](@ref) for specific implementations.
 """
