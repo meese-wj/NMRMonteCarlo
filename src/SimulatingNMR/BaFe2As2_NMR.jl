@@ -216,7 +216,7 @@ crystallographic axes into the spin-space basis.
 1. `site`: which unit cell to operate on
 """
 function hyperfine_plus(ty, ham, latt::CubicLattice2D, site )
-    return rotation_mat * sum( hyperfine_plus_vectors(ty, ham, latt, site) )
+    return sum( hyperfine_plus_vectors(ty, ham, latt, site) )
 end
 
 """
@@ -233,7 +233,7 @@ crystallographic axes into the spin-space basis.
 1. `site`: which unit cell to operate on
 """
 function hyperfine_minus(ty, ham, latt::CubicLattice2D, site )
-    return rotation_mat * sum( hyperfine_minus_vectors(ty, ham, latt, site ) )
+    return sum( hyperfine_minus_vectors(ty, ham, latt, site ) )
 end
 
 """
@@ -254,7 +254,7 @@ function hyperfine_fields(ty, ham, latt::CubicLattice2D, site )
 end
 
 @doc raw"""
-    single_hyperfine_fluct( field )
+    single_hyperfine_fluct(::Type{<: AbstractNMRConstruct}, field)
 
 Calculate the instantaneous `field` fluctuations that contribute to the NMR
 spin-lattice relaxation rate. For example, if the `field` is ``\vec{h}`` **in 
@@ -267,9 +267,13 @@ spin-space**, then the instantaneous proxy spin-lattice relaxation rate is
 !!! note 
     By definition, in **spin-space**, the ̂z direction points along the
     external field which doesn't couple to the As nuclear moment's 
-    raising and lowering operators.
+    raising and lowering operators. The definition of the ̂z direction
+    in spin-space follows from specific [`AbstractNMRConstruct`](@ref)s.
+    The default implementation is `x == 1` and `y == 3`. Specific 
+    implementations are required for non-default constructs.
 """
-single_hyperfine_fluct( field ) = field[1] * field[1] + field[2] * field[2]
+single_hyperfine_fluct(::Type{<: AbstractNMRConstruct}, field) = field[1] * field[1] + field[3] * field[3]
+single_hyperfine_fluct(::Type{Out_of_Plane}, field) = field[1] * field[1] + field[2] * field[2]
 
 """
     inst_hyperfine_fluctuations(ty, ham, ::CubicLattice2D, site)
@@ -286,5 +290,5 @@ unit cell.
 """
 function inst_hyperfine_fluctuations(ty, ham, latt::CubicLattice2D, site )
     fields = hyperfine_fields(ty, ham, latt, site)
-    return @SVector [ single_hyperfine_fluct(fields[1]), single_hyperfine_fluct(fields[2]) ]
+    return @SVector [ single_hyperfine_fluct(ty, fields[1]), single_hyperfine_fluct(ty, fields[2]) ]
 end
