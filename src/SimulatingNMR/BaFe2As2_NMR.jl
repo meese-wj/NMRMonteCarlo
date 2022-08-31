@@ -13,6 +13,13 @@ const hyp_Acc = 0.47
 const hyp_Aac = 0.43
 const hyp_Aab = 0.33
 
+const FeAs_diagram = raw"""
+    b
+Fe2 : Fe1
+    As ---> a
+Fe4   Fe3
+"""
+
 """
     const hyp_Aaa
 
@@ -54,7 +61,12 @@ A vector collecting of the hyperfine tensors as
 1. `hyp_A3` = $(hyp_A3)
 1. `hyp_A4` = $(hyp_A4)
 
-in that specific order.
+in that specific order. The numbering corresponds to 
+the following convention:
+
+$(FeAs_diagram)
+
+given by [Katagawa _et al._ J. Phys. Soc. Jpn. (2008)](https://journals.jps.jp/doi/10.1143/JPSJ.77.114709).
 """
 const hyperfine_Amats = @SVector [ hyp_A1, hyp_A2, hyp_A3, hyp_A4 ]
 
@@ -167,8 +179,8 @@ Return the set of four hyperfine field vectors for the `As_plus` atom of the [`A
 @inline function hyperfine_plus_vectors(ty, ham, latt::CubicLattice2D, site )
     Atau0     = hyperfine_Amats[4] * mag_vector(ty, ham, site, AT_tau)
     Atau0p1   = -hyperfine_Amats[1] * mag_vector(ty, ham, site_index(latt, site, (0, 1)), AT_tau)
-    Asigma0   = hyperfine_Amats[3] * mag_vector(ty, ham, site, AT_sigma)
-    Asigma1p0 = -hyperfine_Amats[2] * mag_vector(ty, ham, site_index(latt, site, (1, 0)), AT_sigma)
+    Asigma0   = hyperfine_Amats[2] * mag_vector(ty, ham, site, AT_sigma)
+    Asigma1p0 = -hyperfine_Amats[3] * mag_vector(ty, ham, site_index(latt, site, (1, 0)), AT_sigma)
     return @SVector [ Asigma0, Atau0, Asigma1p0, Atau0p1 ]
 end
 """
@@ -186,8 +198,8 @@ Return the set of four hyperfine field vectors for the `As_plus` atom of the [`A
 @inline function hyperfine_minus_vectors(ty, ham, latt::CubicLattice2D, site )
     Asigma0   = hyperfine_Amats[1] * mag_vector(ty, ham, site, AT_sigma)
     Asigma0m1 = -hyperfine_Amats[4] * mag_vector(ty, ham, site_index(latt, site, (0, -1)), AT_sigma)
-    Atau0     = hyperfine_Amats[2] * mag_vector(ty, ham, site, AT_tau)
-    Atau1m0   = -hyperfine_Amats[3] * mag_vector(ty, ham, site_index(latt, site, (-1, 0)), AT_tau)
+    Atau0     = hyperfine_Amats[3] * mag_vector(ty, ham, site, AT_tau)
+    Atau1m0   = -hyperfine_Amats[2] * mag_vector(ty, ham, site_index(latt, site, (-1, 0)), AT_tau)
     return @SVector [ Asigma0, Asigma0m1, Atau0, Atau1m0 ]
 end
 

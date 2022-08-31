@@ -41,13 +41,22 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
 
     println("  Testing BaFe2As2 OOP & EAIP values")
     @time @testset "BaFe2As2 OOP & EAIP value tests" begin
-        OOP_vals =  ( 2.9584, 1.4792, 0.0 )
-        OOP_degeneracies = (4, 8, 4)
+        OOP_vals =  [ 2.9584, 1.4792, 0.0 ]
+        OOP_degeneracies = [4, 8, 4]
         
-        EAIP_vals = ( 0., 2.4820, 2.9584, 6.9696 )
-        EAIP_degeneracies = (4, 8, 2, 2)
+        EAIP_vals = [ 2.9584, 2.4820, 0.0, 6.9696 ]
+        EAIP_degeneracies = [2, 8, 4, 2]
 
         latt, atparams, ham = create_test_suite(NMRTests)
+
+        function degeneracy_equality(a_arr, b_arr, deg_a, deg_b)
+            if size(deg_a) != size(deg_b) return false end
+            bool_arr = zeros(Bool, size(deg_a))
+            for (idx, val) ∈ enumerate(a_arr)
+                bool_arr[idx] = deg_a[idx] == deg_b[ findfirst(≈(val), b_arr) ]
+            end
+            return all(bool_arr)
+        end
         
         @testset "As⁺ atom tests" begin
             reset_spins!(ham, one(eltype(ham)))
@@ -100,15 +109,15 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
                 Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
                 push!(calc_Ωvals_EAIP, round(Ωvals[Ωval_idx], digits = 4))
             end
-            unique_OOP = sort( unique(calc_Ωvals_OOP); rev = true )
-            unique_EAIP = sort( unique(calc_Ωvals_EAIP) )
+            unique_OOP = unique(calc_Ωvals_OOP)
+            unique_EAIP = unique(calc_Ωvals_EAIP)
             
             counts_OOP  = map( x -> count(==(x), calc_Ωvals_OOP), unique_OOP )
             counts_EAIP = map( x -> count(==(x), calc_Ωvals_EAIP), unique_EAIP )
-            @test all(unique_OOP  .== OOP_vals)
-            @test all(unique_EAIP .== EAIP_vals)
-            @test all( counts_OOP .== OOP_degeneracies )
-            @test all( counts_EAIP .== EAIP_degeneracies )
+            @test unique_OOP ⊆ OOP_vals && OOP_vals ⊆ unique_OOP
+            @test unique_EAIP ⊆ EAIP_vals && EAIP_vals ⊆ unique_EAIP
+            @test degeneracy_equality(OOP_vals, unique_OOP, OOP_degeneracies, counts_OOP)
+            @test degeneracy_equality(EAIP_vals, unique_EAIP, EAIP_degeneracies, counts_EAIP)
         end
 
         @testset "As⁻ atom tests" begin
@@ -162,15 +171,15 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
                 Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
                 push!(calc_Ωvals_EAIP, round(Ωvals[Ωval_idx], digits = 4))
             end
-            unique_OOP = sort( unique(calc_Ωvals_OOP); rev = true )
-            unique_EAIP = sort( unique(calc_Ωvals_EAIP) )
+            unique_OOP = unique(calc_Ωvals_OOP)
+            unique_EAIP = unique(calc_Ωvals_EAIP)
             
             counts_OOP  = map( x -> count(==(x), calc_Ωvals_OOP), unique_OOP )
             counts_EAIP = map( x -> count(==(x), calc_Ωvals_EAIP), unique_EAIP )
-            @test all(unique_OOP  .== OOP_vals)
-            @test all(unique_EAIP .== EAIP_vals)
-            @test all( counts_OOP .== OOP_degeneracies )
-            @test all( counts_EAIP .== EAIP_degeneracies )
+            @test unique_OOP ⊆ OOP_vals && OOP_vals ⊆ unique_OOP
+            @test unique_EAIP ⊆ EAIP_vals && EAIP_vals ⊆ unique_EAIP
+            @test degeneracy_equality(OOP_vals, unique_OOP, OOP_degeneracies, counts_OOP)
+            @test degeneracy_equality(EAIP_vals, unique_EAIP, EAIP_degeneracies, counts_EAIP)
         end
 
     end
