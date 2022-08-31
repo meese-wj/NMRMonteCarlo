@@ -4,7 +4,7 @@ using DrWatson
 using MonteCarloMeasurementUncertainty
 import OnlineLogBinning: BinningAnalysisResult
 
-sim = CleanNMRATMSimulation(; Lx = 8, βvalue = 0.2, Ntherm =2^18)
+sim = CleanNMRATMSimulation(; Lx = 8, βvalue = 0.2, Ntherm =2^18, nmr_spin_type = Out_of_Plane)
 timer = @timed simulate!(sim)
 @info "Simulation time: $(round(timer.time; sigdigits=4)) seconds"
 mc_params = SimulationParameters(sim)

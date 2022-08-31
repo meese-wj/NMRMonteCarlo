@@ -63,34 +63,34 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
             
             Ωval_idx = 1
             # Check (σ0, τ0, σ(1,0), τ(0,1)) = (+1, +1, +1, +1)
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ OOP_vals[1]
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[1]
             
             # Check (σ0, τ0, σ(1,0), τ(0,1)) = (+1, +1, +1, -1)
             ham[site_index(latt, TestSite(NMRTests), (0, 1)), Hamiltonians.AT_tau] *= -1
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ OOP_vals[2]
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[2]
             reset_spins!(ham, one(eltype(ham)))
             
             # Check (σ0, τ0, σ(1,0), τ(0,1)) = (+1, -1, +1, -1)
             ham[site_index(latt, TestSite(NMRTests), (0, 0)), Hamiltonians.AT_tau] *= -1
             ham[site_index(latt, TestSite(NMRTests), (0, 1)), Hamiltonians.AT_tau] *= -1
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ OOP_vals[1]
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[3]
             reset_spins!(ham, one(eltype(ham)))
 
             # Check (σ0, τ0, σ(1,0), τ(0,1)) = (+1, +1, -1, -1)
             ham[site_index(latt, TestSite(NMRTests), (1, 0)), Hamiltonians.AT_sigma] *= -1
             ham[site_index(latt, TestSite(NMRTests), (0, 1)), Hamiltonians.AT_tau] *= -1
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ OOP_vals[3]
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[4]
             reset_spins!(ham, one(eltype(ham)))
 
@@ -104,9 +104,9 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
                 ham[site_index(latt, TestSite(NMRTests), (1, 0)), Hamiltonians.AT_sigma] = σ1p0
                 ham[site_index(latt, TestSite(NMRTests), (0, 1)), Hamiltonians.AT_sigma] = τ0p1
                 
-                Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+                Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
                 push!(calc_Ωvals_OOP, round(Ωvals[Ωval_idx], digits = 4))
-                Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+                Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
                 push!(calc_Ωvals_EAIP, round(Ωvals[Ωval_idx], digits = 4))
             end
             unique_OOP = unique(calc_Ωvals_OOP)
@@ -125,34 +125,34 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
 
             Ωval_idx = 2
             # Check (σ0, τ0, σ(0,-1), τ(-1,0)) = (+1, +1, +1, +1)
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ OOP_vals[1]
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[1]
             
             # Check (σ0, τ0, σ(0,-1), τ(-1,0)) = (+1, +1, +1, -1)
             ham[site_index(latt, TestSite(NMRTests), (-1, 0)), Hamiltonians.AT_tau] *= -1
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ OOP_vals[2]
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[2]
             reset_spins!(ham, one(eltype(ham)))
             
             # Check (σ0, τ0, σ(0,-1), τ(-1,0)) = (+1, -1, +1, -1)
             ham[site_index(latt, TestSite(NMRTests), (0, 0)), Hamiltonians.AT_tau] *= -1
             ham[site_index(latt, TestSite(NMRTests), (-1, 0)), Hamiltonians.AT_tau] *= -1
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ OOP_vals[1]
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[3]
             reset_spins!(ham, one(eltype(ham)))
 
             # Check (σ0, τ0, σ(0,-1), τ(-1,0)) = (+1, +1, -1, -1)
             ham[site_index(latt, TestSite(NMRTests), (0, -1)), Hamiltonians.AT_sigma] *= -1
             ham[site_index(latt, TestSite(NMRTests), (-1, 0)), Hamiltonians.AT_tau] *= -1
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ OOP_vals[3]
-            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+            Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[4]
             reset_spins!(ham, one(eltype(ham)))
 
@@ -166,9 +166,9 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
                 ham[site_index(latt, TestSite(NMRTests), (0, -1)), Hamiltonians.AT_sigma] = σ0m1
                 ham[site_index(latt, TestSite(NMRTests), (-1, 0)), Hamiltonians.AT_sigma] = τ1m0
                 
-                Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
+                Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Out_of_Plane, ham, latt, TestSite(NMRTests))
                 push!(calc_Ωvals_OOP, round(Ωvals[Ωval_idx], digits = 4))
-                Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
+                Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
                 push!(calc_Ωvals_EAIP, round(Ωvals[Ωval_idx], digits = 4))
             end
             unique_OOP = unique(calc_Ωvals_OOP)

@@ -6,7 +6,7 @@ import ..Lattices: CubicLattice2D, site_index
 using ..Hamiltonians
 import ..Hamiltonians: site_Baxter
 
-export inst_hyperfine_fluctuations, to_index, As_atom_index, As_atoms, As_plus, As_minus
+export inst_hyperfine_fluctuations, to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling
 
 const hyp_Aaa = 0.66
 const hyp_Acc = 0.47
