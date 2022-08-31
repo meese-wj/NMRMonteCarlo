@@ -154,7 +154,7 @@ md"""
 
 # ╔═╡ 1cb6a5b4-cc67-4282-aabc-b93d14de64c7
 begin
-	const Lvalue = 64
+	const Lvalue = 32
 	const Kvalue = 0.0
 end
 
@@ -167,6 +167,15 @@ beta_vals = LinRange(1/3, 1/2, Njobs)
 # ╔═╡ 97e04998-0a02-435a-8919-b860b54c0e24
 const Ncompleted = 50
 
+# ╔═╡ ba69f08e-d5f6-4b5a-98b4-1f826a39e892
+begin
+	idx = 1
+	temp_sim = CleanNMRATMSimulation(; Lx = Lvalue, Kex = Kvalue, 
+											   βvalue = beta_vals[idx], Ntherm = 2^20,
+											   Nmeas=2^18, Lτ = 2^18)
+	filename = savename("clean_temp_sweep_Out_of_Plane_", SimulationParameters(temp_sim) ) * "_#1.jld2"
+end
+
 # ╔═╡ f66a27d7-4df5-4af9-8498-ddf94606a490
 begin
 	agate_sims = CleanNMRATMSimulation{Float64}[]
@@ -174,7 +183,7 @@ begin
 		temp_sim = CleanNMRATMSimulation(; Lx = Lvalue, Kex = Kvalue, 
 										   βvalue = beta_vals[idx], Ntherm = 2^20,
 										   Nmeas=2^18, Lτ = 2^18)
-		filename = savename("clean_temp_sweep", SimulationParameters(temp_sim) ) * "_#1.jld2"
+		filename = savename("clean_temp_sweep_Out_of_Plane", SimulationParameters(temp_sim) ) * "_#1.jld2"
 		push!( agate_sims, JLD2.load_object( agatedatadir( filename ) ) )
 	end
 end
@@ -201,23 +210,33 @@ end
 
 # ╔═╡ 2967d4a8-2937-4d5a-9225-9a617ddfb947
 begin
-	Ωplot = plot( 1 ./ beta_vals[1:Ncompleted], mean.(job_ghists); legend=false,
+	Ωplot = plot( 1 ./ beta_vals[1:Ncompleted], mean.(job_ghists); label=nothing,
 		  		  xlabel = "Temperature", ylabel = "\$ \\bar{\\Omega} \$",
 		  		  markershape=:circle)
 	vline!(Ωplot, [2.269]; color = :orange, 
 		  label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
-	savefig(Ωplot, plotsdir("L=64_OmegaBar.png"))
+	hline!(Ωplot, [16*SimulatingNMR.hyp_Aac^2]; color = :purple,
+		   label = "\$ \\bar{\\Omega}(T \\rightarrow 0) \$", linewidth = 2)
+	hline!(Ωplot, [4*(SimulatingNMR.hyp_Aac^2 + SimulatingNMR.hyp_Aac^2)]; 
+		   color = :red, label = "\$ \\bar{\\Omega}(T \\rightarrow \\infty) \$",
+		   linewidth = 2)
+	savefig(Ωplot, plotsdir("L=$(Lvalue)_OmegaBar.png"))
 	Ωplot
 end
 
 # ╔═╡ cd7b7b5e-548a-4df3-9a0b-746785c2e651
 begin
-	T1Tplot = plot( 1 ./ beta_vals[1:Ncompleted], beta_vals[1:Ncompleted] .* mean.(job_ghists); legend=false,
+	T1Tplot = plot( 1 ./ beta_vals[1:Ncompleted], beta_vals[1:Ncompleted] .* mean.(job_ghists); label = nothing,
 		  		  xlabel = "Temperature", ylabel = "\$ \\bar{\\Omega} / T \$",
 		  		  markershape=:circle)
 	vline!(T1Tplot, [2.269]; color = :orange, 
 		  label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
-	# savefig(T1Tplot, plotsdir("L=64_T1T.png"))
+	plot!(T1Tplot, 1 ./ beta_vals, (16*SimulatingNMR.hyp_Aac^2) .* beta_vals; color = :purple,
+		   label = "\$ \\bar{\\Omega}(T \\rightarrow 0) \$", linewidth = 2)
+	plot!(T1Tplot, 1 ./ beta_vals, 4*(SimulatingNMR.hyp_Aac^2 + SimulatingNMR.hyp_Aac^2) .* beta_vals; 
+		   color = :red, label = "\$ \\bar{\\Omega}(T \\rightarrow \\infty) \$",
+		   linewidth = 2)
+	savefig(T1Tplot, plotsdir("L=$(Lvalue)_T1T.png"))
 	T1Tplot
 end
 
@@ -228,7 +247,7 @@ begin
 		  		   markershape=:circle)
 	vline!(ΔΩplot, [2.269]; color = :orange, 
 		   label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
-	# savefig(ΔΩplot, plotsdir("L=64_DeltaOmega.png"))
+	# savefig(ΔΩplot, plotsdir("L=$(Lvalue)_DeltaOmega.png"))
 	ΔΩplot
 end
 
@@ -292,6 +311,7 @@ analyze(agate_sims[1])
 # ╠═76278ec5-8559-40ce-90fd-b8a4f5f6bdf7
 # ╠═97e04998-0a02-435a-8919-b860b54c0e24
 # ╠═e3e8effc-0c7e-4739-94f2-e0a65f0c4381
+# ╠═ba69f08e-d5f6-4b5a-98b4-1f826a39e892
 # ╠═f66a27d7-4df5-4af9-8498-ddf94606a490
 # ╠═408bc59b-28aa-4453-a484-1c49167473ae
 # ╠═2967d4a8-2937-4d5a-9225-9a617ddfb947
