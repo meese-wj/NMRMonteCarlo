@@ -71,7 +71,7 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
             ham[site_index(latt, TestSite(NMRTests), (0, 0)), Hamiltonians.AT_tau] *= -1
             ham[site_index(latt, TestSite(NMRTests), (0, 1)), Hamiltonians.AT_tau] *= -1
             Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
-            @test Ωvals[Ωval_idx] ≈ OOP_vals[3]
+            @test Ωvals[Ωval_idx] ≈ OOP_vals[1]
             Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[3]
             reset_spins!(ham, one(eltype(ham)))
@@ -80,7 +80,7 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
             ham[site_index(latt, TestSite(NMRTests), (1, 0)), Hamiltonians.AT_sigma] *= -1
             ham[site_index(latt, TestSite(NMRTests), (0, 1)), Hamiltonians.AT_tau] *= -1
             Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
-            @test Ωvals[Ωval_idx] ≈ OOP_vals[4]
+            @test Ωvals[Ωval_idx] ≈ OOP_vals[3]
             Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[4]
             reset_spins!(ham, one(eltype(ham)))
@@ -100,7 +100,7 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
                 Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
                 push!(calc_Ωvals_EAIP, round(Ωvals[Ωval_idx], digits = 4))
             end
-            unique_OOP = sort( unique(calc_Ωvals_OOP) )
+            unique_OOP = sort( unique(calc_Ωvals_OOP); rev = true )
             unique_EAIP = sort( unique(calc_Ωvals_EAIP) )
             
             counts_OOP  = map( x -> count(==(x), calc_Ωvals_OOP), unique_OOP )
@@ -133,7 +133,7 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
             ham[site_index(latt, TestSite(NMRTests), (0, 0)), Hamiltonians.AT_tau] *= -1
             ham[site_index(latt, TestSite(NMRTests), (-1, 0)), Hamiltonians.AT_tau] *= -1
             Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
-            @test Ωvals[Ωval_idx] ≈ OOP_vals[3]
+            @test Ωvals[Ωval_idx] ≈ OOP_vals[1]
             Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[3]
             reset_spins!(ham, one(eltype(ham)))
@@ -142,7 +142,7 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
             ham[site_index(latt, TestSite(NMRTests), (0, -1)), Hamiltonians.AT_sigma] *= -1
             ham[site_index(latt, TestSite(NMRTests), (-1, 0)), Hamiltonians.AT_tau] *= -1
             Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Out_of_Plane, ham, latt, TestSite(NMRTests))
-            @test Ωvals[Ωval_idx] ≈ OOP_vals[4]
+            @test Ωvals[Ωval_idx] ≈ OOP_vals[3]
             Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
             @test Ωvals[Ωval_idx] ≈ EAIP_vals[4]
             reset_spins!(ham, one(eltype(ham)))
@@ -162,7 +162,7 @@ reset_spins!(ham, value) = for (iteration, val) ∈ enumerate(Hamiltonians.Itera
                 Ωvals = SimulatingNMR.inst_hyperfine_fluctuations(SimulatingNMR.Easy_Axis_In_Plane, ham, latt, TestSite(NMRTests))
                 push!(calc_Ωvals_EAIP, round(Ωvals[Ωval_idx], digits = 4))
             end
-            unique_OOP = sort( unique(calc_Ωvals_OOP) )
+            unique_OOP = sort( unique(calc_Ωvals_OOP); rev = true )
             unique_EAIP = sort( unique(calc_Ωvals_EAIP) )
             
             counts_OOP  = map( x -> count(==(x), calc_Ωvals_OOP), unique_OOP )
