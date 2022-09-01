@@ -16,19 +16,23 @@
     srun julia --threads=$SLURM_CPUS_PER_TASK clean_nmr_temp_sweep.jl
     exit
 =#
-
+using Pkg
 using DrWatson
 @quickactivate :NMRMonteCarlo
+Pkg.instantiate()
 
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 
-const Jex = 1.0
-const Kex = 0.5
-const Tc = critical_temperature(Jex, Kex)
-const βc = 1 / Tc
-const Δβ = 0.375
+@show const Jex = 1.0
+@show const Kex = 0.5
+@show const Tc = critical_temperature(Jex, Kex)
+@show const βc = 1 / Tc
+const dTLow = 0.125
+const dTHigh = 0.375
+@show const betaHigh = Tc - dTLow
+@show const betaLow = Tc + dTHigh
 
-beta_vals = LinRange( βc - 0.5 * Δβ, βc + 0.5 * Δβ, slurm_arr_length )
+beta_vals = LinRange( betaLow, betaHigh, slurm_arr_length )
 
 const my_index = parse(Int, ENV["SLURM_ARRAY_TASK_ID"])
 const my_beta::Float64 = beta_vals[my_index] 
