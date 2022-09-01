@@ -5,7 +5,7 @@ include("AbstractSimulations.jl")
 # Automatically submodulizes this code
 import ..MonteCarloMethods: AbstractModel, AbstractMonteCarloParameters, thermalization_sweeps, sampling_sweeps, total_measurements, metropolis_sweep!
 import ..Models: CleanNMRAshkinTellerModel
-import ..SimulatingNMR
+import ..SimulatingNMR: Easy_Axis_In_Plane
 
 export CleanNMRATMParameters, CleanNMRATMSimulation, thermalization_sweeps, sampling_sweeps, total_measurements
 

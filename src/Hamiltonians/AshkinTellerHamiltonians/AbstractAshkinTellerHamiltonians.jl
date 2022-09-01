@@ -3,12 +3,13 @@ import StaticArrays: @SVector, @MVector
 import Base: getindex, setindex!, to_index
 import ..Lattices: num_sites  # Automatically submodulizes this code
 import MuladdMacro: @muladd 
+using Roots: find_zero
 
 export 
 # Base overloads
        getindex, setindex!, eltype, length, to_index,
 # Ashkin-Teller functionality
-       num_colors, spins, AT_sigma, AT_tau, ColorIndex
+       num_colors, spins, AT_sigma, AT_tau, ColorIndex, critical_temperature
 
 ############################################################################
 #             Abstract Ashkin-Teller Hamiltonian Interface                 #
@@ -194,3 +195,34 @@ evaluated to `true`. This `Bool`ean may be, for example, the Metropolis acceptan
     ham[site, color_update(ham)] = condition ? -ham[site, color_update(ham)] : ham[site, color_update(ham)]
     return nothing
 end
+
+"""
+    TcFunction(T, Jex, Kex)
+
+Analytical function whose zeros are the critical points of the Ashkin-Teller Hamiltonian
+in 2D on a square lattice.
+"""
+TcFunction(T, Jex, Kex) = sinh( 2 * Jex / T ) - exp( -2 * Kex / T )
+
+"""
+    critical_temperature([::Type{<: AbstractTwoColorAshkinTellerHamiltonian}], Jex, Kex, [starting_point = 4.0 * Jex])
+
+Calculate the critical temperature for base/clean cases of the [`AbstractTwoColorAshkinTellerHamiltonian`](@ref) on a 
+square lattice in 2D.
+
+```jldoctest
+julia> Jex = 1.0
+1.0
+
+julia> Kex = 0.5 * Jex
+0.5
+
+julia> critical_temperature(Jex, Kex)
+3.0017774197047444
+```
+"""
+function critical_temperature(::Type{<: TwoC_ATH}, Jex, Kex, starting_point = 4.0 * Jex)
+    f = T -> TcFunction(T, Jex, Kex)
+    find_zero(f, starting_point)
+end
+critical_temperature(Jex, Kex) = critical_temperature(BasicAshkinTellerHamiltonian, Jex, Kex)

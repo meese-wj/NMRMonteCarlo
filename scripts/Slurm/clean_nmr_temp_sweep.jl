@@ -22,7 +22,13 @@ using DrWatson
 
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 
-beta_vals = LinRange( 1/3, 1/2, slurm_arr_length )
+const Jex = 1.0
+const Kex = 0.5
+const Tc = critical_temperature(Jex, Kex)
+const βc = 1 / Tc
+const Δβ = 0.375
+
+beta_vals = LinRange( βc - 0.5 * Δβ, βc + 0.5 * Δβ, slurm_arr_length )
 
 const my_index = parse(Int, ENV["SLURM_ARRAY_TASK_ID"])
 const my_beta::Float64 = beta_vals[my_index] 
@@ -36,7 +42,10 @@ println(sim)
 @info "End of the small simulation."
 
 @info "Starting real run."
-sim = CleanNMRATMSimulation(Lx = 64, βvalue= my_beta, Ntherm = 2^20, Nmeas = 2^18, nmr_spin_type = nmr_type)
+sim = CleanNMRATMSimulation(Jex = Jex, Kex = Kex, 
+                            Lx = 32, βvalue= my_beta,
+                            Ntherm = 2^20, Nmeas = 2^18, 
+                            nmr_spin_type = nmr_type)
 @show sim
 
 @timev simulate!(sim)
