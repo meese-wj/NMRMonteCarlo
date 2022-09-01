@@ -4,6 +4,9 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 53fba007-fdcd-4510-9778-728866a36f0d
+using Pkg
+
 # ╔═╡ bf2d7db5-eaa1-4631-879e-c07400d2cd6d
 using DrWatson
 
@@ -52,6 +55,9 @@ Start by loading the [`DrWatson`.jl](https://juliadynamics.github.io/DrWatson.jl
 	
 		to do the same thing.
 """
+
+# ╔═╡ 6c4f18e0-d4f7-4fca-bd20-1e3cb8ea5e53
+Pkg.instantiate()
 
 # ╔═╡ 5f32ec73-2d1d-42bd-9561-8a440bf05f65
 md"""
@@ -155,14 +161,20 @@ md"""
 # ╔═╡ 1cb6a5b4-cc67-4282-aabc-b93d14de64c7
 begin
 	const Lvalue = 32
-	const Kvalue = 0.0
+	const Kvalue = 0.5
+	const Tc = critical_temperature(1.0, Kvalue)
+	@show const βc = 1 / Tc
+	const dTLow = 0.125
+	const dTHigh = 0.375
+	@show const betaHigh = 1 / (Tc - dTLow)
+	@show const betaLow = 1 / (Tc + dTHigh)
 end
 
 # ╔═╡ 08df149d-6f09-474a-ac32-780b6d0c5340
 const Njobs = 50
 
 # ╔═╡ 76278ec5-8559-40ce-90fd-b8a4f5f6bdf7
-beta_vals = LinRange(1/3, 1/2, Njobs)
+beta_vals = LinRange(betaLow, betaHigh, Njobs)
 
 # ╔═╡ 97e04998-0a02-435a-8919-b860b54c0e24
 const Ncompleted = 50
@@ -171,9 +183,9 @@ const Ncompleted = 50
 begin
 	idx = 1
 	temp_sim = CleanNMRATMSimulation(; Lx = Lvalue, Kex = Kvalue, 
-											   βvalue = beta_vals[idx], Ntherm = 2^20,
-											   Nmeas=2^18, Lτ = 2^18)
-	filename = savename("clean_temp_sweep_Out_of_Plane_", SimulationParameters(temp_sim) ) * "_#1.jld2"
+									   βvalue = beta_vals[idx], Ntherm = 2^20,
+									   Nmeas=2^18, Lτ = 2^18)
+	filename = savename("clean_temp_sweep_Out_of_Plane", SimulationParameters(temp_sim) ) * "_#1.jld2"
 end
 
 # ╔═╡ f66a27d7-4df5-4af9-8498-ddf94606a490
@@ -188,17 +200,13 @@ begin
 	end
 end
 
-# ╔═╡ 0da7403b-4e72-4ee0-8389-843ce42fb2da
+# ╔═╡ 408bc59b-28aa-4453-a484-1c49167473ae
 begin
 	TSObs = Dict{String, Vector{Measurement{Float64}}}()
 	for ob ∈ Models.BaseATMTimeSeriesObs
 		TSObs[ob] = Measurement{Float64}[]
 	end
-	TSObs
-end
-
-# ╔═╡ 408bc59b-28aa-4453-a484-1c49167473ae
-begin
+	
 	job_ghists = GaussianHistogram{Float64}[]
 	for (idx, job) ∈ enumerate(agate_sims)
 		job_results = analyze(job)
@@ -265,7 +273,7 @@ begin
 	hline!(Ωplot, [4*(SimulatingNMR.hyp_Aac^2 + SimulatingNMR.hyp_Aac^2)]; 
 		   color = :red, label = "\$ \\bar{\\Omega}(T \\rightarrow \\infty) \$",
 		   linewidth = 2)
-	savefig(Ωplot, plotsdir("L=$(Lvalue)_OmegaBar.png"))
+	savefig(Ωplot, plotsdir("L=$(Lvalue)_K-$(Kvalue)_OmegaBar.png"))
 	Ωplot
 end
 
@@ -281,7 +289,7 @@ begin
 	plot!(T1Tplot, 1 ./ beta_vals, 4*(SimulatingNMR.hyp_Aac^2 + SimulatingNMR.hyp_Aac^2) .* beta_vals; 
 		   color = :red, label = "\$ \\bar{\\Omega}(T \\rightarrow \\infty) \$",
 		   linewidth = 2)
-	savefig(T1Tplot, plotsdir("L=$(Lvalue)_T1T.png"))
+	savefig(T1Tplot, plotsdir("L=$(Lvalue)_K-$(Kvalue)_T1T.png"))
 	T1Tplot
 end
 
@@ -292,7 +300,7 @@ begin
 		  		   markershape=:circle)
 	vline!(ΔΩplot, [2.269]; color = :orange, 
 		   label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
-	# savefig(ΔΩplot, plotsdir("L=$(Lvalue)_DeltaOmega.png"))
+	# savefig(ΔΩplot, plotsdir("L=$(Lvalue)_K-$(Kvalue)_DeltaOmega.png"))
 	ΔΩplot
 end
 
@@ -329,6 +337,8 @@ analyze(agate_sims[1])
 # ╠═bf2d7db5-eaa1-4631-879e-c07400d2cd6d
 # ╠═e18e91ba-791b-4bde-825e-502eee274aee
 # ╠═03f49b47-ef03-4b8a-97a3-9f1e84250ff5
+# ╠═53fba007-fdcd-4510-9778-728866a36f0d
+# ╠═6c4f18e0-d4f7-4fca-bd20-1e3cb8ea5e53
 # ╟─5f32ec73-2d1d-42bd-9561-8a440bf05f65
 # ╠═560f5e5b-3d5e-4605-b3fb-d4ba3365d7f8
 # ╟─c9be49e2-0581-46b3-9e3a-a6ff61434a9c
@@ -358,7 +368,6 @@ analyze(agate_sims[1])
 # ╠═e3e8effc-0c7e-4739-94f2-e0a65f0c4381
 # ╠═ba69f08e-d5f6-4b5a-98b4-1f826a39e892
 # ╠═f66a27d7-4df5-4af9-8498-ddf94606a490
-# ╠═0da7403b-4e72-4ee0-8389-843ce42fb2da
 # ╠═408bc59b-28aa-4453-a484-1c49167473ae
 # ╟─22447192-72b2-4346-8d88-2be3129b7f5c
 # ╠═b0bf7ed2-a005-47fd-a6ab-bf8c41ff0e10

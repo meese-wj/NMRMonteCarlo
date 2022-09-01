@@ -29,8 +29,8 @@ const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 @show const βc = 1 / Tc
 const dTLow = 0.125
 const dTHigh = 0.375
-@show const betaHigh = Tc - dTLow
-@show const betaLow = Tc + dTHigh
+@show const betaHigh = 1 / (Tc - dTLow)
+@show const betaLow = 1 / (Tc + dTHigh)
 
 beta_vals = LinRange( betaLow, betaHigh, slurm_arr_length )
 
