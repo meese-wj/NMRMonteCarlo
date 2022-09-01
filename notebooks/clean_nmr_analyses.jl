@@ -188,6 +188,15 @@ begin
 	end
 end
 
+# ╔═╡ 0da7403b-4e72-4ee0-8389-843ce42fb2da
+begin
+	TSObs = Dict{String, Vector{Measurement{Float64}}}()
+	for ob ∈ Models.BaseATMTimeSeriesObs
+		TSObs[ob] = Measurement{Float64}[]
+	end
+	TSObs
+end
+
 # ╔═╡ 408bc59b-28aa-4453-a484-1c49167473ae
 begin
 	job_ghists = GaussianHistogram{Float64}[]
@@ -195,18 +204,54 @@ begin
 		job_results = analyze(job)
 		temp_ghist = GaussianHistogram()
 		failures = zero(Int)
-		for obs_idx ∈ start_idx:length(Observables(job))
-			push!(temp_ghist, measurement(job_results[obs_idx]))
-			# if job_results[obs_idx].plateau_found
-			# 	push!(temp_ghist, measurement(job_results[obs_idx]))
-			# else
-			# 	failures += one(failures)
-			# end
+		for obs_idx ∈ 1:length(Observables(job))
+			if obs_idx < start_idx
+				push!(TSObs[Models.BaseATMTimeSeriesObs[obs_idx]], measurement(job_results[obs_idx]))
+			else
+				push!(temp_ghist, measurement(job_results[obs_idx]))
+				# if job_results[obs_idx].plateau_found
+				# 	push!(temp_ghist, measurement(job_results[obs_idx]))
+				# else
+				# 	failures += one(failures)
+				# end
+			end
 		end
 		# @show idx, beta_vals[idx], failures
 		push!(job_ghists, temp_ghist)
 	end
 end
+
+# ╔═╡ 22447192-72b2-4346-8d88-2be3129b7f5c
+md"""
+### Ashkin-Teller Model Time Series Observables
+"""
+
+# ╔═╡ b0bf7ed2-a005-47fd-a6ab-bf8c41ff0e10
+function plot_observable(observable_name, xaxis, yaxis; xlabel = "Temperature", Tc = 2.269, legend_position = :top)
+	plt = plot(xaxis, yaxis; ylabel = observable_name, markershape = :circle, label = nothing, legend = legend_position)
+	vline!(plt, [Tc]; color = :orange, linestyle = :dash, linewidth = 2.5, xlabel = xlabel, z_order = :back, label = "\$ T_c = $(Tc)\\, J\$")
+	return plt
+end
+
+# ╔═╡ 71c55127-3160-46da-a436-0dd618799285
+plot_observable("Energy per site", 1 ./ beta_vals, TSObs["Energy"])
+
+# ╔═╡ 4e1d9402-5140-476b-aadc-e5df22ae80cb
+plot_observable("Energy² per site", 1 ./ beta_vals, TSObs["Energy2"])
+
+# ╔═╡ 2e344977-272f-478e-aa25-c07bf75dcd0c
+plot_observable("\$ \\langle \\sigma \\rangle \$", 1 ./ beta_vals, TSObs["Sigma"])
+
+# ╔═╡ a6ddcaf6-b697-4626-abb7-804f4670fad0
+plot_observable("\$ \\langle \\tau \\rangle \$", 1 ./ beta_vals, TSObs["Tau"])
+
+# ╔═╡ 277f8394-a349-4168-875d-7f35ba2769aa
+plot_observable("\$ \\langle \\sigma\\tau \\rangle \$", 1 ./ beta_vals, TSObs["Baxter"])
+
+# ╔═╡ 4d8a0d8b-06da-4f64-babd-ad96b24bd928
+md"""
+### Proxy Spin-Lattice Relaxation Rate
+"""
 
 # ╔═╡ 2967d4a8-2937-4d5a-9225-9a617ddfb947
 begin
@@ -313,7 +358,16 @@ analyze(agate_sims[1])
 # ╠═e3e8effc-0c7e-4739-94f2-e0a65f0c4381
 # ╠═ba69f08e-d5f6-4b5a-98b4-1f826a39e892
 # ╠═f66a27d7-4df5-4af9-8498-ddf94606a490
+# ╠═0da7403b-4e72-4ee0-8389-843ce42fb2da
 # ╠═408bc59b-28aa-4453-a484-1c49167473ae
+# ╟─22447192-72b2-4346-8d88-2be3129b7f5c
+# ╠═b0bf7ed2-a005-47fd-a6ab-bf8c41ff0e10
+# ╠═71c55127-3160-46da-a436-0dd618799285
+# ╠═4e1d9402-5140-476b-aadc-e5df22ae80cb
+# ╠═2e344977-272f-478e-aa25-c07bf75dcd0c
+# ╠═a6ddcaf6-b697-4626-abb7-804f4670fad0
+# ╠═277f8394-a349-4168-875d-7f35ba2769aa
+# ╟─4d8a0d8b-06da-4f64-babd-ad96b24bd928
 # ╠═2967d4a8-2937-4d5a-9225-9a617ddfb947
 # ╠═cd7b7b5e-548a-4df3-9a0b-746785c2e651
 # ╠═d860b4c3-9753-40a2-8532-7592d60a3962
