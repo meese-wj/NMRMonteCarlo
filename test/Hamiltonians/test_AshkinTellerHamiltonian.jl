@@ -120,6 +120,21 @@ end
     end
     println()
 
+    println("  Critical Temperatures")
+    @time @testset "Critical Temperatures" begin
+        Jex = 1.0
+        Kvals = [ 0., 0.5, 1.0 ]
+        TcKnowns = [ 2 * Jex / asinh(1.0), 3.0017774197047444, 3.6409569065073497 ]
+        for (idx, Kex) ∈ enumerate(Kvals)
+            value = critical_temperature(Jex, Kex * Jex)
+            @test value ≈ TcKnowns[idx]
+            bm = @benchmark critical_temperature($Jex, $(Kex * Jex))
+            @test bm.memory == zero(bm.memory)
+            @test bm.allocs == zero(bm.allocs)
+        end
+    end
+    println()
+
     println("  Total testset timing:")
 end
 @info "End of BasicAshkinTellerHamiltonian tests."
