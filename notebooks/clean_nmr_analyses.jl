@@ -242,19 +242,27 @@ function plot_observable(observable_name, xaxis, yaxis; xlabel = "Temperature", 
 end
 
 # ╔═╡ 71c55127-3160-46da-a436-0dd618799285
-plot_observable("Energy per site", 1 ./ beta_vals, TSObs["Energy"])
+plot_observable("Energy per site", 1 ./ beta_vals, TSObs["Energy"], Tc = round(Tc; digits = 3))
 
 # ╔═╡ 4e1d9402-5140-476b-aadc-e5df22ae80cb
-plot_observable("Energy² per site", 1 ./ beta_vals, TSObs["Energy2"])
+begin
+	begin
+		plt = plot_observable("Energy² per site", 1 ./ beta_vals, TSObs["Energy2"], Tc = round(Tc; digits = 3))
+		plot!( plt, 1 ./ beta_vals, TSObs["Energy"] .^ 2; markershape = :square, label = "\$ \\langle E \\rangle^2 \$" )
+	end
+end
+
+# ╔═╡ 57416b8d-1cd1-4029-8c25-5740ba4f5078
+plot_observable("\$ \\Delta E\$", 1 ./ beta_vals, TSObs["Energy2"] .- TSObs["Energy"] .^ 2, Tc = round(Tc; digits = 3))
 
 # ╔═╡ 2e344977-272f-478e-aa25-c07bf75dcd0c
-plot_observable("\$ \\langle \\sigma \\rangle \$", 1 ./ beta_vals, TSObs["Sigma"])
+plot_observable("\$ \\langle \\sigma \\rangle \$", 1 ./ beta_vals, TSObs["Sigma"], Tc = round(Tc; digits = 3))
 
 # ╔═╡ a6ddcaf6-b697-4626-abb7-804f4670fad0
-plot_observable("\$ \\langle \\tau \\rangle \$", 1 ./ beta_vals, TSObs["Tau"])
+plot_observable("\$ \\langle \\tau \\rangle \$", 1 ./ beta_vals, TSObs["Tau"], Tc = round(Tc; digits = 3))
 
 # ╔═╡ 277f8394-a349-4168-875d-7f35ba2769aa
-plot_observable("\$ \\langle \\sigma\\tau \\rangle \$", 1 ./ beta_vals, TSObs["Baxter"])
+plot_observable("\$ \\langle \\sigma\\tau \\rangle \$", 1 ./ beta_vals, TSObs["Baxter"], Tc = round(Tc; digits = 3))
 
 # ╔═╡ 4d8a0d8b-06da-4f64-babd-ad96b24bd928
 md"""
@@ -266,8 +274,8 @@ begin
 	Ωplot = plot( 1 ./ beta_vals[1:Ncompleted], mean.(job_ghists); label=nothing,
 		  		  xlabel = "Temperature", ylabel = "\$ \\bar{\\Omega} \$",
 		  		  markershape=:circle)
-	vline!(Ωplot, [2.269]; color = :orange, 
-		  label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
+	vline!(Ωplot, [Tc]; color = :orange, 
+		  label = "\$ T_c = $(round(Tc; digits = 3))\\, J\$", linestyle = :dash, linewidth = 2 )
 	hline!(Ωplot, [16*SimulatingNMR.hyp_Aac^2]; color = :purple,
 		   label = "\$ \\bar{\\Omega}(T \\rightarrow 0) \$", linewidth = 2)
 	hline!(Ωplot, [4*(SimulatingNMR.hyp_Aac^2 + SimulatingNMR.hyp_Aac^2)]; 
@@ -282,8 +290,8 @@ begin
 	T1Tplot = plot( 1 ./ beta_vals[1:Ncompleted], beta_vals[1:Ncompleted] .* mean.(job_ghists); label = nothing,
 		  		  xlabel = "Temperature", ylabel = "\$ \\bar{\\Omega} / T \$",
 		  		  markershape=:circle)
-	vline!(T1Tplot, [2.269]; color = :orange, 
-		  label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
+	vline!(T1Tplot, [Tc]; color = :orange, 
+		  label = "\$ T_c = $(round(Tc; digits = 3))\\, J\$", linestyle = :dash, linewidth = 2 )
 	plot!(T1Tplot, 1 ./ beta_vals, (16*SimulatingNMR.hyp_Aac^2) .* beta_vals; color = :purple,
 		   label = "\$ \\bar{\\Omega}(T \\rightarrow 0) \$", linewidth = 2)
 	plot!(T1Tplot, 1 ./ beta_vals, 4*(SimulatingNMR.hyp_Aac^2 + SimulatingNMR.hyp_Aac^2) .* beta_vals; 
@@ -298,8 +306,8 @@ begin
 	ΔΩplot = plot( 1 ./ beta_vals[1:Ncompleted], std.(job_ghists); legend=false,
 		  		   xlabel = "Temperature", ylabel = "\$ \\Delta \\Omega \$",
 		  		   markershape=:circle)
-	vline!(ΔΩplot, [2.269]; color = :orange, 
-		   label = "\$ T_c = 2.269\\, J\$", linestyle = :dash, linewidth = 2 )
+	vline!(ΔΩplot, [Tc]; color = :orange, 
+		   label = "\$ T_c = $(round(Tc; digits = 3))\\, J\$", linestyle = :dash, linewidth = 2 )
 	# savefig(ΔΩplot, plotsdir("L=$(Lvalue)_K-$(Kvalue)_DeltaOmega.png"))
 	ΔΩplot
 end
@@ -373,6 +381,7 @@ analyze(agate_sims[1])
 # ╠═b0bf7ed2-a005-47fd-a6ab-bf8c41ff0e10
 # ╠═71c55127-3160-46da-a436-0dd618799285
 # ╠═4e1d9402-5140-476b-aadc-e5df22ae80cb
+# ╠═57416b8d-1cd1-4029-8c25-5740ba4f5078
 # ╠═2e344977-272f-478e-aa25-c07bf75dcd0c
 # ╠═a6ddcaf6-b697-4626-abb7-804f4670fad0
 # ╠═277f8394-a349-4168-875d-7f35ba2769aa
