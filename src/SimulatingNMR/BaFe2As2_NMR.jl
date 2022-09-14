@@ -129,7 +129,7 @@ struct Spin_Orbit_Coupling <: AbstractNMRConstruct end
 const mag_vector_types = @SVector [Out_of_Plane, Easy_Axis_In_Plane, Spin_Orbit_Coupling]
 
 """
-    spin_space(::Type{<: AbstractNMRConstruct}, component::Type{Val{<: Int}}, hvec)
+    spin_space(::Type{<: AbstractNMRConstruct}, component::Type{Val{<: Char}}, hvec)
 
 Define the default spin-space `component`s for a given [`AbstractNMRConstruct`](@ref)
 relative to the crystallographic axes of the 1-Fe unit cell.
@@ -139,12 +139,12 @@ defines the spin-space ̂z to be along the ̂b direction. Defining ̂a == ̂x, t
 clockwise about the ̂x axis yields the right transformation. This makes the following true:
 ̂a == ̂x, ̂b == ̂z, ̂c == -̂y.
 """
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{1}}, hvec) = hvec[1] 
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{2}}, hvec) = hvec[3] 
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{3}}, hvec) = -hvec[2] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'x'}}, hvec) = hvec[1] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'y'}}, hvec) = hvec[3] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'z'}}, hvec) = -hvec[2] 
 
 """
-    spin_space(::Type{Out_of_Plane}, component::Type{Val{<: Int}}, hvec)
+    spin_space(::Type{Out_of_Plane}, component::Type{Val{<: Char}}, hvec)
 
 Overwrite the default the spin-space `component`s for the [`Out_of_Plane`](@ref)
 NMR construct relative to the crystallographic axes of the 1-Fe unit cell.
@@ -152,9 +152,9 @@ NMR construct relative to the crystallographic axes of the 1-Fe unit cell.
 In this case, the external field applied along the ̂c direction. This defines the spin-space
 z to be along the ̂c direction. Thus, the crystallographic and spin-space axes are coincident.
 """
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{1}}, hvec) = hvec[1] 
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{2}}, hvec) = hvec[2] 
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{3}}, hvec) = hvec[3] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'x'}}, hvec) = hvec[1] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'y'}}, hvec) = hvec[2] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'z'}}, hvec) = hvec[3] 
 
 """
     mag_vector(::Type{<: AbstractNMRConstruct}, args...)
@@ -321,9 +321,14 @@ spin-space**, then the instantaneous proxy spin-lattice relaxation rate is
     The default implementation is `x == 1` and `y == 3`. Specific 
     implementations are required for non-default constructs.
 """
-single_hyperfine_fluct(::Type{<: AbstractNMRConstruct}, field) = field[1] * field[1] + field[3] * field[3]
-single_hyperfine_fluct(::Type{Out_of_Plane}, field) = field[1] * field[1] + field[2] * field[2]
-
+function single_hyperfine_fluct(ty::Type{<: AbstractNMRConstruct}, field)
+    hx, hy = (spin_space(ty, Val{'x'}, field), spin_space(ty, Val{'y'}, field))
+    return hx * hx + hy * hy
+end
+function single_hyperfine_fluct(::Type{Out_of_Plane}, field) 
+    hx, hy = (spin_space(Out_of_Plane, Val{'x'}, field), spin_space(Out_of_Plane, Val{'y'}, field))
+    return hx * hx + hy * hy
+end
 """
     inst_hyperfine_fluctuations(ty, ham, ::CubicLattice2D, site)
 
