@@ -129,11 +129,39 @@ struct Spin_Orbit_Coupling <: AbstractNMRConstruct end
 const mag_vector_types = @SVector [Out_of_Plane, Easy_Axis_In_Plane, Spin_Orbit_Coupling]
 
 """
+    spin_space(::Type{<: AbstractNMRConstruct}, component::Type{Val{<: Int}}, hvec)
+
+Define the default spin-space `component`s for a given [`AbstractNMRConstruct`](@ref)
+relative to the crystallographic axes of the 1-Fe unit cell.
+
+The default will be taken with the external field applied along the ̂b direction. This 
+defines the spin-space ̂z to be along the ̂b direction. Defining ̂a == ̂x, then a 90° rotation
+clockwise about the ̂x axis yields the right transformation. This makes the following true:
+̂a == ̂x, ̂b == ̂z, ̂c == -̂y.
+"""
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{1}}, hvec) = hvec[1] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{2}}, hvec) = hvec[3] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{3}}, hvec) = -hvec[2] 
+
+"""
+    spin_space(::Type{Out_of_Plane}, component::Type{Val{<: Int}}, hvec)
+
+Overwrite the default the spin-space `component`s for the [`Out_of_Plane`](@ref)
+NMR construct relative to the crystallographic axes of the 1-Fe unit cell.
+
+In this case, the external field applied along the ̂c direction. This defines the spin-space
+z to be along the ̂c direction. Thus, the crystallographic and spin-space axes are coincident.
+"""
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{1}}, hvec) = hvec[1] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{2}}, hvec) = hvec[2] 
+spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{3}}, hvec) = hvec[3] 
+
+"""
     mag_vector(::Type{<: AbstractNMRConstruct}, args...)
 
 Build the magnetic spin vector for a given [`AbstractNMRConstruct`] with respect to 
 its expected behavior in the crystallographic basis. One must be careful about the 
-meaning of the ``x`` and ``y`` components of the internal field in **spin-space**
+meaning of the ``x`` and ``y`` components of the internal field in [`spin_space`](@ref)
 in calculating the spin-lattice relaxation rate, for example in [`single_hyperfine_fluct`](@ref).
 """
 @inline mag_vector(ty::Type{T}, args...) where {T <: AbstractNMRConstruct} = throw(MethodError(mag_vector, ty, args...))
@@ -250,6 +278,28 @@ the As atoms within a unit cell.
 """
 function hyperfine_fields(ty, ham, latt::CubicLattice2D, site )
     return @SVector [ hyperfine_plus(ty, ham, latt, site), hyperfine_minus(ty, ham, latt, site) ]
+end
+
+"""
+    hyperfine_field_parts_to_save(ty, hyp)
+
+Return the set of observables to save from a specific hyperfine field.
+The specific order of the observables in the return Tuple are
+
+```math
+(|h_x|, |h_y|, h_x^2, h_y^2)
+```
+
+where ``x`` and ``y`` are defined in [`spin_space`](@ref).
+
+# Arguments:
+
+1. `ty::Type{<: AbstractNMRConstruct}`: defines which magnetic spin construct to implement
+1. `hyp::SVector{3}`: the hyperfine field in question
+"""
+function hyperfine_field_parts_to_save(ty, hyp)
+    hx, hy = spin_space(ty, Val{1}, hyp), spin_space(ty, Val{2}, hyp)
+    return abs(hx), abs(hy), hx * hx, hy * hy
 end
 
 @doc raw"""
