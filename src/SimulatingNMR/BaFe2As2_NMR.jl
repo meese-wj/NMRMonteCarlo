@@ -6,7 +6,7 @@ import ..Lattices: CubicLattice2D, site_index
 using ..Hamiltonians
 import ..Hamiltonians: site_Baxter
 
-export inst_hyperfine_fluctuations, inst_hyperfine_observables, NMR_OBS_PER_AS,
+export inst_hyperfine_fluctuations, inst_hyperfine_observables, NMR_OBS_PER_AS, hyperfine_field_susceptibility,
        to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling
 
 const hyp_Aaa = 0.66
@@ -303,6 +303,18 @@ function hyperfine_field_parts_to_save(ty, hyp)
     hx, hy = spin_space(ty, Val{'x'}, hyp), spin_space(ty, Val{'y'}, hyp)
     return abs(hx), abs(hy), hx * hx, hy * hy
 end
+@doc raw"""
+    hyperfine_field_susceptibility(hyperfine_tuple)
+
+Compute the susceptibility for the hyperfine field that contributes to 
+the spin-lattice relaxation rate. Note that this quantity is a *proxy*
+in that it represents proportionality as
+
+```math
+\frac{1}{T_1} \propto \sum_{\alpha = x,y} \chi_{\alpha\alpha}^{(h)} \equiv \sum_{\alpha = x,y} \langle h_\alpha^2 \rangle - \langle |h_\alpha |\rangle^2.
+```
+"""
+hyperfine_field_susceptibility(hyperfine_tuple) = ( abshx, abshy, hx2, hy2 = hyperfine_tuple; (hx2 - abshx * abshx) + (hy2 - abshy * abshy) ) 
 
 """
     inst_hyperfine_observables(ty, ham, ::CubicLattice2D, site)
