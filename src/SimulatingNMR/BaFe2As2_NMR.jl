@@ -302,6 +302,24 @@ function hyperfine_field_parts_to_save(ty, hyp)
     return abs(hx), abs(hy), hx * hx, hy * hy
 end
 
+"""
+    inst_hyperfine_observables(ty, ham, ::CubicLattice2D, site)
+
+Return the pair of hyperfine observables in a single 
+unit cell. 
+
+# Arguments
+
+1. `ty::Type{<: AbstractNMRConstruct}`: defines which magnetic spin construct to implement
+1. `ham`: the Hamiltonian of spins
+1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
+1. `site`: which unit cell to operate on
+"""
+function inst_hyperfine_fluctuations(ty, ham, latt::CubicLattice2D, site )
+    fields = hyperfine_fields(ty, ham, latt, site)
+    return @SVector [ hyperfine_field_parts_to_save(ty, fields[1]), hyperfine_field_parts_to_save(ty, fields[2]) ]
+end
+
 @doc raw"""
     single_hyperfine_fluct(::Type{<: AbstractNMRConstruct}, field)
 
