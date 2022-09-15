@@ -135,6 +135,8 @@ end
 @inline TimeSeriesObservables(model::CleanNMRAshkinTellerModel) = Observables(model).time_series_obs
 @inline AccumulatedSeriesObservables(model::CleanNMRAshkinTellerModel) = Observables(model).acc_series_obs
 
+@inline nmr_observable_index(site, As_sign, ob) = NMR_OBS_PER_AS * (As_atom_index(site, As_sign) - one(NMR_OBS_PER_AS)) + ob
+
 function update_NMR_values!(model::CleanNMRAshkinTellerModel, ty)
     for (site, val) ∈ enumerate(IterateBySite, Hamiltonian(model))
         hyp_obs_tup = inst_hyperfine_observables(ty, Hamiltonian(model), Lattice(model), site)
@@ -142,7 +144,7 @@ function update_NMR_values!(model::CleanNMRAshkinTellerModel, ty)
         # push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_plus)],  Ωvals[As_plus] )
         # push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_minus)], Ωvals[As_minus] )
         for (hyp_obs, As_sign)  ∈ zip(hyp_obs_tup, (As_plus, As_minus)), ob ∈ (1:4)  
-            push!( AccumulatedSeriesObservables(model)[4 * (As_atom_index(site, As_sign) - 1) + ob],  hyp_obs[ob] )
+            push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_sign, ob)],  hyp_obs[ob] )
         end
     end
     return AccumulatedSeriesObservables(model)

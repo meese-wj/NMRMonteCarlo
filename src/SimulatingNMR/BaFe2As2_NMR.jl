@@ -6,7 +6,7 @@ import ..Lattices: CubicLattice2D, site_index
 using ..Hamiltonians
 import ..Hamiltonians: site_Baxter
 
-export inst_hyperfine_fluctuations, inst_hyperfine_observables, 
+export inst_hyperfine_fluctuations, inst_hyperfine_observables, NMR_OBS_PER_AS,
        to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling
 
 const hyp_Aaa = 0.66
@@ -281,6 +281,7 @@ function hyperfine_fields(ty, ham, latt::CubicLattice2D, site )
     return @SVector [ hyperfine_plus(ty, ham, latt, site), hyperfine_minus(ty, ham, latt, site) ]
 end
 
+const NMR_OBS_PER_AS = 4
 """
     hyperfine_field_parts_to_save(ty, hyp)
 
@@ -299,7 +300,7 @@ where ``x`` and ``y`` are defined in [`spin_space`](@ref).
 1. `hyp::SVector{3}`: the hyperfine field in question
 """
 function hyperfine_field_parts_to_save(ty, hyp)
-    hx, hy = spin_space(ty, Val{1}, hyp), spin_space(ty, Val{2}, hyp)
+    hx, hy = spin_space(ty, Val{'x'}, hyp), spin_space(ty, Val{'y'}, hyp)
     return abs(hx), abs(hy), hx * hx, hy * hy
 end
 
