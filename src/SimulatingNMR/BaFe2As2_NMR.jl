@@ -6,7 +6,8 @@ import ..Lattices: CubicLattice2D, site_index
 using ..Hamiltonians
 import ..Hamiltonians: site_Baxter
 
-export inst_hyperfine_fluctuations, to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling
+export inst_hyperfine_fluctuations, inst_hyperfine_observables, 
+       to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling
 
 const hyp_Aaa = 0.66
 const hyp_Acc = 0.47
@@ -315,7 +316,7 @@ unit cell.
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function inst_hyperfine_fluctuations(ty, ham, latt::CubicLattice2D, site )
+function inst_hyperfine_observables(ty, ham, latt::CubicLattice2D, site )
     fields = hyperfine_fields(ty, ham, latt, site)
     return @SVector [ hyperfine_field_parts_to_save(ty, fields[1]), hyperfine_field_parts_to_save(ty, fields[2]) ]
 end

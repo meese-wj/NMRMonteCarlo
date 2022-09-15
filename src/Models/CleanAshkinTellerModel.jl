@@ -114,8 +114,18 @@ struct CleanNMRAshkinTellerModel{T <: AbstractFloat} <: AbstractAshkinTellerMode
         end
         acc_list = AccumulatedSeries{T}[]
         for (iter, val) ∈ enumerate(IterateBySite, ham)
-            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): Ω⁺", num_meas ))
-            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): Ω⁻", num_meas ))
+            # push!(acc_list, AccumulatedSeries{T}( "Site $(iter): Ω⁺", num_meas ))
+            # push!(acc_list, AccumulatedSeries{T}( "Site $(iter): Ω⁻", num_meas ))
+            
+            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): |hx⁺|", num_meas ))
+            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): |hy⁺|", num_meas ))
+            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): (hx⁺)²", num_meas ))
+            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): (hy⁺)²", num_meas ))
+            
+            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): |hx⁻|", num_meas ))
+            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): |hy⁻|", num_meas ))
+            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): (hx⁻)²", num_meas ))
+            push!(acc_list, AccumulatedSeries{T}( "Site $(iter): (hy⁻)²", num_meas ))
         end
         return new{T}( spin_type, latt, ham, NMRObservables{T}( ts_list, acc_list ) )
     end
@@ -127,9 +137,13 @@ end
 
 function update_NMR_values!(model::CleanNMRAshkinTellerModel, ty)
     for (site, val) ∈ enumerate(IterateBySite, Hamiltonian(model))
-        Ωvals = inst_hyperfine_fluctuations(ty, Hamiltonian(model), Lattice(model), site)
-        push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_plus)],  Ωvals[As_plus] )
-        push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_minus)], Ωvals[As_minus] )
+        hyp_obs_tup = inst_hyperfine_observables(ty, Hamiltonian(model), Lattice(model), site)
+        # Ωvals = inst_hyperfine_fluctuations(ty, Hamiltonian(model), Lattice(model), site)
+        # push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_plus)],  Ωvals[As_plus] )
+        # push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_minus)], Ωvals[As_minus] )
+        for (hyp_obs, As_sign)  ∈ zip(hyp_obs_tup, (As_plus, As_minus)), ob ∈ (1:4)  
+            push!( AccumulatedSeriesObservables(model)[4 * (As_atom_index(site, As_sign) - 1) + ob],  hyp_obs[ob] )
+        end
     end
     return AccumulatedSeriesObservables(model)
 end
