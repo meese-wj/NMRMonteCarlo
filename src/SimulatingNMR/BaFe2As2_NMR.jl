@@ -314,7 +314,7 @@ in that it represents proportionality as
 \frac{1}{T_1} \propto \sum_{\alpha = x,y} \chi_{\alpha\alpha}^{(h)} \equiv \sum_{\alpha = x,y} \langle h_\alpha^2 \rangle - \langle |h_\alpha |\rangle^2.
 ```
 """
-hyperfine_field_susceptibility(hyperfine_tuple) = ( abshx, abshy, hx2, hy2 = hyperfine_tuple; (hx2 - abshx * abshx) + (hy2 - abshy * abshy) ) 
+hyperfine_field_susceptibility(hyperfine_tuple) = ( (abshx, abshy, hx2, hy2) = hyperfine_tuple; (hx2 - abshx * abshx) + (hy2 - abshy * abshy) ) 
 
 """
     inst_hyperfine_observables(ty, ham, ::CubicLattice2D, site)
