@@ -158,6 +158,21 @@ function update_observables!(model::CleanNMRAshkinTellerModel, ty = model.nmr_sp
     return Observables(model)
 end
 
+"""
+    collect_hyperfine_susceptibilites(::AbstractAshkinTellerModel)
+
+This function is to be used *after* a simulation. It undergoes a 
+binning analysis for each NMR observable, outputs the measurement with 
+error, and then propagates error in an appropriate manner using the 
+[`Measurements.jl`](https://github.com/JuliaPhysics/Measurements.jl) package.
+
+!!! note
+    These measurements very likely will **overestimate** the Monte Carlo
+    error due to correlations between the time records of the multiple 
+    observables. To get a better handle on the error bars, one probably 
+    needs to run identical simulations with different seeds and use some
+    resampling methods.
+"""
 function collect_hyperfine_susceptibilites(model::AbstractAshkinTellerModel)
     hyp_chi_vals = []
     num_chi = length( AccumulatedSeriesObservables(model) ) ÷ NUM_OBS_PER_AS
