@@ -140,9 +140,9 @@ defines the spin-space ̂z to be along the ̂b direction. Defining ̂a == ̂x, t
 clockwise about the ̂x axis yields the right transformation. This makes the following true:
 ̂a == ̂x, ̂b == ̂z, ̂c == -̂y.
 """
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'x'}}, hvec) = hvec[1] 
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'y'}}, hvec) = hvec[3] 
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'z'}}, hvec) = -hvec[2] 
+spin_space(::Type{T}, ::Type{Val{'x'}}, hvec) where T <: AbstractNMRConstruct = hvec[1] 
+spin_space(::Type{T}, ::Type{Val{'y'}}, hvec) where T <: AbstractNMRConstruct = hvec[3] 
+spin_space(::Type{T}, ::Type{Val{'z'}}, hvec) where T <: AbstractNMRConstruct = -hvec[2] 
 
 """
     spin_space(::Type{Out_of_Plane}, component::Type{Val{<: Char}}, hvec)
@@ -153,9 +153,9 @@ NMR construct relative to the crystallographic axes of the 1-Fe unit cell.
 In this case, the external field applied along the ̂c direction. This defines the spin-space
 z to be along the ̂c direction. Thus, the crystallographic and spin-space axes are coincident.
 """
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'x'}}, hvec) = hvec[1] 
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'y'}}, hvec) = hvec[2] 
-spin_space(::Type{<: AbstractNMRConstruct}, ::Type{Val{'z'}}, hvec) = hvec[3] 
+spin_space(::Type{Out_of_Plane}, ::Type{Val{'x'}}, hvec) = hvec[1] 
+spin_space(::Type{Out_of_Plane}, ::Type{Val{'y'}}, hvec) = hvec[2] 
+spin_space(::Type{Out_of_Plane}, ::Type{Val{'z'}}, hvec) = hvec[3] 
 
 """
     mag_vector(::Type{<: AbstractNMRConstruct}, args...)
