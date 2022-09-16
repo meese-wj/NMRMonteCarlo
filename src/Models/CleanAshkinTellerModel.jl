@@ -6,6 +6,7 @@ import ..Hamiltonians: BasicAshkinTellerHamiltonian, AshkinTellerParameters,
                        site_Baxter, sigma_values, tau_values, IterateBySite
 
 using ..SimulatingNMR
+using MonteCarloMeasurementUncertainty
 
 export 
 # Base overloads
@@ -135,7 +136,8 @@ end
 @inline TimeSeriesObservables(model::CleanNMRAshkinTellerModel) = Observables(model).time_series_obs
 @inline AccumulatedSeriesObservables(model::CleanNMRAshkinTellerModel) = Observables(model).acc_series_obs
 
-@inline nmr_observable_index(site, As_sign, ob) = NMR_OBS_PER_AS * (As_atom_index(site, As_sign) - one(NMR_OBS_PER_AS)) + ob
+@inline nmr_observable_index(atom_idx, ob) = NMR_OBS_PER_AS * (atom_idx - one(NMR_OBS_PER_AS)) + ob
+@inline nmr_observable_index(site, As_sign::As_atoms, ob) = NMR_OBS_PER_AS * (As_atom_index(site, As_sign) - one(NMR_OBS_PER_AS)) + ob
 
 function update_NMR_values!(model::CleanNMRAshkinTellerModel, ty)
     for (site, val) ∈ enumerate(IterateBySite, Hamiltonian(model))
@@ -154,4 +156,18 @@ function update_observables!(model::CleanNMRAshkinTellerModel, ty = model.nmr_sp
     update_TimeSeriesObservables!(model)
     update_NMR_values!(model, ty)
     return Observables(model)
+end
+
+function collect_hyperfine_susceptibilites(model::AbstractAshkinTellerModel)
+    hyp_chi_vals = []
+    num_chi = length( AccumulatedSeriesObservables(model) ) ÷ NUM_OBS_PER_AS
+    for atom_idx ∈ (1:num_chi)
+        hyp_tuple = AccumulatedSeriesObservables(model)[ nmr_observable_index(atom_idx, 1) : nmr_observable_index(atom_idx, NUM_OBS_PER_AS) ]
+        measurements = []
+        for obs ∈ hyp_tuple
+            push!(measurements, measurement(obs))
+        end
+        push!(hyp_chi_vals, hyperfine_field_susceptibility(measurements))
+    end
+    return hyp_chi_vals
 end
