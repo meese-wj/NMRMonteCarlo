@@ -19,7 +19,7 @@
 using Pkg
 using DrWatson
 @quickactivate :NMRMonteCarlo
-Pkg.instantiate()
+# Pkg.instantiate()
 
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 
@@ -64,10 +64,10 @@ datapath = savename("clean_temp_sweep_$(nmr_type)", SimulationParameters(sim), "
 # @info "Find the data at: $( datadir(datapath) )"
 
 using JLD2
-save_object( datadir(chi_path), sim )
+save_object( datadir(chi_path), local_chi_vals )
 # save_object( datadir(datapath), sim )
 
-DrWatson.safesave( datadir(chi_path), sim )
+DrWatson.safesave( datadir(chi_path), local_chi_vals )
 # DrWatson.safesave( datadir(datapath), sim )
 
 
