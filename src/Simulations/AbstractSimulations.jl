@@ -1,5 +1,6 @@
 
 import ..MonteCarloMethods: thermalize!, sweep_and_measure!, Lattice, Hamiltonian, Observables
+import ..Models: collect_hyperfine_susceptibilites
 import Base: show
 using MonteCarloMeasurementUncertainty
 import OnlineLogBinning: BinningAnalysisResult
@@ -7,6 +8,8 @@ import OnlineLogBinning: BinningAnalysisResult
 export 
 #      Base overloads
        show,
+#      NMRMonteCarlo Convenience overloads
+       collect_hyperfine_susceptibilites,
 #      AbstractSimulations exports
        SimulationParameters, SimulationModel, SimulationMethod, simulate!, Lattice, Hamiltonian, Observables, analyze
 
@@ -164,3 +167,5 @@ function analyze(sim::AbstractMCMCSimulation)
     end
     return results
 end
+
+collect_hyperfine_susceptibilites(sim::AbstractMCMCSimulation) = collect_hyperfine_susceptibilites(SimulationModel(sim))

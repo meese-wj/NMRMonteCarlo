@@ -12,7 +12,8 @@ export
 # Base overloads
        iterate, length,
 # Concrete type exports
-       CleanAshkinTellerModel, CleanNMRAshkinTellerModel, CleanAshkinTellerModelParameters
+       CleanAshkinTellerModel, CleanNMRAshkinTellerModel, CleanAshkinTellerModelParameters,
+       collect_hyperfine_susceptibilites
 
 struct CleanAshkinTellerModelParameters{T <: AbstractFloat}
     Lx::Int
@@ -175,9 +176,9 @@ error, and then propagates error in an appropriate manner using the
 """
 function collect_hyperfine_susceptibilites(model::AbstractAshkinTellerModel)
     hyp_chi_vals = []
-    num_chi = length( AccumulatedSeriesObservables(model) ) ÷ NUM_OBS_PER_AS
+    num_chi = length( AccumulatedSeriesObservables(model) ) ÷ NMR_OBS_PER_AS
     for atom_idx ∈ (1:num_chi)
-        hyp_tuple = AccumulatedSeriesObservables(model)[ nmr_observable_index(atom_idx, 1) : nmr_observable_index(atom_idx, NUM_OBS_PER_AS) ]
+        hyp_tuple = AccumulatedSeriesObservables(model)[ nmr_observable_index(atom_idx, 1) : nmr_observable_index(atom_idx, NMR_OBS_PER_AS) ]
         measurements = []
         for obs ∈ hyp_tuple
             push!(measurements, measurement(obs))
