@@ -23,8 +23,9 @@ Pkg.instantiate()
 
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 
+@show const Lvalue = 32
 @show const Jex = 1.0
-@show const Kex = 0.5
+@show const Kex = 0.0
 @show const Tc = critical_temperature(Jex, Kex)
 @show const βc = 1 / Tc
 const dTLow = 0.125
@@ -47,7 +48,7 @@ println(sim)
 
 @info "Starting real run."
 sim = CleanNMRATMSimulation(Jex = Jex, Kex = Kex, 
-                            Lx = 32, βvalue= my_beta,
+                            Lx = Lvalue, βvalue= my_beta,
                             Ntherm = 2^20, Nmeas = 2^18, 
                             nmr_spin_type = nmr_type)
 @show sim
@@ -55,12 +56,18 @@ sim = CleanNMRATMSimulation(Jex = Jex, Kex = Kex,
 @timev simulate!(sim)
 @info "End of real run."
 
+local_chi_vals = collect_hyperfine_susceptibilites(sim)
+
+chi_path = savename("hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(sim), "jld2")
 datapath = savename("clean_temp_sweep_$(nmr_type)", SimulationParameters(sim), "jld2")
-@info "Find the data at: $( datadir(datapath) )"
+@info "Find the data at: $( datadir(chi_path) )"
+# @info "Find the data at: $( datadir(datapath) )"
 
 using JLD2
-save_object( datadir(datapath), sim )
+save_object( datadir(chi_path), sim )
+# save_object( datadir(datapath), sim )
 
-DrWatson.safesave( datadir(datapath), sim )
+DrWatson.safesave( datadir(chi_path), sim )
+# DrWatson.safesave( datadir(datapath), sim )
 
 
