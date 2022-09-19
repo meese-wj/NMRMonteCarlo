@@ -22,11 +22,11 @@ using Plots
 # ╔═╡ 16517c06-3855-11ed-1e40-e5dedf174ec8
 begin
 	const Lvalue = 32
-	const Kvalue = 0.5
+	const Kvalue = 0.0
 	const Tc = critical_temperature(1.0, Kvalue)
 	@show const βc = 1 / Tc
-	const dTLow = 0.125
-	const dTHigh = 0.375
+	const dTLow = 0.125 * Tc
+	const dTHigh = 0.375 * Tc
 	@show const betaHigh = 1 / (Tc - dTLow)
 	@show const betaLow = 1 / (Tc + dTHigh)
 end
@@ -36,6 +36,9 @@ const Njobs = 50
 
 # ╔═╡ 0692581e-7534-4453-ae14-d17a41f9b3d8
 beta_vals = LinRange(betaLow, betaHigh, Njobs)
+
+# ╔═╡ 67d0a176-ce3d-4f96-af9e-2326d6356c9c
+for b ∈ beta_vals @show b end
 
 # ╔═╡ 51338e72-6766-41c6-93d6-19376a7d22ec
 temperatures = 1 ./ beta_vals
@@ -123,6 +126,7 @@ end
 # ╠═16517c06-3855-11ed-1e40-e5dedf174ec8
 # ╠═b8fa1e9f-c9dd-41bb-aa3a-f0c0fe6db28d
 # ╠═0692581e-7534-4453-ae14-d17a41f9b3d8
+# ╠═67d0a176-ce3d-4f96-af9e-2326d6356c9c
 # ╠═51338e72-6766-41c6-93d6-19376a7d22ec
 # ╠═9ac73365-2cfa-41c1-89c4-401a31bc26b1
 # ╠═02d8107b-ba22-442a-acbe-fc975c78ed81
