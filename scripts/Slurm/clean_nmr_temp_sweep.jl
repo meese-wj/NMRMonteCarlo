@@ -72,7 +72,7 @@ for atom_idx ∈ eachindex(all_local_susc[begin, :])
     local_chi_vals[atom_idx] = measurement(mean_χ, err_χ)
 end
 
-chi_path = savename("hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(sim), "jld2")
+chi_path = savename("threaded_hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(sim), "jld2")
 datapath = savename("clean_temp_sweep_$(nmr_type)", SimulationParameters(sim), "jld2")
 @info "Find the data at: $( datadir(chi_path) )"
 # @info "Find the data at: $( datadir(datapath) )"
