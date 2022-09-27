@@ -21,8 +21,8 @@ using Plots
 
 # ╔═╡ 16517c06-3855-11ed-1e40-e5dedf174ec8
 begin
-	const Lvalue = 32
-	const Kvalue = 0.0
+	const Lvalue = 64
+	const Kvalue = 0.5
 	const Tc = critical_temperature(1.0, Kvalue)
 	@show const βc = 1 / Tc
 	const dTLow = 0.125 * Tc
@@ -40,20 +40,24 @@ beta_vals = LinRange(betaLow, betaHigh, Njobs)
 # ╔═╡ 67d0a176-ce3d-4f96-af9e-2326d6356c9c
 for b ∈ beta_vals @show b end
 
-# ╔═╡ 51338e72-6766-41c6-93d6-19376a7d22ec
-temperatures = 1 ./ beta_vals
-
 # ╔═╡ 9ac73365-2cfa-41c1-89c4-401a31bc26b1
 begin
 	agate_hyp_χs = []
+	conv_betas = Float64[]
 	for idx ∈ 1:Njobs
 		temp_sim = CleanNMRATMSimulation(; Lx = Lvalue, Kex = Kvalue, 
 										   βvalue = beta_vals[idx], Ntherm = 2^20,
 										   Nmeas=2^18, Lτ = 2^18)
 		filename = savename("hyperfine_susceptibilites_Out_of_Plane", SimulationParameters(temp_sim) ) * "_#1.jld2"
-		push!( agate_hyp_χs, JLD2.load_object( agatedatadir( filename ) ) )
+		if isfile( agatedatadir(filename) )
+			push!(conv_betas, beta_vals[idx])
+			push!( agate_hyp_χs, JLD2.load_object( agatedatadir( filename ) ) )
+		end
 	end
 end
+
+# ╔═╡ 51338e72-6766-41c6-93d6-19376a7d22ec
+temperatures = 1 ./ conv_betas
 
 # ╔═╡ 02d8107b-ba22-442a-acbe-fc975c78ed81
 begin
@@ -76,7 +80,8 @@ md"""
 let
 	plt = plot( temperatures, mean.(hyp_χ_ghists); label = nothing, 
 	  	        xlabel = "Temperature \$T\$", ylabel = "\$ \\mathrm{Av}(1 / T_1) \$",
-				markershape = :circle)
+				markershape = :circle,
+				title = "\$ L = $Lvalue \$")
 	vline!(plt, [Tc]; 
 		   label = "\$T_c \\approx $(round(Tc; digits = 3)) \\, J\$", 
 		   linestyle = :dash, linewidth = 2.5, z_order = :back)
@@ -93,7 +98,8 @@ md"""
 let
 	plt = plot( temperatures, mean.(hyp_χ_ghists) ./ temperatures; label = nothing, 
 	  	        xlabel = "Temperature \$T\$", ylabel = "\$ \\mathrm{Av}(1 / T_1T) \$",
-				markershape = :circle)
+				markershape = :circle,
+				title = "\$ L = $Lvalue \$")
 	vline!(plt, [Tc]; 
 		   label = "\$T_c \\approx $(round(Tc; digits = 3)) \\, J\$", 
 		   linestyle = :dash, linewidth = 2.5, z_order = :back)
@@ -110,7 +116,8 @@ md"""
 let
 	plt = plot( temperatures, std.(hyp_χ_ghists); label = nothing, 
 	  	        xlabel = "Temperature \$T\$", ylabel = "\$ \\sigma_1 \$",
-				markershape = :circle)
+				markershape = :circle,
+				title = "\$ L = $Lvalue \$")
 	vline!(plt, [Tc]; 
 		   label = "\$T_c \\approx $(round(Tc; digits = 3)) \\, J\$", 
 		   linestyle = :dash, linewidth = 2.5, z_order = :back)
@@ -127,13 +134,13 @@ end
 # ╠═b8fa1e9f-c9dd-41bb-aa3a-f0c0fe6db28d
 # ╠═0692581e-7534-4453-ae14-d17a41f9b3d8
 # ╠═67d0a176-ce3d-4f96-af9e-2326d6356c9c
-# ╠═51338e72-6766-41c6-93d6-19376a7d22ec
 # ╠═9ac73365-2cfa-41c1-89c4-401a31bc26b1
+# ╠═51338e72-6766-41c6-93d6-19376a7d22ec
 # ╠═02d8107b-ba22-442a-acbe-fc975c78ed81
 # ╠═cb61db54-e330-4520-a356-3efbca769929
 # ╟─0a4ef262-a1e8-4c43-b290-42c17751cca7
-# ╠═6c7c2778-6ad5-485a-a22e-c20e73c9196b
+# ╟─6c7c2778-6ad5-485a-a22e-c20e73c9196b
 # ╟─44ba1d1d-9cde-440f-9f86-2af893f9cd5f
-# ╠═89d5a071-d24f-4fd6-b537-f6167fdd3e9b
+# ╟─89d5a071-d24f-4fd6-b537-f6167fdd3e9b
 # ╟─d44ca312-2ee2-432d-a454-67d34c630f4b
-# ╠═997888be-71f3-4e0b-9ee0-98adbbea4ba2
+# ╟─997888be-71f3-4e0b-9ee0-98adbbea4ba2
