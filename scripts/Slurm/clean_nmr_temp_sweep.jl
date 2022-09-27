@@ -1,11 +1,11 @@
 #!/usr/bin/bash -l
 #SBATCH --time=5:00:00
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=5
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=10g
 #SBATCH --mail-type=all
 #SBATCH --mail-user=meese022@umn.edu
-#SBATCH --array=1-50
+#SBATCH --array=1-10
 #SBATCH --job-name=nmr-L-32_%A_%a.out
 #SBATCH -o %x-%j.out
 #=
@@ -23,7 +23,7 @@ using DrWatson
 
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 
-@show const Lvalue = 64
+@show const Lvalue = 16
 @show const Jex = 1.0
 @show const Kex = 0.5
 @show const Tc = critical_temperature(Jex, Kex)
@@ -47,16 +47,30 @@ println(sim)
 @info "End of the small simulation."
 
 @info "Starting real run."
-sim = CleanNMRATMSimulation(Jex = Jex, Kex = Kex, 
-                            Lx = Lvalue, βvalue= my_beta,
-                            Ntherm = 2^20, Nmeas = 2^18, 
-                            nmr_spin_type = nmr_type)
-@show sim
+@show const nreplicas = Threads.nthreads()
+all_local_susc = zeros(Float64, nreplicas, 2 * Lvalue^2)
+Threads.@threads for rep_dx ∈ 1:nreplicas
+    sim = CleanNMRATMSimulation(Jex = Jex, Kex = Kex, 
+                                Lx = Lvalue, βvalue= my_beta,
+                                Ntherm = 2^20, Nmeas = 2^18, 
+                                nmr_spin_type = nmr_type)
+    @show rep_dx, sim
 
-@timev simulate!(sim)
+    @timev simulate!(sim)
+    rep_local_chi_vals = collect_hyperfine_susceptibilites(sim)
+    for atom_idx ∈ eachindex(all_local_susc[rep_dx, :])
+        all_local_susc[rep_dx, atom_idx] = local_chi_vals[rep_dx].val
+    end
+end
 @info "End of real run."
 
-local_chi_vals = collect_hyperfine_susceptibilites(sim)
+using Measurements, Statistics
+local_chi_vals = Measurement{Float64}[]
+for atom_idx ∈ eachindex(all_local_susc[begin, :])
+    mean_χ = mean( @view all_local_susc[:, atom_idx] )
+    err_χ  = std( @view all_local_susc[:, atom_idx]; mean = mean_χ )
+    local_chi_vals[atom_idx] = measurement(mean_χ, err_χ)
+end
 
 chi_path = savename("hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(sim), "jld2")
 datapath = savename("clean_temp_sweep_$(nmr_type)", SimulationParameters(sim), "jld2")
