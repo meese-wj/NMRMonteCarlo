@@ -23,13 +23,13 @@ using DrWatson
 
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 
-@show const Lvalue = 32
+@show const Lvalue = 64
 @show const Jex = 1.0
-@show const Kex = 0.0
+@show const Kex = 0.5
 @show const Tc = critical_temperature(Jex, Kex)
 @show const βc = 1 / Tc
-const dTLow = 0.125
-const dTHigh = 0.375
+const dTLow = 0.125 * Tc
+const dTHigh = 0.375 * Tc
 @show const betaHigh = 1 / (Tc - dTLow)
 @show const betaLow = 1 / (Tc + dTHigh)
 
