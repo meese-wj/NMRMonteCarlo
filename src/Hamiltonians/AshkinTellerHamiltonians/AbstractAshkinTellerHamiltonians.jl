@@ -163,7 +163,7 @@ H = -\sum_{\langle ij \rangle} \left[ J\left( \sigma_i\sigma_j + \tau_i\tau_j \r
 @inline function _base_energy( ham::TwoC_ATH, latt )
     en = zero(eltype(ham))
     @inbounds for (iter, dof_location_val) ∈ enumerate(IterateBySite, ham)
-        en += site_energy( ham, latt, dof_location_val...)
+        en += _base_site_energy( ham, latt, dof_location_val...)
     end
     return 0.5 * en
 end
@@ -182,7 +182,7 @@ new `site_values`.
     σ_value = ham[site, AT_sigma] * ( cond ? -one(eltype(ham)) : one(eltype(ham)) )  # color === AT_sigma, cond == true
     τ_value = ham[site, AT_tau]   * ( !cond ? -one(eltype(ham)) : one(eltype(ham)) ) # color === AT_tau,   cond == false
     bax_val = σ_value * τ_value
-    return site_energy( ham, latt, site, @SVector [ σ_value - old_σ, τ_value - old_τ, bax_val - old_bax ] )
+    return _base_site_energy( ham, latt, site, @SVector [ σ_value - old_σ, τ_value - old_τ, bax_val - old_bax ] )
 end
 
 """
