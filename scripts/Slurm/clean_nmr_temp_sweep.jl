@@ -59,7 +59,7 @@ Threads.@threads for rep_dx ∈ 1:nreplicas
     @timev simulate!(sim)
     rep_local_chi_vals = collect_hyperfine_susceptibilites(sim)
     for atom_idx ∈ eachindex(all_local_susc[rep_dx, :])
-        all_local_susc[rep_dx, atom_idx] = local_chi_vals[rep_dx].val
+        all_local_susc[rep_dx, atom_idx] = rep_local_chi_vals[rep_dx].val
     end
 end
 @info "End of real run."
