@@ -64,13 +64,17 @@ Threads.@threads for rep_dx ∈ 1:nreplicas
 end
 @info "End of real run."
 
+flush(stdout)
+
 using Measurements, Statistics
-local_chi_vals = Measurement{Float64}[]
+local_chi_vals = similar(all_local_susc[begin, :], Measurement{Float64})
 for atom_idx ∈ eachindex(all_local_susc[begin, :])
     mean_χ = mean( @view all_local_susc[:, atom_idx] )
     err_χ  = std( @view all_local_susc[:, atom_idx]; mean = mean_χ )
     local_chi_vals[atom_idx] = measurement(mean_χ, err_χ)
 end
+@show local_chi_vals
+println()
 
 chi_path = savename("threaded_hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(sim), "jld2")
 datapath = savename("clean_temp_sweep_$(nmr_type)", SimulationParameters(sim), "jld2")
