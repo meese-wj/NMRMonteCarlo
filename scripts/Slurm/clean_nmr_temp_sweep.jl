@@ -1,11 +1,11 @@
 #!/usr/bin/bash -l
-#SBATCH --time=5:00:00
+#SBATCH --time=17:00:00
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=10g
+#SBATCH --cpus-per-task=32
+#SBATCH --mem-per-cpu=4g
 #SBATCH --mail-type=all
 #SBATCH --mail-user=meese022@umn.edu
-#SBATCH --array=1-10
+#SBATCH --array=1-50
 #SBATCH --job-name=nmr-L-32_%A_%a.out
 #SBATCH -o %x-%j.out
 #=
@@ -23,7 +23,7 @@ using DrWatson
 
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 
-@show const Lvalue = 16
+@show const Lvalue = 32
 @show const Jex = 1.0
 @show const Kex = 0.5
 @show const Tc = critical_temperature(Jex, Kex)
