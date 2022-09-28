@@ -21,7 +21,7 @@ using Plots
 
 # ╔═╡ 16517c06-3855-11ed-1e40-e5dedf174ec8
 begin
-	const Lvalue = 64
+	const Lvalue = 4
 	const Kvalue = 0.5
 	const Tc = critical_temperature(1.0, Kvalue)
 	@show const βc = 1 / Tc
@@ -48,7 +48,7 @@ begin
 		temp_sim = CleanNMRATMSimulation(; Lx = Lvalue, Kex = Kvalue, 
 										   βvalue = beta_vals[idx], Ntherm = 2^20,
 										   Nmeas=2^18, Lτ = 2^18)
-		filename = savename("hyperfine_susceptibilites_Out_of_Plane", SimulationParameters(temp_sim) ) * "_#1.jld2"
+		filename = savename("threaded_hyperfine_susceptibilites_Out_of_Plane", SimulationParameters(temp_sim) ) * "_#1.jld2"
 		if isfile( agatedatadir(filename) )
 			push!(conv_betas, beta_vals[idx])
 			push!( agate_hyp_χs, JLD2.load_object( agatedatadir( filename ) ) )
@@ -70,6 +70,9 @@ begin
 		push!(hyp_χ_ghists, ghist)
 	end
 end
+
+# ╔═╡ 08653366-4143-4e29-91ee-08655ca0efdf
+@show agate_hyp_χs
 
 # ╔═╡ 0a4ef262-a1e8-4c43-b290-42c17751cca7
 md"""
@@ -137,6 +140,7 @@ end
 # ╠═9ac73365-2cfa-41c1-89c4-401a31bc26b1
 # ╠═51338e72-6766-41c6-93d6-19376a7d22ec
 # ╠═02d8107b-ba22-442a-acbe-fc975c78ed81
+# ╠═08653366-4143-4e29-91ee-08655ca0efdf
 # ╠═cb61db54-e330-4520-a356-3efbca769929
 # ╟─0a4ef262-a1e8-4c43-b290-42c17751cca7
 # ╟─6c7c2778-6ad5-485a-a22e-c20e73c9196b
