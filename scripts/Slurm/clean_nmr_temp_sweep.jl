@@ -47,6 +47,11 @@ println(sim)
 @info "End of the small simulation."
 
 @info "Starting real run."
+save_sim = CleanNMRATMSimulation(Jex = Jex, Kex = Kex, 
+                            Lx = Lvalue, βvalue= my_beta,
+                            Ntherm = 2^20, Nmeas = 2^18, 
+                            nmr_spin_type = nmr_type)
+println(save_sim)                            
 @show const nreplicas = Threads.nthreads()
 all_local_susc = zeros(Float64, nreplicas, 2 * Lvalue^2)
 Threads.@threads for rep_dx ∈ 1:nreplicas
@@ -76,16 +81,16 @@ end
 @show local_chi_vals
 println()
 
-chi_path = savename("threaded_hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(sim), "jld2")
-datapath = savename("clean_temp_sweep_$(nmr_type)", SimulationParameters(sim), "jld2")
+chi_path = savename("threaded_hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(save_sim), "jld2")
+datapath = savename("clean_temp_sweep_$(nmr_type)", SimulationParameters(save_sim), "jld2")
 @info "Find the data at: $( datadir(chi_path) )"
 # @info "Find the data at: $( datadir(datapath) )"
 
 using JLD2
 save_object( datadir(chi_path), local_chi_vals )
-# save_object( datadir(datapath), sim )
+# save_object( datadir(datapath), save_sim )
 
 DrWatson.safesave( datadir(chi_path), local_chi_vals )
-# DrWatson.safesave( datadir(datapath), sim )
+# DrWatson.safesave( datadir(datapath), save_sim )
 
 
