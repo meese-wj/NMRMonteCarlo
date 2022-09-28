@@ -76,7 +76,7 @@ local_chi_vals = similar(all_local_susc[begin, :], Measurement{Float64})
 for atom_idx ∈ eachindex(all_local_susc[begin, :])
     mean_χ = mean( @view all_local_susc[:, atom_idx] )
     err_χ  = std( @view all_local_susc[:, atom_idx]; mean = mean_χ )
-    local_chi_vals[atom_idx] = measurement(mean_χ, err_χ)
+    local_chi_vals[atom_idx] = measurement(mean_χ, err_χ / sqrt(nreplicas))
 end
 @show local_chi_vals
 println()
