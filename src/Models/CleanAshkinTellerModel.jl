@@ -140,15 +140,47 @@ end
 @inline nmr_observable_index(atom_idx, ob) = NMR_OBS_PER_AS * (atom_idx - one(NMR_OBS_PER_AS)) + ob
 @inline nmr_observable_index(site, As_sign::As_atoms, ob) = NMR_OBS_PER_AS * (As_atom_index(site, As_sign) - one(NMR_OBS_PER_AS)) + ob
 
+@generated function _up_nmr_vals(model, site, hyp_obs_tup)
+    expr = :()
+    for (As_idx, As_sign) ∈ enumerate((As_plus, As_minus)), ob ∈ 1:NMR_OBS_PER_AS
+       expr = :( $expr; push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, $As_sign, $ob)],  hyp_obs_tup[$As_idx][$ob] ) )
+    end
+    return expr
+end
+
 function update_NMR_values!(model::CleanNMRAshkinTellerModel, ty)
     for (site, val) ∈ enumerate(IterateBySite, Hamiltonian(model))
         hyp_obs_tup = inst_hyperfine_observables(ty, Hamiltonian(model), Lattice(model), site)
         # Ωvals = inst_hyperfine_fluctuations(ty, Hamiltonian(model), Lattice(model), site)
         # push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_plus)],  Ωvals[As_plus] )
         # push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_minus)], Ωvals[As_minus] )
-        for (hyp_obs, As_sign) ∈ zip(hyp_obs_tup, (As_plus, As_minus)), ob ∈ 1:NMR_OBS_PER_AS  
-            push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_sign, ob)],  hyp_obs[ob] )
-        end
+        
+        # Original
+        # for (hyp_obs, As_sign) ∈ zip(hyp_obs_tup, (As_plus, As_minus)), ob ∈ 1:NMR_OBS_PER_AS  
+        #     push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_sign, ob)],  hyp_obs[ob] )
+        # end
+
+        # Take 1
+        # for (idx, ob) ∈ enumerate(hyp_obs_tup[1])  
+        #     push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_plus, idx)],  ob )
+        # end
+        # for (idx, ob) ∈ enumerate(hyp_obs_tup[2])  
+        #     push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_minus, idx)],  ob )
+        # end
+
+        # Take 2
+        # push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_plus, 1)],  hyp_obs_tup[1][1] )
+        # push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_plus, 2)],  hyp_obs_tup[1][2] )
+        # push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_plus, 3)],  hyp_obs_tup[1][3] )
+        # push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_plus, 4)],  hyp_obs_tup[1][4] )
+        
+        # push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_minus, 1)],  hyp_obs_tup[2][1] )
+        # push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_minus, 2)],  hyp_obs_tup[2][2] )
+        # push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_minus, 3)],  hyp_obs_tup[2][3] )
+        # push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_minus, 4)],  hyp_obs_tup[2][4] )
+        
+        # Take 3
+        _up_nmr_vals(model, site, hyp_obs_tup)
     end
     return AccumulatedSeriesObservables(model)
 end

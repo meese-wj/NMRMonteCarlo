@@ -362,7 +362,10 @@ unit cell.
 """
 function inst_hyperfine_observables(ty, ham, latt::CubicLattice2D, site )
     fields = hyperfine_fields(ty, ham, latt, site)
-    return ( hyperfine_field_parts_to_save(ty, fields[1]), hyperfine_field_parts_to_save(ty, fields[2]) )
+    plus = hyperfine_field_parts_to_save(ty, fields[1])
+    minus = hyperfine_field_parts_to_save(ty, fields[2])
+    return plus, minus
+    # return ( hyperfine_field_parts_to_save(ty, fields[1]), hyperfine_field_parts_to_save(ty, fields[2]) )
 end
 
 @doc raw"""
