@@ -309,7 +309,7 @@ the As atoms within a unit cell.
 1. `site`: which unit cell to operate on
 """
 function hyperfine_fields(ty, ham, latt::CubicLattice2D, site )
-    return @SVector [ hyperfine_plus(ty, ham, latt, site), hyperfine_minus(ty, ham, latt, site) ]
+    return ( hyperfine_plus(ty, ham, latt, site), hyperfine_minus(ty, ham, latt, site) )
 end
 
 const NMR_OBS_PER_AS = 4
@@ -362,7 +362,7 @@ unit cell.
 """
 function inst_hyperfine_observables(ty, ham, latt::CubicLattice2D, site )
     fields = hyperfine_fields(ty, ham, latt, site)
-    return @SVector [ hyperfine_field_parts_to_save(ty, fields[1]), hyperfine_field_parts_to_save(ty, fields[2]) ]
+    return ( hyperfine_field_parts_to_save(ty, fields[1]), hyperfine_field_parts_to_save(ty, fields[2]) )
 end
 
 @doc raw"""
