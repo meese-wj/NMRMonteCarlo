@@ -146,7 +146,7 @@ function update_NMR_values!(model::CleanNMRAshkinTellerModel, ty)
         # Ωvals = inst_hyperfine_fluctuations(ty, Hamiltonian(model), Lattice(model), site)
         # push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_plus)],  Ωvals[As_plus] )
         # push!( AccumulatedSeriesObservables(model)[As_atom_index(site, As_minus)], Ωvals[As_minus] )
-        for (hyp_obs, As_sign) ∈ zip(hyp_obs_tup, (As_plus, As_minus)), ob ∈ (1:4)  
+        for (hyp_obs, As_sign) ∈ zip(hyp_obs_tup, (As_plus, As_minus)), ob ∈ 1:NMR_OBS_PER_AS  
             push!( AccumulatedSeriesObservables(model)[nmr_observable_index(site, As_sign, ob)],  hyp_obs[ob] )
         end
     end
