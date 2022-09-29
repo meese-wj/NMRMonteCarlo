@@ -212,6 +212,7 @@ Return the set of four hyperfine field vectors for the `As_plus` atom of the [`A
     Asigma1p0 = -hyperfine_Amats[3] * mag_vector(ty, ham, site_index(latt, site, (1, 0)), AT_sigma)
     return @SVector [ Asigma0, Atau0, Asigma1p0, Atau0p1 ]
 end
+
 """
     hyperfine_minus_vectors(ty, ham, ::CubicLattice2D, site)
 
@@ -248,6 +249,24 @@ function hyperfine_plus(ty, ham, latt::CubicLattice2D, site )
     return sum( hyperfine_plus_vectors(ty, ham, latt, site) )
 end
 
+function hyperfine_plus_spins(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, site)
+    S1 = -ham[site_index(latt, site, (0, 1)), AT_tau]
+    S2 =  ham[site, AT_sigma]
+    S3 = -ham[site_index(latt, site, (1, 0)), AT_sigma]
+    S4 =  ham[site, AT_tau]
+    return S1, S2, S3, S4
+end
+
+function hyperfine_spin_vector(::Type{Out_of_Plane}, S1, S2, S3, S4)
+    return ( hyp_Aac * (S1 - S2 + S3 - S4),
+             hyp_Aac * (S1 + S2 - S3 - S4),
+             hyp_Acc * (S1 + S2 + S3 + S4) )
+end
+
+function hyperfine_plus(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, site)
+    return hyperfine_spin_vector(Out_of_Plane, hyperfine_plus_spins(Out_of_Plane, ham, latt, site)... )
+end
+
 """
     hyperfine_minus(ty, ham, ::CubicLattice2D, site)
 
@@ -262,6 +281,18 @@ Sum the set of hyperfine fields in real-space.
 """
 function hyperfine_minus(ty, ham, latt::CubicLattice2D, site )
     return sum( hyperfine_minus_vectors(ty, ham, latt, site ) )
+end
+
+function hyperfine_minus_spins(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, site)
+    S1 =  ham[site, AT_sigma]
+    S2 = -ham[site_index(latt, site, (-1, 0)), AT_tau]
+    S3 =  ham[site, AT_tau]
+    S4 = -ham[site_index(latt, site, (0, -1)), AT_sigma]
+    return S1, S2, S3, S4
+end
+
+function hyperfine_minus(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, site)
+    return hyperfine_spin_vector(Out_of_Plane, hyperfine_minus_spins(Out_of_Plane, ham, latt, site)... )
 end
 
 """
