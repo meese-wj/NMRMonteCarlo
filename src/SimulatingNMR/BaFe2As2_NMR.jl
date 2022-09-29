@@ -6,7 +6,7 @@ import ..Lattices: CubicLattice2D, site_index
 using ..Hamiltonians
 import ..Hamiltonians: site_Baxter
 
-export inst_hyperfine_fluctuations, inst_hyperfine_observables, NMR_OBS_PER_AS, hyperfine_field_susceptibility,
+export inst_hyperfine_fluctuations, hyperfine_field_parts_to_save, inst_hyperfine_observables, NMR_OBS_PER_AS, hyperfine_field_susceptibility,
        to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling
 
 const hyp_Aaa = 0.66
@@ -360,13 +360,17 @@ unit cell.
 1. `::CubicLattice2D`: needed to find the [`nearest_neighbors`](@ref)
 1. `site`: which unit cell to operate on
 """
-function inst_hyperfine_observables(ty, ham, latt::CubicLattice2D, site )
-    fields = hyperfine_fields(ty, ham, latt, site)
-    plus = hyperfine_field_parts_to_save(ty, fields[1])
-    minus = hyperfine_field_parts_to_save(ty, fields[2])
-    return plus, minus
-    # return ( hyperfine_field_parts_to_save(ty, fields[1]), hyperfine_field_parts_to_save(ty, fields[2]) )
+@generated function inst_hyperfine_observables(ty, ham, latt::CubicLattice2D, site )
+    expr = quote
+        fields = hyperfine_fields(ty, ham, latt, site)
+        return ( hyperfine_field_parts_to_save(ty, fields[1]), hyperfine_field_parts_to_save(ty, fields[2]) )
+    end
+    return expr
 end
+# function inst_hyperfine_observables(ty, ham, latt::CubicLattice2D, site )
+#     fields = hyperfine_fields(ty, ham, latt, site)
+#     return ( hyperfine_field_parts_to_save(ty, fields[1]), hyperfine_field_parts_to_save(ty, fields[2]) )
+# end
 
 @doc raw"""
     single_hyperfine_fluct(::Type{<: AbstractNMRConstruct}, field)
