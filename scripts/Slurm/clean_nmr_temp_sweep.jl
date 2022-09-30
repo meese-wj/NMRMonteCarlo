@@ -6,8 +6,8 @@
 #SBATCH --mail-type=all
 #SBATCH --mail-user=meese022@umn.edu
 #SBATCH --array=1-50
-#SBATCH --job-name=nmr-L-32_%A_%a.out
-#SBATCH -o %x-%j.out
+#SBATCH --job-name=K0.0L64
+#SBATCH -o %x_%A_%a.out
 #=
     pwd
     echo $SLURM_NPROCS
@@ -23,9 +23,9 @@ using DrWatson
 
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 
-@show const Lvalue = 32
+@show const Lvalue = 64
 @show const Jex = 1.0
-@show const Kex = 0.5
+@show const Kex = 0.0
 @show const Tc = critical_temperature(Jex, Kex)
 @show const βc = 1 / Tc
 const dTLow = 0.125 * Tc
@@ -90,7 +90,7 @@ using JLD2
 save_object( datadir(chi_path), local_chi_vals )
 # save_object( datadir(datapath), save_sim )
 
-DrWatson.safesave( datadir(chi_path), local_chi_vals )
+# DrWatson.safesave( datadir(chi_path), local_chi_vals )
 # DrWatson.safesave( datadir(datapath), save_sim )
 
 
