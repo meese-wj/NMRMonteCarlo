@@ -6,7 +6,7 @@
 #SBATCH --mail-type=all
 #SBATCH --mail-user=meese022@umn.edu
 #SBATCH --array=1-50
-#SBATCH --job-name=K0.0L64
+#SBATCH --job-name=K=0.0_L=64
 #SBATCH -o %x_%A_%a.out
 #=
     pwd
@@ -21,11 +21,14 @@ using DrWatson
 @quickactivate :NMRMonteCarlo
 # Pkg.instantiate()
 
+include("jobname_parser.jl")
+
+const slurm_jobname::String = ENV["SLURM_JOB_NAME"]
 const slurm_arr_length::Int = parse(Int, ENV["SLURM_ARRAY_TASK_COUNT"])
 
-@show const Lvalue = 64
+@show const Lvalue = jobname_parser(slurm_jobname, "L", Int)
 @show const Jex = 1.0
-@show const Kex = 0.0
+@show const Kex = jobname_parser(slurm_jobname, "K", Float64)
 @show const Tc = critical_temperature(Jex, Kex)
 @show const βc = 1 / Tc
 const dTLow = 0.125 * Tc
