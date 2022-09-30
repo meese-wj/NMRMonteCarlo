@@ -34,8 +34,8 @@ using Plots
 
 # ╔═╡ 16517c06-3855-11ed-1e40-e5dedf174ec8
 begin
-	const Lvalue = 64
-	const Kvalue = 0.
+	const Lvalue = 4
+	const Kvalue = 0.5
 	const Tc = critical_temperature(1.0, Kvalue)
 	@show const βc = 1 / Tc
 	const dTLow = 0.125 * Tc
@@ -60,12 +60,13 @@ begin
 		temp_sim = CleanNMRATMSimulation(; Lx = Lvalue, Kex = Kvalue, 
 										   βvalue = beta_vals[idx], Ntherm = 2^20,
 										   Nmeas=2^18, Lτ = 2^18)
-		filename = savename("threaded_hyperfine_susceptibilites_Out_of_Plane", SimulationParameters(temp_sim) ) * "_#1.jld2"
+		filename = savename("threaded_hyperfine_susceptibilites_Out_of_Plane", SimulationParameters(temp_sim) ) * ".jld2"
 		if isfile( agatedatadir(filename) )
 			push!(conv_betas, beta_vals[idx])
 			push!( agate_hyp_χs, JLD2.load_object( agatedatadir( filename ) ) )
 		end
 	end
+	println("Number completed: $(length(conv_betas))")
 end
 
 # ╔═╡ 51338e72-6766-41c6-93d6-19376a7d22ec
