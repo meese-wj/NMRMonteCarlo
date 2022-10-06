@@ -34,8 +34,8 @@ using Plots
 
 # ╔═╡ 16517c06-3855-11ed-1e40-e5dedf174ec8
 begin
-	const Lvalue = 32
-	const Kvalue = 0.5
+	const Lvalue = 128
+	const Kvalue = 0.0
 	const Tc = critical_temperature(1.0, Kvalue)
 	@show const βc = 1 / Tc
 	const dTLow = 0.125 * Tc
