@@ -40,7 +40,8 @@ beta_vals = LinRange( betaLow, betaHigh, slurm_arr_length )
 
 const my_index = parse(Int, ENV["SLURM_ARRAY_TASK_ID"])
 const my_beta::Float64 = beta_vals[my_index] 
-const nmr_type::Type = Out_of_Plane
+const nmr_type::Type = Form_Factor_Test
+# const nmr_type::Type = Out_of_Plane
 
 @info "Setting up a small run first."
 sim = CleanNMRATMSimulation( Lx = 4, βvalue = my_beta, nmr_spin_type = nmr_type)

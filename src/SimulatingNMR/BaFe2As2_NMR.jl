@@ -7,7 +7,7 @@ using ..Hamiltonians
 import ..Hamiltonians: site_Baxter
 
 export inst_hyperfine_fluctuations, hyperfine_field_parts_to_save, inst_hyperfine_observables, NMR_OBS_PER_AS, hyperfine_field_susceptibility,
-       to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling
+       to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling, Form_Factor_Test
 
 const hyp_Aaa = 0.66
 const hyp_Acc = 0.47
@@ -127,7 +127,16 @@ nematic.
 See also [`mag_vector`](@ref) for specific implementations.
 """
 struct Spin_Orbit_Coupling <: AbstractNMRConstruct end
-const mag_vector_types = @SVector [Out_of_Plane, Easy_Axis_In_Plane, Spin_Orbit_Coupling]
+"""
+    struct Form_Factor_Test <: AbstractNMRConstruct
+
+Artificial test where all hyperfine tensors are the identity
+matrix to see if they diverge at the transition. In this case,
+the ̂c axis is the -̂y axis in spin space, and the external field
+is directed along the ̂b axis.
+"""
+struct Form_Factor_Test <: AbstractNMRConstruct end
+const mag_vector_types = @SVector [Out_of_Plane, Easy_Axis_In_Plane, Spin_Orbit_Coupling, Form_Factor_Test]
 
 """
     spin_space(::Type{<: AbstractNMRConstruct}, component::Type{Val{<: Char}}, hvec)
@@ -193,6 +202,9 @@ function mag_vector(::Type{Spin_Orbit_Coupling}, ham, site, color)
     return SVector{3, eltype(ham)}(zero(eltype(ham)), ham[site, color], zero(eltype(ham)))
 end
 
+@inline mag_vector(::Type{Form_Factor_Test}, ham, site, color) = mag_vector(Out_of_Plane, ham, site, color)
+
+
 """
     hyperfine_plus_vectors(ty, ham, ::CubicLattice2D, site)
 
@@ -257,14 +269,22 @@ function hyperfine_plus_spins(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, s
     return S1, S2, S3, S4
 end
 
+hyperfine_plus_spins(::Type{Form_Factor_Test}, ham, latt::CubicLattice2D, site) = hyperfine_plus_spins(Out_of_Plane, ham, latt, site)
+
 function hyperfine_spin_vector(::Type{Out_of_Plane}, S1, S2, S3, S4)
     return ( hyp_Aac * (S1 - S2 + S3 - S4),
              hyp_Aac * (S1 + S2 - S3 - S4),
              hyp_Acc * (S1 + S2 + S3 + S4) )
 end
 
+hyperfine_spin_vector(::Type{Form_Factor_Test}, S1, S2, S3, S4) = ( zero(S1), zero(S2), S1 + S2 + S3 + S4 )
+
 function hyperfine_plus(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, site)
     return hyperfine_spin_vector(Out_of_Plane, hyperfine_plus_spins(Out_of_Plane, ham, latt, site)... )
+end
+
+function hyperfine_plus(::Type{Form_Factor_Test}, ham, latt::CubicLattice2D, site)
+    return hyperfine_spin_vector(Form_Factor_Test, hyperfine_plus_spins(Form_Factor_Test, ham, latt, site)... )
 end
 
 """
@@ -291,8 +311,14 @@ function hyperfine_minus_spins(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, 
     return S1, S2, S3, S4
 end
 
+hyperfine_minus_spins(::Type{Form_Factor_Test}, ham, latt::CubicLattice2D, site) = hyperfine_minus_spins(Out_of_Plane, ham, latt, site)
+
 function hyperfine_minus(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, site)
     return hyperfine_spin_vector(Out_of_Plane, hyperfine_minus_spins(Out_of_Plane, ham, latt, site)... )
+end
+
+function hyperfine_minus(::Type{Form_Factor_Test}, ham, latt::CubicLattice2D, site)
+    return hyperfine_spin_vector(Form_Factor_Test, hyperfine_minus_spins(Form_Factor_Test, ham, latt, site)... )
 end
 
 """
