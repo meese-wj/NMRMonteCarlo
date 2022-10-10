@@ -2,11 +2,11 @@
 #SBATCH --time=17:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
-#SBATCH --mem-per-cpu=4g
+#SBATCH --mem-per-cpu=8g
 #SBATCH --mail-type=all
 #SBATCH --mail-user=meese022@umn.edu
 #SBATCH --array=1-50
-#SBATCH --job-name=K=0.0_L=64
+#SBATCH --job-name=K=0.0_L=128
 #SBATCH -o %x_%A_%a.out
 #=
     pwd
