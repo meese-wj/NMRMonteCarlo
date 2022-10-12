@@ -24,7 +24,8 @@ using Plots
 
 # ╔═╡ 445f6190-b1c7-4f49-be35-6eae76d184c6
 begin
-	const Lvalues = [32, 64, 128]
+	const Lvalues = [12, 16, 20, 24, 28, 32]
+	# const Lvalues = [32, 64, 128]
 	const Kvalue = 0.0
 	const Tc = critical_temperature(1.0, Kvalue)
 	@show const βc = 1 / Tc
@@ -34,6 +35,7 @@ begin
 	@show const betaLow = 1 / (Tc + dTHigh)
 	const sigma_confidence = 1
 	const num_replicas = 32
+	@show const nmr_type = "Form_Factor_Test"
 end
 
 # ╔═╡ 8bdd7dbc-2f91-4db8-9fe8-681ee3f831a7
@@ -53,7 +55,7 @@ begin
 			temp_sim = CleanNMRATMSimulation(; Lx = Lvalue, Kex = Kvalue, 
 											   βvalue = beta_vals[idx], Ntherm = 2^20,
 											   Nmeas=2^18, Lτ = 2^18)
-			filename = savename("threaded_hyperfine_susceptibilites_Out_of_Plane", SimulationParameters(temp_sim) ) * ".jld2"
+			filename = savename("FFT_threaded_hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(temp_sim) ) * ".jld2"
 			if isfile( agatedatadir(filename) )
 				push!(conv_betas_L, beta_vals[idx])
 				push!( agate_hyp_χs_L, JLD2.load_object( agatedatadir( filename ) ) )
@@ -62,8 +64,8 @@ begin
 			agate_hyp_χs[Lvalue] = agate_hyp_χs_L
 		end
 	end
-	for key ∈ keys(conv_betas)
-		println("Number completed: $(length(conv_betas[key]))")
+	for key ∈ sort(collect(keys(conv_betas)))
+		println("L = $key Number completed: $(length(conv_betas[key]))")
 	end
 end
 
@@ -97,7 +99,10 @@ end
 let
 plt = plot(; xlabel = "Temperature \$T\$", ylabel = "\$ \\mathrm{Av}(1/T_1) \$")
 
-for (TLval, HistLval) ∈ zip( keys(temperatures), keys(hyp_χ_ghists) )
+sort_temps = sort(collect(keys(temperatures)))
+sort_hyp = sort(collect(keys(hyp_χ_ghists)))
+	
+for (TLval, HistLval) ∈ zip( sort_temps, sort_hyp )
 	plot!(plt, temperatures[TLval], mean.(hyp_χ_ghists[HistLval]);
 		  yerror = std.(hyp_χ_ghists[HistLval]),
 		  label = "\$ L = $(TLval) \$", markershape = :circle)
@@ -111,9 +116,12 @@ end
 # ╔═╡ eb72f5b4-6a30-4a64-82bf-4596b2599966
 let
 plt = plot(; xlabel = "Temperature \$T\$", ylabel = "\$ \\sigma_1 \$")
-
+	
 Lmin = minimum(keys(hyp_χ_ghists))	
-for (TLval, HistLval) ∈ zip( keys(temperatures), keys(hyp_χ_ghists) )
+sort_temps = sort(collect(keys(temperatures)))
+sort_hyp = sort(collect(keys(hyp_χ_ghists)))
+	
+for (TLval, HistLval) ∈ zip( sort_temps, sort_hyp )
 	plot!(plt, temperatures[TLval], std.(hyp_χ_ghists[HistLval]) ;
 		  label = "\$ L = $(TLval) \$", markershape = :circle)
 end
@@ -128,7 +136,11 @@ let
 plt = plot(; xlabel = "Temperature \$T\$", ylabel = "\$ \\sigma_1 \\sqrt{L^2} \$")
 
 Lmin = minimum(keys(hyp_χ_ghists))	
-for (TLval, HistLval) ∈ zip( keys(temperatures), keys(hyp_χ_ghists) )
+
+sort_temps = sort(collect(keys(temperatures)))
+sort_hyp = sort(collect(keys(hyp_χ_ghists)))
+	
+for (TLval, HistLval) ∈ zip( sort_temps, sort_hyp )
 	plot!(plt, temperatures[TLval], std.(hyp_χ_ghists[HistLval]) .* HistLval ;
 		  label = "\$ L = $(TLval) \$", markershape = :circle)
 end
