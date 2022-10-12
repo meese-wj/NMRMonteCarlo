@@ -85,7 +85,7 @@ end
 @show local_chi_vals
 println()
 
-chi_path = savename("threaded_hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(save_sim), "jld2")
+chi_path = savename("FFT_threaded_hyperfine_susceptibilites_$(nmr_type)", SimulationParameters(save_sim), "jld2")
 datapath = savename("clean_temp_sweep_$(nmr_type)", SimulationParameters(save_sim), "jld2")
 @info "Find the data at: $( datadir(chi_path) )"
 # @info "Find the data at: $( datadir(datapath) )"
