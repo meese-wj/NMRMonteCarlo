@@ -7,7 +7,7 @@ using ..Hamiltonians
 import ..Hamiltonians: site_Baxter
 
 export inst_hyperfine_fluctuations, hyperfine_field_parts_to_save, inst_hyperfine_observables, NMR_OBS_PER_AS, hyperfine_field_susceptibility,
-       to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling, Form_Factor_Test
+       to_index, As_atom_index, As_atoms, As_plus, As_minus, Easy_Axis_In_Plane, Out_of_Plane, Spin_Orbit_Coupling, Form_Factor_Test, Ferro_Form_Factor_Test
 
 const hyp_Aaa = 0.66
 const hyp_Acc = 0.47
@@ -134,9 +134,26 @@ Artificial test where all hyperfine tensors are the identity
 matrix to see if they diverge at the transition. In this case,
 the ̂c axis is the -̂y axis in spin space, and the external field
 is directed along the ̂b axis.
+
+!!! note
+    This keeps the mapping from (σ, τ) to staggered sublattice
+    magnetizations in tact.
 """
 struct Form_Factor_Test <: AbstractNMRConstruct end
-const mag_vector_types = @SVector [Out_of_Plane, Easy_Axis_In_Plane, Spin_Orbit_Coupling, Form_Factor_Test]
+"""
+    struct Ferro_Form_Factor_Test <: AbstractNMRConstruct
+
+Artificial test where all hyperfine tensors are the identity
+matrix to see if they diverge at the transition. In this case,
+the ̂c axis is the -̂y axis in spin space, and the external field
+is directed along the ̂b axis.
+
+!!! note
+    This destroys the staggered sublattice magnetization mapping
+    and keeps everything (ferro)magnetic in (σ, τ).
+"""
+struct Ferro_Form_Factor_Test <: AbstractNMRConstruct end
+const mag_vector_types = @SVector [Out_of_Plane, Easy_Axis_In_Plane, Spin_Orbit_Coupling, Form_Factor_Test, Ferro_Form_Factor_Test]
 
 """
     spin_space(::Type{<: AbstractNMRConstruct}, component::Type{Val{<: Char}}, hvec)
@@ -203,6 +220,7 @@ function mag_vector(::Type{Spin_Orbit_Coupling}, ham, site, color)
 end
 
 @inline mag_vector(::Type{Form_Factor_Test}, ham, site, color) = ( S = ham[site, color]; SVector{3, eltype(ham)}(S, S, S) )
+@inline mag_vector(::Type{Ferro_Form_Factor_Test}, ham, site, color) = mag_vector(Form_Factor_Test, ham, site, color)
 
 
 """
@@ -271,6 +289,14 @@ end
 
 hyperfine_plus_spins(::Type{Form_Factor_Test}, ham, latt::CubicLattice2D, site) = hyperfine_plus_spins(Out_of_Plane, ham, latt, site)
 
+function hyperfine_plus_spins(::Type{Ferro_Form_Factor_Test}, ham, latt::CubicLattice2D, site)
+    S1 = ham[site_index(latt, site, (0, 1)), AT_tau]
+    S2 = ham[site, AT_sigma]
+    S3 = ham[site_index(latt, site, (1, 0)), AT_sigma]
+    S4 = ham[site, AT_tau]
+    return S1, S2, S3, S4
+end
+
 function hyperfine_spin_vector(::Type{Out_of_Plane}, S1, S2, S3, S4)
     return ( hyp_Aac * (S1 - S2 + S3 - S4),
              hyp_Aac * (S1 + S2 - S3 - S4),
@@ -278,6 +304,7 @@ function hyperfine_spin_vector(::Type{Out_of_Plane}, S1, S2, S3, S4)
 end
 
 @inline hyperfine_spin_vector(::Type{Form_Factor_Test}, S1, S2, S3, S4) = ( sum = S1 + S2 + S3 + S4; ( sum, sum, sum ) )
+@inline hyperfine_spin_vector(::Type{Ferro_Form_Factor_Test}, S1, S2, S3, S4) = hyperfine_spin_vector(Form_Factor_Test, S1, S2, S3, S4)
 
 function hyperfine_plus(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, site)
     return hyperfine_spin_vector(Out_of_Plane, hyperfine_plus_spins(Out_of_Plane, ham, latt, site)... )
@@ -285,6 +312,10 @@ end
 
 function hyperfine_plus(::Type{Form_Factor_Test}, ham, latt::CubicLattice2D, site)
     return hyperfine_spin_vector(Form_Factor_Test, hyperfine_plus_spins(Form_Factor_Test, ham, latt, site)... )
+end
+
+function hyperfine_plus(::Type{Ferro_Form_Factor_Test}, ham, latt::CubicLattice2D, site)
+    return hyperfine_spin_vector(Ferro_Form_Factor_Test, hyperfine_plus_spins(Ferro_Form_Factor_Test, ham, latt, site)... )
 end
 
 """
@@ -313,12 +344,24 @@ end
 
 hyperfine_minus_spins(::Type{Form_Factor_Test}, ham, latt::CubicLattice2D, site) = hyperfine_minus_spins(Out_of_Plane, ham, latt, site)
 
+function hyperfine_minus_spins(::Type{Ferro_Form_Factor_Test}, ham, latt::CubicLattice2D, site)
+    S1 = ham[site, AT_sigma]
+    S2 = ham[site_index(latt, site, (-1, 0)), AT_tau]
+    S3 = ham[site, AT_tau]
+    S4 = ham[site_index(latt, site, (0, -1)), AT_sigma]
+    return S1, S2, S3, S4
+end
+
 function hyperfine_minus(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, site)
     return hyperfine_spin_vector(Out_of_Plane, hyperfine_minus_spins(Out_of_Plane, ham, latt, site)... )
 end
 
 function hyperfine_minus(::Type{Form_Factor_Test}, ham, latt::CubicLattice2D, site)
     return hyperfine_spin_vector(Form_Factor_Test, hyperfine_minus_spins(Form_Factor_Test, ham, latt, site)... )
+end
+
+function hyperfine_minus(::Type{Ferro_Form_Factor_Test}, ham, latt::CubicLattice2D, site)
+    return hyperfine_spin_vector(Ferro_Form_Factor_Test, hyperfine_minus_spins(Ferro_Form_Factor_Test, ham, latt, site)... )
 end
 
 """
