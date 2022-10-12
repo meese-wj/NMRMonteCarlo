@@ -202,7 +202,7 @@ function mag_vector(::Type{Spin_Orbit_Coupling}, ham, site, color)
     return SVector{3, eltype(ham)}(zero(eltype(ham)), ham[site, color], zero(eltype(ham)))
 end
 
-@inline mag_vector(::Type{Form_Factor_Test}, ham, site, color) = mag_vector(Out_of_Plane, ham, site, color)
+@inline mag_vector(::Type{Form_Factor_Test}, ham, site, color) = ( S = ham[site, color]; SVector{3, eltype(ham)}(S, S, S) )
 
 
 """
@@ -277,7 +277,7 @@ function hyperfine_spin_vector(::Type{Out_of_Plane}, S1, S2, S3, S4)
              hyp_Acc * (S1 + S2 + S3 + S4) )
 end
 
-hyperfine_spin_vector(::Type{Form_Factor_Test}, S1, S2, S3, S4) = ( zero(S1), zero(S2), S1 + S2 + S3 + S4 )
+@inline hyperfine_spin_vector(::Type{Form_Factor_Test}, S1, S2, S3, S4) = ( sum = S1 + S2 + S3 + S4; ( sum, sum, sum ) )
 
 function hyperfine_plus(::Type{Out_of_Plane}, ham, latt::CubicLattice2D, site)
     return hyperfine_spin_vector(Out_of_Plane, hyperfine_plus_spins(Out_of_Plane, ham, latt, site)... )
