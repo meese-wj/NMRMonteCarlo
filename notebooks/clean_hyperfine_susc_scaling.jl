@@ -24,7 +24,7 @@ using Plots
 
 # ╔═╡ 445f6190-b1c7-4f49-be35-6eae76d184c6
 begin
-	const Lvalues = [12, 16, 20, 24, 28, 32]
+	const Lvalues = [12, 16, 20, 24, 28, 32, 64]
 	# const Lvalues = [32, 64, 128]
 	const Kvalue = 0.0
 	const Tc = critical_temperature(1.0, Kvalue)
@@ -36,6 +36,7 @@ begin
 	const sigma_confidence = 1
 	const num_replicas = 32
 	@show const nmr_type = "Form_Factor_Test"
+	# @show const nmr_type = "Ferro_Form_Factor_Test"
 end
 
 # ╔═╡ 8bdd7dbc-2f91-4db8-9fe8-681ee3f831a7
@@ -110,6 +111,8 @@ end
 
 vline!(plt, [Tc]; ls = :dash, color = :orange, lw = 2.5, label = "\$ T_c \$",
 	   z_order = :back)
+
+# savefig(plt, plotsdir("identity_form_factor_antiferro_scaling.png"))
 plt
 end
 
