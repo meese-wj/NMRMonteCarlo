@@ -10,10 +10,11 @@ export BasicAshkinTellerHamiltonian, AshkinTellerParameters, sigma_values, tau_v
     Kex::T  # Baxter exchange measured in units of Jex
 end
 
-struct RandomBaxterFieldParameters{T <: AbstractFloat} <: AbstractRandomBaxterFieldParameters
+struct RandomBaxterFieldParameters{T <: AbstractFloat, D <: DisorderDistribution} <: AbstractRandomBaxterFieldParameters
     Jex::T  # Ising exchanges in the AT model. Jex > 0 is ferromagnetic
     Kex::T  # Baxter exchange measured in units of Jex
     Δε::T   # Width of the Baxter field disorder distribution
+    disorder_distribution::D # Type of Baxter field distribution
 end
 AshkinTellerParameters{T}(; J::T = 1., K::T = 0. ) where {T <: AbstractFloat} = AshkinTellerParameters{T}( J, K )
 RandomBaxterFieldParameters(; J = 1., K = 0., Δε = 0. ) = ( args = promote(J, K, Δε); AshkinTellerParameters{eltype(args)}( args... ) )
@@ -41,9 +42,10 @@ mutable struct RandomBaxterFieldHamiltonian{T <: AbstractFloat} <: AbstractRando
     spins::Vector{T}
     random_baxter_fields::Vector{T}
 
-    function RandomBaxterFieldHamiltonian(latt, params::RandomBaxterFieldParameters{T}) where T
+    function RandomBaxterFieldHamiltonian(latt, params::RandomBaxterFieldParameters{T}, rng::Random.AbstractRNG = Random.GLOBAL_RNG) where T
         ndofs = num_colors(RandomBaxterFieldHamiltonian) * num_sites(latt)
-        fields = random_field_generator(params.Δε, num_sites(latt))
+        qgd = QuenchedDisorderGenerator(zero(params.Δε), params.Δε, rng, params.disorder_distribution)
+        fields = generate_disorder(qgd, num_sites(latt))
         return new{T}(ATDefaultColor(RandomBaxterFieldHamiltonian), params, rand([one(T), -one(T)], ndofs), fields)
     end
 end
