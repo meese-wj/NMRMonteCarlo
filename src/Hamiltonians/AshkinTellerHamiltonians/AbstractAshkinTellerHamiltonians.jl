@@ -51,6 +51,11 @@ abstract type AbstractTwoColorAshkinTellerParameters <: AbstractAshkinTellerPara
 const TwoC_ATH = AbstractTwoColorAshkinTellerHamiltonian
 const TwoC_AT_Params = AbstractTwoColorAshkinTellerParameters
 
+abstract type AbstractRandomBaxterFieldHamiltonian <: AbstractTwoColorAshkinTellerHamiltonian end
+abstract type AbstractRandomBaxterFieldParameters <: AbstractTwoColorAshkinTellerParameters end
+const Abstract_RBFM = AbstractRandomBaxterFieldHamiltonian
+const Abstract_RBFM_Params = AbstractRandomBaxterFieldParameters
+
 @inline num_colors(::Type{<: TwoC_ATH}) = 2
 @inline site_Baxter( ham::AbstractTwoColorAshkinTellerHamiltonian, site ) = ham[site, AT_sigma] * ham[site, AT_tau]
 @inline ATDefaultColor(::Type{<: TwoC_ATH}) = AT_sigma
@@ -226,3 +231,12 @@ function critical_temperature(::Type{<: TwoC_ATH}, Jex, Kex, starting_point = 4.
     find_zero(f, starting_point)
 end
 critical_temperature(Jex, Kex) = critical_temperature(BasicAshkinTellerHamiltonian, Jex, Kex)
+
+# ====================================================================
+# Random Baxter Field Generics
+# ====================================================================
+@inline _random_baxter_fields(ham::Abstract_RBFM) = ham.random_baxter_fields
+@inline Baxter_field(ham::Abstract_RBFM, site) = _random_baxter_fields(ham)[site]
+@inline _Baxter_site_energy(ham::Abstract_RBFM, site, site_baxter_value) = -Baxter_field(ham, site) * site_baxter_value
+@inline _Baxter_site_energy(ham::Abstract_RBFM, site) = _Baxter_site_energy(ham, site, site_Baxter(ham, site))
+@inline _Baxter_DoF_energy_change(ham::Abstract_RBFM, site) = -2_Baxter_site_energy(ham, site)
